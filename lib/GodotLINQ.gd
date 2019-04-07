@@ -44,6 +44,15 @@ class cmp_or:
 				return true
 		return false
 	
+class cmp_func:
+	extends Comparer
+	var func_ref
+	func _init(func_ref):
+		self.func_ref = func_ref
+		
+	func eval(item):
+		return func_ref.call_func(item)
+			
 class lt:
 	extends Comparer
 	var val

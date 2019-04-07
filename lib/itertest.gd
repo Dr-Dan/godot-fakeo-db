@@ -1,6 +1,7 @@
 extends Node2D
 const GL = GodotLINQ
 
+
 class Human:
 	var name: String
 	var age: int
