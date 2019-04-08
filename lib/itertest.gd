@@ -1,4 +1,5 @@
-extends Node2D
+tool
+extends EditorScript
 const GL = GodotLINQ
 
 
@@ -12,13 +13,19 @@ class Human:
 		self.age = age
 		self.addr_id = addr_id
 		
+func _run():
+	run_test()
+	
+func test_func(val):
+	print("called test with %s" % val)
+	
 # Called when the node enters the scene tree for the first time.
-func _ready():
+func run_test():
 	var itr = GL.IterList.new([
 	{name="mike", age=22, addr_id=0}, 
 	{name="mindy", age=16, addr_id=1},
 	{name="trish", age=9, addr_id=2},
-	{name="aslan", age=199, addr_id=2},
+	{name="aslan", age=199, addr_id=1},
 	Human.new("dan", 30, 0),
 	Human.new("ariel", 65, 3),
 	])
@@ -43,6 +50,9 @@ func _ready():
 #   select.run(itr)?
 
 #	var result = itr.select({age=cmp_target.new(ai, gt)}, ["addr_id", "age"])
+	var a = GL.cmp_func.new(funcref(self, "test_func"))
+	var result_func = itr.first({name=a})
+	
 	var age_comp = GL.cmp_and.new([GL.gt.new(20), GL.lt.new(100)])
 	var result = itr.select({age=age_comp}, ["addr_id", "name"])
 #	print(result.to_list())
