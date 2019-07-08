@@ -13,14 +13,27 @@ _global_script_classes=[ {
 "class": "GodotLINQ",
 "language": "GDScript",
 "path": "res://lib/GodotLINQ.gd"
+}, {
+"base": "Resource",
+"class": "GodotLinqFactory",
+"language": "GDScript",
+"path": "res://lib/GodotLinqFactory.gd"
+}, {
+"base": "Reference",
+"class": "IterList",
+"language": "GDScript",
+"path": "res://lib/IterList.gd"
 } ]
 _global_script_class_icons={
-"GodotLINQ": ""
+"GodotLINQ": "",
+"GodotLinqFactory": "",
+"IterList": ""
 }
 
 [application]
 
 config/name="GodotLINQ"
+run/main_scene="res://example/ShopkeeperMainScene.tscn"
 config/icon="res://icon.png"
 
 [rendering]
