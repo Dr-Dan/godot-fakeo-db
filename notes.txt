@@ -1,0 +1,59 @@
+TODO:
+
+    Code taste:
+        how similar to linq should it be?
+            what ways can gdscript be uniquely leveraged/advantaged
+		generally move towards objects as opposed to raw dictionaries
+			wrap dictionary in default class
+			think mongo db c# (BSON)
+
+    improvements/planned features:
+        add functions:
+			any() -> bool,
+			all() -> bool,
+            add(_if), remove(_if)
+
+		# online after this + some clean-up
+                
+        select, where with func
+            i.e. lambda
+
+		search keys and values??
+
+		built in support for unique-id system
+
+		json
+			+save support - not sure this is necessary
+
+		better examples showing all major features
+
+		monitoring/signals
+			observer pattern
+
+		some method for accessing nested fields
+			In builder method?:
+				Start().First(cmps).Open("inventory").First({type=eq("sword")})
+
+		actions:
+			for_each,
+			mathematical functions
+				Add, Sub, Mult, Div, Mod
+			Append/Erase on signal/event?
+
+	test library - gut??
+		
+Shopkeeper example
+	Inventory + items as Nodes - keeping it godotic
+		detect in _ready
+		show adding Node items to db
+
+	refactor gui code
+		set nodes in gui scene, get using variable
+		
+	UI:
+		;::;
+		®∫®¬g
+		o/
+		
+	dialogue: (? separate example ?)
+		search wares, gossip

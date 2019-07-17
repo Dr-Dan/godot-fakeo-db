@@ -1,20 +1,10 @@
 extends Node
 
 """
-Inventory + items as Nodes - keeping it godotic
-	detect in _ready
-	
-UI:
-	 ;::;
-	®∫®¬g
-	 o/
-	
-dialogue:
-	search wares, gossip
 """
 
-const ButtonInvItem = preload("res://example/ButtonInventoryItem.tscn")
-const GLF = GodotLinqFactory
+const ButtonInvItem = preload("res://examples/Shopkeeper/ButtonInventoryItem.tscn")
+const GLF = Factory
 
 class Actor:
 	var name: String
@@ -38,7 +28,7 @@ const MEAT = "Meat"
 const AXE = "Axe"
 const SWORD = "Sword"
 const SPELL_HEAL = "Heal Spell"
-const THE_JUICE = "THE_JUICE"
+const THE_JUICE = "##JUICE##"
 
 const PLAYER = "Player"
 const SHOPKEEPER = "Shopkeeper"
@@ -75,11 +65,11 @@ func _ready():
 	update_gui()
 	
 func update_gui():
-	update_actor_gui(SHOPKEEPER, $Control/MarginContainer/HBoxContainer/ShopkeeperPanel)
-	update_actor_gui(PLAYER, $Control/MarginContainer/HBoxContainer/PlayerPanel)
+	update_actor_gui(SHOPKEEPER, $GUI/MarginContainer/HBoxContainer/ShopkeeperPanel)
+	update_actor_gui(PLAYER, $GUI/MarginContainer/HBoxContainer/PlayerPanel)
 
-	update_cash_display(SHOPKEEPER, $Control/MarginContainer/HBoxContainer/ShopkeeperPanel)
-	update_cash_display(PLAYER, $Control/MarginContainer/HBoxContainer/PlayerPanel)
+	update_cash_display(SHOPKEEPER, $GUI/MarginContainer/HBoxContainer/ShopkeeperPanel)
+	update_cash_display(PLAYER, $GUI/MarginContainer/HBoxContainer/PlayerPanel)
 
 func update_actor_gui(name, container):
 	clear_inventory_gui(container)
@@ -89,7 +79,6 @@ func update_actor_gui(name, container):
 		for shp_item in actor.inventory.to_list():
 			var btn = create_button(name, shp_item)
 			btn.connect("button_down", self, "item_clicked", [btn, name, shp_item.type])
-			
 			container.get_node("Inventory").add_child(btn)
 		
 func clear_inventory_gui(container):
@@ -102,7 +91,7 @@ func update_cash_display(name, container):
 
 func create_button(name, shp_item):
 	var info = item_data.first({type=GLF.eq(shp_item.type)})
-	var txt = "%s:\nvalue:%d\namt %d" %\
+	var txt = "%s\nvalue:%d\namt %d" %\
 		[shp_item.type, get_cost(name, shp_item.type), shp_item.amt]
 
 	var btn = ButtonInvItem.instance()
@@ -119,7 +108,6 @@ func item_clicked(btn, name, type):
 		if transfer_cash(PLAYER, SHOPKEEPER, get_cost(SHOPKEEPER, type)):
 			deposit_item(PLAYER, type, 1)
 			remove_item(SHOPKEEPER, type)
-		
 	update_gui()
 	
 func transfer_cash(source_name, target_name, amt) -> bool:
@@ -131,6 +119,12 @@ func transfer_cash(source_name, target_name, amt) -> bool:
 		return true
 	return false
 		
+func get_cost(source, type) -> int:
+	var value = item_data.first({type=GLF.eq(type)}).value
+	if source == SHOPKEEPER:
+		return int(value * shopkeeper_mult)
+	return int(value)
+	
 func deposit_item(name, type, amt=1):
 	var inv = actor_data.first({name=GLF.eq(name)})
 	var i = inv.inventory.first({type=GLF.eq(type)})
@@ -148,8 +142,3 @@ func remove_item(name, type):
 		actor.inventory.items.erase(item)
 	var value = item_data.first({type=GLF.eq(type)}).value
 			
-func get_cost(source, type) -> int:
-	var value = item_data.first({type=GLF.eq(type)}).value
-	if source == SHOPKEEPER:
-		return int(value * shopkeeper_mult)
-	return int(value)

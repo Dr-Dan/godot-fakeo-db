@@ -1,27 +1,26 @@
 extends Resource
-class_name GodotLinqFactory
+class_name Factory
 
 static func and_(items: Array):
-	return GodotLINQ.and_.new(items)
+	return Comparers.And.new(items)
 
 static func or_(items: Array):
-	return GodotLINQ.or_.new(items)
+	return Comparers.Or.new(items)
 
 static func not_(item):
-	return GodotLINQ.not_.new(item)
-	
+	return Comparers.Not.new(item)
+
 static func in_(item):
-	return GodotLINQ.in_.new(item)
+	return Comparers.In.new(item)
 
 static func lt(item):
-	return GodotLINQ.lt.new(item)
-		
+	return Comparers.LT.new(item)
+
 static func gt(item):
-	return GodotLINQ.gt.new(item)
+	return Comparers.GT.new(item)
 
 static func eq(item):
-	return GodotLINQ.eq.new(item)
-
+	return Comparers.Eq.new(item)
 
 static func op(item:String, arg):
 	match item:
@@ -40,4 +39,3 @@ static func op(item:String, arg):
 		"in":
 			return in_(arg)
 	return null
-		

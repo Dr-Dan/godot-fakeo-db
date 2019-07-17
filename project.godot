@@ -9,15 +9,20 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "Reference",
-"class": "GodotLINQ",
+"base": "Resource",
+"class": "Builders",
 "language": "GDScript",
-"path": "res://lib/GodotLINQ.gd"
+"path": "res://lib/Builders.gd"
+}, {
+"base": "Reference",
+"class": "Comparers",
+"language": "GDScript",
+"path": "res://lib/Comparers.gd"
 }, {
 "base": "Resource",
-"class": "GodotLinqFactory",
+"class": "Factory",
 "language": "GDScript",
-"path": "res://lib/GodotLinqFactory.gd"
+"path": "res://lib/Factory.gd"
 }, {
 "base": "Reference",
 "class": "IterList",
@@ -25,15 +30,16 @@ _global_script_classes=[ {
 "path": "res://lib/IterList.gd"
 } ]
 _global_script_class_icons={
-"GodotLINQ": "",
-"GodotLinqFactory": "",
+"Builders": "",
+"Comparers": "",
+"Factory": "",
 "IterList": ""
 }
 
 [application]
 
 config/name="GodotLINQ"
-run/main_scene="res://example/ShopkeeperMainScene.tscn"
+run/main_scene="res://examples/Shopkeeper/ShopkeeperMainScene.tscn"
 config/icon="res://icon.png"
 
 [rendering]
