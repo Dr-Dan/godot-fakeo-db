@@ -23,6 +23,10 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="PlayerPanel" parent="MarginContainer/HBoxContainer" instance=ExtResource( 1 )]
+editor/display_folded = true
+
+[node name="Label" parent="MarginContainer/HBoxContainer/PlayerPanel/Name" index="0"]
+text = "Player"
 
 [node name="Container" type="MarginContainer" parent="MarginContainer/HBoxContainer"]
 margin_left = 342.0
@@ -35,3 +39,5 @@ size_flags_vertical = 3
 margin_left = 684.0
 margin_right = 1024.0
 
+
+[editable path="MarginContainer/HBoxContainer/PlayerPanel"]

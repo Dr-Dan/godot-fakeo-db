@@ -16,13 +16,6 @@ class Actor:
 		self.cash = cash
 		self.inventory = inventory
 		
-class InventoryItem:
-	var type: String
-	var amt: int
-
-	func _init(type, amt=1):
-		self.type = type
-		self.amt = amt
 		
 const MEAT = "Meat"
 const AXE = "Axe"
@@ -47,14 +40,9 @@ onready var shopkeep_inventory = IterList.new([
 	InventoryItem.new(SPELL_HEAL, 1),
 	InventoryItem.new(THE_JUICE, 1),
 	])
-	
-onready var player_inventory = IterList.new([
-	InventoryItem.new(MEAT, 5),
-	InventoryItem.new(SWORD, 2),
-	])
 
 onready var actor_data = IterList.new([
-	Actor.new(PLAYER, 180, player_inventory),
+	$Player,
 	Actor.new(SHOPKEEPER, 800, shopkeep_inventory),
 	])
 

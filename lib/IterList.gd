@@ -7,7 +7,7 @@ var end
 var increment 
 var items = []
 
-func _init(items):
+func _init(items=[]):
 	increment = 1
 	start = 0
 	curr = start
