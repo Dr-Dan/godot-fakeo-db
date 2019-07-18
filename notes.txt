@@ -7,6 +7,9 @@ TODO:
 			wrap dictionary in default class
 			think mongo db c# (BSON)
 
+		db class vs IterList of Lists
+			add collection vs IterList.first({name=collection_name})
+
     improvements/planned features:
         add functions:
 			any() -> bool,
@@ -14,16 +17,17 @@ TODO:
             add(_if), remove(_if)
 
 		# online after this + some clean-up
-                
+		      
         select, where with func
             i.e. lambda
-
-		search keys and values??
+		for_each(action)
 
 		built in support for unique-id system
+          
+		search keys and values??
 
 		json
-			+save support - not sure this is necessary
+			+ write support - not sure this is necessary
 
 		better examples showing all major features
 
@@ -35,7 +39,6 @@ TODO:
 				Start().First(cmps).Open("inventory").First({type=eq("sword")})
 
 		actions:
-			for_each,
 			mathematical functions
 				Add, Sub, Mult, Div, Mod
 			Append/Erase on signal/event?

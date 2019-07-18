@@ -21,6 +21,7 @@ const MEAT = "Meat"
 const AXE = "Axe"
 const SWORD = "Sword"
 const SPELL_HEAL = "Heal Spell"
+const SCROLL_FIRE = "Fire Scroll"
 const THE_JUICE = "##JUICE##"
 
 const PLAYER = "Player"
@@ -31,8 +32,10 @@ onready var item_data = IterList.new([
 	{type=AXE, value=25, descr="A simple logging axe."},
 	{type=SWORD, value=40, descr="A sword from some lost soldier."},
 	{type=SPELL_HEAL, value=120, descr="Refills a substantial amount of HP."},
+	{type=SCROLL_FIRE, value=300, descr="Deals a small amount of fire damage.\nDestroyed on use."},
 	{type=THE_JUICE, value=1000, descr="Nice."},
 ])
+
 
 onready var shopkeep_inventory = IterList.new([
 	InventoryItem.new(MEAT),

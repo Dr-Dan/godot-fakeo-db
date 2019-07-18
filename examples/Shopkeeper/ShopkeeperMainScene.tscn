@@ -11,10 +11,9 @@ script = ExtResource( 1 )
 
 [node name="Player" type="Node2D" parent="."]
 script = ExtResource( 3 )
-_name = "Player"
-cash = 200
-start_inv = {
-"Meat": 5,
-"Sword": 2
+_start_inv = {
+"Fire Scroll": 4,
+"Sword": 1
 }
+cash = 200
 
