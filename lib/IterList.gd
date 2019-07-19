@@ -108,6 +108,18 @@ func first(cmps):
 					return item
 	return null
 	
+func take(cmps, amt):
+	var result = []
+	for item in items:
+		for key in cmps:
+			if key in item:
+				if cmps[key].eval(item[key]):
+					result.append(item)
+					if result.size() >= amt:
+						return get_script().new(result)
+
+	return get_script().new(result)
+		
 func to_list(deep=false):
 	return items.duplicate(deep)	
 	

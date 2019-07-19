@@ -7,23 +7,49 @@ TODO:
 			wrap dictionary in default class
 			think mongo db c# (BSON)
 
+		library modules
+		
 		db class vs IterList of Lists
 			add collection vs IterList.first({name=collection_name})
 
     improvements/planned features:
-        add functions:
+		show take in example
+		
+        add functions (chainers and functional):
 			any() -> bool,
 			all() -> bool,
             add(_if), remove(_if)
+			at(index)
+			size, first, last
 
-		# online after this + some clean-up
-		      
+		remove any need to access iter_list.items
+			RF in shopkeeper example
+
+		# online after this + some clean-up, readme
+		
         select, where with func
             i.e. lambda
+				able to read key and value
+				var age_comp = GLF.and_([GLF.gt(20), GLF.lt(100)])
+				var cash_comp = GLF.gt(1200)
+				var chain = Builders.ChainerKV.start()\
+					.where(and([{age=age_comp}, {cash=cash_comp}]))
+					.where(or([{age=age_comp}, {cash=cash_comp}]))
+
+
 		for_each(action)
 
 		built in support for unique-id system
-          
+
+		functions
+			change:
+				append, remove -> return copy of original
+				combine/union?
+			generation (a la numpy):
+				repeat(i) -> list of i repeated N times
+			mathematical:
+				sum, average, min, max
+
 		search keys and values??
 
 		json
@@ -33,21 +59,34 @@ TODO:
 
 		monitoring/signals
 			observer pattern
+			on_destroy/create
 
 		some method for accessing nested fields
 			In builder method?:
 				Start().First(cmps).Open("inventory").First({type=eq("sword")})
 
-		actions:
+
+		actions (on data):
+		for_each
 			mathematical functions
 				Add, Sub, Mult, Div, Mod
 			Append/Erase on signal/event?
 
+
 	test library - gut??
+
+	ecs impl example
+		requires id system
 		
 Shopkeeper example
+	use builder method to avoid duplicate comparisons
+
+	how to handle multiplication of values by price
+		for_each??
+		pass edited list to gui for display
+
 	show item stats
-		hover/tooltip thang??
+		in hover/tooltip
 		or use center panel
 
 	refactor gui code

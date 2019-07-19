@@ -1,6 +1,15 @@
 extends Resource
 class_name Factory
 
+static func gt(item):
+	return Comparers.GT.new(item)
+	
+static func lt(item):
+	return Comparers.LT.new(item)
+
+static func eq(item):
+	return Comparers.Eq.new(item)
+
 static func and_(items: Array):
 	return Comparers.And.new(items)
 
@@ -13,29 +22,20 @@ static func not_(item):
 static func in_(item):
 	return Comparers.In.new(item)
 
-static func lt(item):
-	return Comparers.LT.new(item)
-
-static func gt(item):
-	return Comparers.GT.new(item)
-
-static func eq(item):
-	return Comparers.Eq.new(item)
-
 static func op(item:String, arg):
 	match item:
 		"<":
 			return lt(arg)
 		">":
 			return gt(arg)
+		"=":
+			return eq(arg)			
 		"&", "and":
 			return and_(arg)
-		"=":
-			return eq(arg)
+		"or", "|":
+			return or_(arg)			
 		"not", "!":
 			return not_(arg)
-		"or", "|":
-			return or_(arg)
 		"in":
 			return in_(arg)
 	return null

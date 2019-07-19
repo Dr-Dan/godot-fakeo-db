@@ -39,6 +39,7 @@ func run_test():
 	{name="trish", age=49, addr_id=2},
 	{name="aslan", age=199, addr_id=1},
 	Human.new("dan", 30, 2),
+	Human.new("andy", 76, 2),
 	Human.new("ariel", 65, 3),
 	])
 	
@@ -52,6 +53,8 @@ func run_test():
 	
 	print_break()
 	print_lists(name_table, addr_table)
+	print_break()
+	take_test(name_table)
 	print_break()
 	count_names_test(name_table)
 	print_break()
@@ -80,8 +83,16 @@ func count_names_test(name_table):
 	var comp_dan = {name=GLF.eq("dan")}
 	print("dan's age is %d" % name_table.first(comp_dan).age)
 
-
-# keep a query for later
+func name_starts_with_letter(name:String, letter:String):
+	return not name.empty() and name[0].to_lower() == letter
+	
+func take_test(name_table):
+	var cmp = GL.CmpFunctionWithArgs.new(funcref(self, "name_starts_with_letter"), "a")
+	var result = name_table.take({name=cmp}, 2).select(["name", "age"])
+	print("first two where name starts with 'a':")
+	print(result.to_list())
+	
+# store query for later
 var age_comp = GLF.and_([GLF.gt(20), GLF.lt(100)])
 var age_comp_not = GLF.not_(age_comp)
 var fields = ["addr_id", "name", "age"]
@@ -89,21 +100,20 @@ var fields = ["addr_id", "name", "age"]
 var chain = Builders.Chainer.start()\
 	.where({age=age_comp})\
 	.select(fields)
-	
+
 var chain_not = Builders.Chainer.start()\
 	.where({age=age_comp_not})\
 	.select(fields)
-	
+
 func age_comp_builder_test(name_table):
 	var result = chain.eval(name_table)
 	var result_not = chain_not.eval(name_table)
-	
+
 	print("age > 20 and age < 100")
 	print(result.to_list())
 	print("\n--------------")
 	print("not (age > 20 and age < 100) == age < 20 or age > 100")
 	print(result_not.to_list())
-	
 	
 func house_search_test(name_table, addr_table):
 	var house_search = addr_table.where({value=GLF.gt(20000)})

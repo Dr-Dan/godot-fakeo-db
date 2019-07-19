@@ -33,13 +33,19 @@ _global_script_classes=[ {
 "class": "IterList",
 "language": "GDScript",
 "path": "res://lib/IterList.gd"
+}, {
+"base": "Node",
+"class": "WorldActor",
+"language": "GDScript",
+"path": "res://examples/Shopkeeper/WorldActor.gd"
 } ]
 _global_script_class_icons={
 "Builders": "",
 "Comparers": "",
 "Factory": "",
 "InventoryItem": "",
-"IterList": ""
+"IterList": "",
+"WorldActor": ""
 }
 
 [application]

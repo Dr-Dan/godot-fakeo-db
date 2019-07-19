@@ -167,11 +167,11 @@ class CmpFunctionWithArgs:
 	extends Comparer
 	var func_ref
 	var args
-	func _init(func_ref: FuncRef, args=null):
+	func _init(func_ref: FuncRef, args):
 		self.func_ref = func_ref
 		self.args = args
 		
 	func eval(item):
-		return func_ref.call_func(args, item)
+		return func_ref.call_func(item, args)
 		
 		

@@ -29,10 +29,14 @@ class Chainer:
 		items.append(Count.new(comps))
 		return self
 	
+	func take(comps, amt):
+		items.append(Take.new(comps, amt))
+		return self		
+		
 	func first(comps):
 		items.append(First.new(comps))
 		return self
-	
+
 	func eval(data):
 		var d = data
 		for i in items:
@@ -85,6 +89,26 @@ class Count:
 						result += 1
 		return result
 
+class Take:
+	var comps = []
+	var amt = 0
+
+	func _init(comps, amt):
+		self.comps = comps
+		self.amt = amt
+
+	func eval(items):
+		var result = []
+		for item in items:
+			for key in comps:
+				if key in item:
+					if comps[key].eval(item[key]):
+						result.append(item)
+						if result.size() >= amt:
+							return IterList.new(result)
+
+		return IterList.new(result)
+		
 class First:
 	var comps = []
 
