@@ -72,9 +72,9 @@ func print_break_mini():
 
 
 func print_lists(name_table, addr_table):
-	var query_names = Builders.Chainer.start()\
+	var query_names = Chainer.new()\
 	.select(["name", "age", "addr_id"])
-	var query_addr = Builders.Chainer.start()\
+	var query_addr = Chainer.new()\
 	.select(["addr_id", "street", "value"])
 
 	print("PEOPLE:")
@@ -86,28 +86,27 @@ func print_lists(name_table, addr_table):
 
 func i_is_in_name(name:String):
 	return "i" in name
-	
-func count_names_test(name_table):
-	var cmp = GL.CmpFunction.new(funcref(self, "i_is_in_name"))
-	var comp_dan = {name=GLF.eq("dan")}
-	
-	var query_name = Builders.Chainer.start()\
-	.count({name=cmp})	
-	var query_age = Builders.Chainer.start()\
-	.first(comp_dan)
 
-	var result = query_name.eval(name_table)
-	print("%d/%d name entries contain 'i'" % [result, name_table.size()])	
+func count_names_test(name_table):
+	var cmp_has_i = GL.CmpFunction.new(funcref(self, "i_is_in_name"))
+	var comp_is_dan = {name=GLF.eq("dan")}
+
+	var query_name = Chainer.new()\
+	.count({name=cmp_has_i})	
+	var query_age = Chainer.new()\
+	.first(comp_is_dan)
+
+	print("%d/%d name entries contain 'i'" % [query_name.eval(name_table), name_table.size()])	
 	print("dan's age is %d" % query_age.eval(name_table).age)
 
 
 func name_starts_with_letter(name:String, letter:String):
 	return not name.empty() and name[0].to_lower() == letter
-	
+
 func take_test(name_table, amt_take=2):
 	var cmp = GL.CmpFunctionWithArgs.new(funcref(self, "name_starts_with_letter"), "a")
-		
-	var query = Builders.Chainer.start()\
+
+	var query = Chainer.new()\
 	.where({name=cmp})\
 	.take(amt_take)\
 	.select(["name", "age"])
@@ -115,18 +114,18 @@ func take_test(name_table, amt_take=2):
 	var result = query.eval(name_table)
 	print("take %d entries where name starts with 'a':" % amt_take)
 	print(result)
-	
-	
+
+
 # store query for later
 var age_comp = GLF.and_([GLF.gt(20), GLF.lt(100)])
 var age_comp_not = GLF.not_(age_comp)
 var fields = ["addr_id", "name", "age"]
 
-var chain = Builders.Chainer.start()\
+var chain = Chainer.new()\
 	.where({age=age_comp})\
 	.select(fields)
 
-var chain_not = Builders.Chainer.start()\
+var chain_not = Chainer.new()\
 	.where({age=age_comp_not})\
 	.select(fields)
 
@@ -142,17 +141,17 @@ func age_comp_builder_test(name_table):
 
 
 func house_search_test(name_table, addr_table):
-	var query_addr_value = Builders.Chainer.start()\
+	var query_addr_value = Chainer.new()\
 		.where({value=GLF.gt(20000)})\
 		.select(["addr_id", "street", "value"])
-						
+
 	var valued_houses = query_addr_value.eval(addr_table)
 
-	var query_addr_id = Builders.Chainer.start()\
-		.values("addr_id")						
-	var addr_ids = query_addr_id.eval(valued_houses)	
+	var addr_ids = Chainer.new()\
+		.values("addr_id")\
+		.eval(valued_houses)	
 
-	var query_homeowner = Builders.Chainer.start()\
+	var query_homeowner = Chainer.new()\
 		.where({addr_id=GLF.in_(addr_ids)})\
 		.select(["name", "addr_id"])
 	var homeowners = query_homeowner.eval(name_table)
