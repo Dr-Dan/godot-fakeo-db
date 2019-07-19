@@ -17,18 +17,20 @@ TODO:
 				should use builder internally
 
     improvements/planned features:
+		change Builders to return new Chainer(items)
+		
 		show all functions in itertest
 			change itertest name to console test or similar
 
-		remove any need to access iter_list.items
-			RF in shopkeeper example
-
+		make sure it is obvious which functions need to take array as argument
 		readme
 
-		remove IterList from example, impl later on top of class system
+		hide shopkeeper example, iterlist also
 
 		### github ###
-		
+		remove any need to access iter_list.items
+			RF in shopkeeper example
+	
 		simple documentation with examples for each 
 			like linq docs
 
@@ -53,7 +55,7 @@ TODO:
 			mathematical:
 				sum, average, min, max
 
-		search keys and values??
+		search/select keys and values??
 
 		json
 			+ write support - not sure this is necessary
@@ -74,6 +76,8 @@ TODO:
 		mathematical functions
 			Add, Sub, Mult, Div, Mod
 		Append/Erase on signal/event?
+
+		schema - some way to ensure inserted items fit template
 
 
 	test library - gut??

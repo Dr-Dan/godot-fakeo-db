@@ -1,5 +1,6 @@
 tool
 extends EditorScript
+# TODO: rename or remove these
 const GL = Comparers
 const GLF = Factory
 
@@ -33,7 +34,7 @@ func _run():
 
 # Called when the node enters the scene tree for the first time.
 func run_test():
-	var name_table = IterList.new([
+	var name_table = [
 	{name="mike", age=22, addr_id=0},
 	{name="mindy", age=16, addr_id=1},
 	{name="trish", age=49, addr_id=2},
@@ -41,15 +42,15 @@ func run_test():
 	Human.new("dan", 30, 2),
 	Human.new("andy", 76, 2),
 	Human.new("ariel", 65, 3),
-	])
+	]
 
-	var addr_table = IterList.new([
+	var addr_table = [
 	{addr_id=0, street="vale road", value=20000},
 	{addr_id=1, street="the lane", value=10000},
 	{addr_id=2, street="london road", value=35250},
 	{addr_id=3, street="diamond mews", value=100000},
 	Address.new(3, "diamond mews", 100000)
-	])
+	]
 	
 	print_break()
 	print_lists(name_table, addr_table)
@@ -62,35 +63,59 @@ func run_test():
 	print_break()
 	house_search_test(name_table, addr_table)
 
+
 func print_break():
 	print("\n###############################")
 
+func print_break_mini():
+	print("\n--------------")
+
+
 func print_lists(name_table, addr_table):
+	var query_names = Builders.Chainer.start()\
+	.select(["name", "age", "addr_id"])
+	var query_addr = Builders.Chainer.start()\
+	.select(["addr_id", "street", "value"])
+
 	print("PEOPLE:")
-	print(name_table.to_list())
+	print(query_names.eval(name_table))
 	print("\n--------------")
 	print("ADDRESSES:")
-	print(addr_table.to_list())
+	print(query_addr.eval(addr_table))
+
 
 func i_is_in_name(name:String):
 	return "i" in name
 	
 func count_names_test(name_table):
 	var cmp = GL.CmpFunction.new(funcref(self, "i_is_in_name"))
-	var result = name_table.count({name=cmp})
-	print("%d/%d name entries contain 'i'" % [result, name_table.size()])
-	
 	var comp_dan = {name=GLF.eq("dan")}
-	print("dan's age is %d" % name_table.first(comp_dan).age)
+	
+	var query_name = Builders.Chainer.start()\
+	.count({name=cmp})	
+	var query_age = Builders.Chainer.start()\
+	.first(comp_dan)
+
+	var result = query_name.eval(name_table)
+	print("%d/%d name entries contain 'i'" % [result, name_table.size()])	
+	print("dan's age is %d" % query_age.eval(name_table).age)
+
 
 func name_starts_with_letter(name:String, letter:String):
 	return not name.empty() and name[0].to_lower() == letter
 	
-func take_test(name_table):
+func take_test(name_table, amt_take=2):
 	var cmp = GL.CmpFunctionWithArgs.new(funcref(self, "name_starts_with_letter"), "a")
-	var result = name_table.take({name=cmp}, 2).select(["name", "age"])
-	print("first two where name starts with 'a':")
-	print(result.to_list())
+		
+	var query = Builders.Chainer.start()\
+	.where({name=cmp})\
+	.take(amt_take)\
+	.select(["name", "age"])
+
+	var result = query.eval(name_table)
+	print("take %d entries where name starts with 'a':" % amt_take)
+	print(result)
+	
 	
 # store query for later
 var age_comp = GLF.and_([GLF.gt(20), GLF.lt(100)])
@@ -110,23 +135,30 @@ func age_comp_builder_test(name_table):
 	var result_not = chain_not.eval(name_table)
 
 	print("age > 20 and age < 100")
-	print(result.to_list())
-	print("\n--------------")
+	print(result)
+	print_break_mini()
 	print("not (age > 20 and age < 100) == age < 20 or age > 100")
-	print(result_not.to_list())
-	
+	print(result_not)
+
+
 func house_search_test(name_table, addr_table):
-	var house_search = addr_table.where({value=GLF.gt(20000)})
-	# get address ids from results
-	var addr_ids = house_search.get_values("addr_id")
-	# find all homeowners with address in addr_ids. Select name, address fields
-	var homeowners = name_table\
-	.where({addr_id=GLF.in_(addr_ids)})\
-	.select(["name", "addr_id"])
-	
+	var query_addr_value = Builders.Chainer.start()\
+		.where({value=GLF.gt(20000)})\
+		.select(["addr_id", "street", "value"])
+						
+	var valued_houses = query_addr_value.eval(addr_table)
+
+	var query_addr_id = Builders.Chainer.start()\
+		.values("addr_id")						
+	var addr_ids = query_addr_id.eval(valued_houses)	
+
+	var query_homeowner = Builders.Chainer.start()\
+		.where({addr_id=GLF.in_(addr_ids)})\
+		.select(["name", "addr_id"])
+	var homeowners = query_homeowner.eval(name_table)
+
 	print("house value > 20000")
-	print(house_search.to_list())
-	print("\n--------------")
-	
+	print(valued_houses)
+	print_break_mini()
 	print("homeowners where house value > 20000 (addr_id in 'addr_ids')")
-	print(homeowners.to_list())
+	print(homeowners)

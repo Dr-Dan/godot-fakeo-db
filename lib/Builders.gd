@@ -14,9 +14,10 @@ class Chainer:
 	static func start() -> Chainer:
 		return Chainer.new()
 		
-	func _init():
-		pass
+	func _init(items=[]):
+		self.items = items
 		
+	# TODO: these should all return Chainer.new(items)
 	func select(fields):
 		items.append(Select.new(fields))
 		return self
@@ -26,8 +27,8 @@ class Chainer:
 		return self
 
 
-	func take(comps, amt):
-		items.append(Take.new(comps, amt))
+	func take(amt):
+		items.append(Take.new(amt))
 		return self		
 		
 	func first(comps):
@@ -57,6 +58,10 @@ class Chainer:
 		items.append(Count.new(comps))
 		return self
 			
+	func values(field):
+		items.append(Values.new(field))
+		return self
+						
 	func eval(data):
 		var d = data
 		for i in items:
@@ -77,7 +82,7 @@ class Select:
 				n[f] = item[f]
 			if not n.empty():
 				result.append(n)
-		return IterList.new(result)
+		return result
 
 class Where:
 	var comps = []
@@ -92,29 +97,25 @@ class Where:
 				if key in item:
 					if comps[key].eval(item[key]):
 						result.append(item)
-		return IterList.new(result)
+		return result
 
 class Take:
-	var comps = []
 	var amt = 0
 
-	func _init(comps, amt):
-		self.comps = comps
+	func _init(amt):
 		self.amt = amt
 
 	func eval(items):
 		var result = []
-		for item in items:
-			for key in comps:
-				if key in item:
-					if comps[key].eval(item[key]):
-						result.append(item)
-						if result.size() >= amt:
-							return IterList.new(result)
+		var n_items = items.size()
+		var n = min(amt, n_items)
+		if n > 0 and n <= n_items:
+			for i in range(n):
+				result.append(items[i])
 
-		return IterList.new(result)
+		return result
 		
-# TODO: return error. Null from Last/FirstOrDefault		
+# TODO: add default argument to _init
 class First:
 	var comps = []
 
@@ -150,7 +151,7 @@ class At:
 	var default  = null
 
 	func _init(index, default=null):
-		self.comps = comps
+		self.index = index
 		self.default = default
 
 	func eval(items):
@@ -204,3 +205,16 @@ class Count:
 					if comps[key].eval(item[key]):
 						result += 1
 		return result
+
+class Values:
+	var field
+	func _init(field):
+		self.field = field
+		
+	func eval(items):
+		var result = []
+		for item in items:
+			if field in item:
+				result.append(item[field])
+		return result
+	
