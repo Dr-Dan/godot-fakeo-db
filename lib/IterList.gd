@@ -17,20 +17,18 @@ func _init(items=[]):
 func size():
 	return items.size()
 
-func is_done():
+func should_continue():
 	return (curr < end)
-
-func do_step():
-	curr += increment
-	return is_done()
 
 func _iter_init(arg):
 	curr = start
-	return is_done()
+	return should_continue()
 
 func _iter_next(arg):
-	return do_step()
+	curr += increment
+	return should_continue()
 
+# TODO: return next evaluated item
 func _iter_get(arg):
 	return items[curr]
 	

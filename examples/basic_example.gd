@@ -1,5 +1,6 @@
 tool
 extends EditorScript
+
 # TODO: rename or remove these
 const GL = Comparers
 const GLF = Factory
@@ -7,6 +8,8 @@ const GLF = Factory
 """
 To use: File > Run
 """
+
+# ==============================================================
 
 class Human:
 	var name: String
@@ -27,12 +30,12 @@ class Address:
 		self.addr_id = addr_id
 		self.street = street
 		self.value = value
+		
+# ==============================================================
 			
 func _run():
 	run_test()
 	
-
-# Called when the node enters the scene tree for the first time.
 func run_test():
 	var name_table = [
 	{name="mike", age=22, addr_id=0},
@@ -55,15 +58,16 @@ func run_test():
 	print_break()
 	print_lists(name_table, addr_table)
 	print_break()
-	take_test(name_table)
-	print_break()
-	count_names_test(name_table)
-	print_break()
 	age_comp_builder_test(name_table)
 	print_break()
 	house_search_test(name_table, addr_table)
+	print_break()
+	take_test(name_table)
+	print_break()
+	count_names_test(name_table)
 
 
+# ==============================================================
 func print_break():
 	print("\n###############################")
 
@@ -83,62 +87,32 @@ func print_lists(name_table, addr_table):
 	print("ADDRESSES:")
 	print(query_addr.eval(addr_table))
 
+# ==============================================================
 
-func i_is_in_name(name:String):
-	return "i" in name
-
-func count_names_test(name_table):
-	var cmp_has_i = GL.CmpFunction.new(funcref(self, "i_is_in_name"))
-	var comp_is_dan = {name=GLF.eq("dan")}
-
-	var query_name = Chainer.new()\
-	.count({name=cmp_has_i})	
-	var query_age = Chainer.new()\
-	.first(comp_is_dan)
-
-	print("%d/%d name entries contain 'i'" % [query_name.eval(name_table), name_table.size()])	
-	print("dan's age is %d" % query_age.eval(name_table).age)
-
-
-func name_starts_with_letter(name:String, letter:String):
-	return not name.empty() and name[0].to_lower() == letter
-
-func take_test(name_table, amt_take=2):
-	var cmp = GL.CmpFunctionWithArgs.new(funcref(self, "name_starts_with_letter"), "a")
-
-	var query = Chainer.new()\
-	.where({name=cmp})\
-	.take(amt_take)\
-	.select(["name", "age"])
-
-	var result = query.eval(name_table)
-	print("take %d entries where name starts with 'a':" % amt_take)
-	print(result)
-
-
-# store query for later
+# store a query for later
 var age_comp = GLF.and_([GLF.gt(20), GLF.lt(100)])
 var age_comp_not = GLF.not_(age_comp)
 var fields = ["addr_id", "name", "age"]
 
-var chain = Chainer.new()\
+var where_age = Chainer.new()\
 	.where({age=age_comp})\
 	.select(fields)
 
-var chain_not = Chainer.new()\
+var where_not_age = Chainer.new()\
 	.where({age=age_comp_not})\
 	.select(fields)
 
 func age_comp_builder_test(name_table):
-	var result = chain.eval(name_table)
-	var result_not = chain_not.eval(name_table)
+	var result = where_age.eval(name_table)
+	var result_not = where_not_age.eval(name_table)
 
 	print("age > 20 and age < 100")
 	print(result)
 	print_break_mini()
-	print("not (age > 20 and age < 100) == age < 20 or age > 100")
+	print("not (age > 20 and age < 100)")
 	print(result_not)
 
+# ==============================================================
 
 func house_search_test(name_table, addr_table):
 	var query_addr_value = Chainer.new()\
@@ -161,3 +135,41 @@ func house_search_test(name_table, addr_table):
 	print_break_mini()
 	print("homeowners where house value > 20000 (addr_id in 'addr_ids')")
 	print(homeowners)
+	
+# ==============================================================
+
+func i_is_in_name(name:String):
+	return "i" in name
+
+func count_names_test(name_table):
+	var cmp_has_i = GL.CmpFunction.new(funcref(self, "i_is_in_name"))
+	var cmp_is_dan = {name=GLF.eq("dan")}
+
+	var result_name = Chainer.new()\
+	.count({name=cmp_has_i})\
+	.eval(name_table)
+
+	var result_age = Chainer.new()\
+	.first(cmp_is_dan)\
+	.eval(name_table)
+
+	print("%d/%d name entries contain 'i'" % [result_name, name_table.size()])	
+	print("dan's age is %d" % result_age.age)
+
+# ==============================================================
+
+func name_starts_with_letter(name:String, letter:String):
+	return not name.empty() and name[0].to_lower() == letter
+
+func take_test(name_table, amt_take=2):
+	var cmp = GL.CmpFunctionWithArgs.new(funcref(self, "name_starts_with_letter"), "a")
+
+	var query = Chainer.new()\
+	.where({name=cmp})\
+	.take(amt_take)\
+	.select(["name", "age"])
+
+	var result = query.eval(name_table)
+	print("take %d entries where name starts with 'a':" % amt_take)
+	print(result)
+

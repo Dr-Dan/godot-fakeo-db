@@ -3,7 +3,7 @@ class_name Enumerators
 class Select:
 	var fields = []
 
-	func _init(fields):
+	func _init(fields: Array):
 		self.fields = fields
 
 	func eval(items):
@@ -17,9 +17,9 @@ class Select:
 		return result
 
 class Where:
-	var comps = []
+	var comps = {}
 
-	func _init(comps):
+	func _init(comps: Dictionary):
 		self.comps = comps
 
 	func eval(items):
@@ -34,7 +34,7 @@ class Where:
 class Take:
 	var amt = 0
 
-	func _init(amt):
+	func _init(amt: int):
 		self.amt = amt
 
 	func eval(items):
@@ -49,9 +49,9 @@ class Take:
 		
 # TODO: add default argument to _init
 class First:
-	var comps = []
+	var comps = {}
 
-	func _init(comps):
+	func _init(comps: Dictionary):
 		self.comps = comps
 
 	func eval(items):
@@ -63,9 +63,9 @@ class First:
 		return null 
 
 class Last:
-	var comps = []
+	var comps = {}
 
-	func _init(comps):
+	func _init(comps: Dictionary):
 		self.comps = comps
 
 	func eval(items):
@@ -82,7 +82,7 @@ class At:
 	var index = -1
 	var default  = null
 
-	func _init(index, default=null):
+	func _init(index: int, default=null):
 		self.index = index
 		self.default = default
 
@@ -92,9 +92,9 @@ class At:
 		return default
 
 class Any:
-	var comps = []
+	var comps = {}
 
-	func _init(comps):
+	func _init(comps: Dictionary):
 		self.comps = comps
 
 	func eval(items):
@@ -106,9 +106,9 @@ class Any:
 		return false
 		
 class All:
-	var comps = []
+	var comps = {}
 
-	func _init(comps):
+	func _init(comps: Dictionary):
 		self.comps = comps
 
 	func eval(items):
@@ -124,9 +124,9 @@ class All:
 
 		
 class Count:
-	var comps = []
+	var comps = {}
 
-	func _init(comps):
+	func _init(comps: Dictionary):
 		self.comps = comps
 
 	func eval(items):

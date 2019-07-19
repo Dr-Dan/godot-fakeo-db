@@ -16,17 +16,14 @@ TODO:
 			IterList an extension (not pure lib)
 				should use builder internally
 
-    improvements/planned features:
-		change Builders to return new Chainer(items)
-		
-		show all functions in itertest
-			change itertest name to console test or similar
-
+    improvements/planned features:	
+		convert Chainer to Iterator
 		make sure it is obvious which functions need to take array as argument
-		readme
+		readme/docs
 
 		hide shopkeeper example, iterlist also
-
+		rename Chainer? Enumerators?
+		
 		### github ###
 		remove any need to access iter_list.items
 			RF in shopkeeper example

@@ -80,7 +80,7 @@ class Any:
 		return true
 	
 """
-	returns true for any item
+	returns false for any item
 """
 class None:
 	extends Comparer
