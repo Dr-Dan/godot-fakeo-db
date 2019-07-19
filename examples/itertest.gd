@@ -42,7 +42,7 @@ func run_test():
 	Human.new("andy", 76, 2),
 	Human.new("ariel", 65, 3),
 	])
-	
+
 	var addr_table = IterList.new([
 	{addr_id=0, street="vale road", value=20000},
 	{addr_id=1, street="the lane", value=10000},

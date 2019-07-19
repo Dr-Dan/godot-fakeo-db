@@ -12,21 +12,26 @@ TODO:
 		db class vs IterList of Lists
 			add collection vs IterList.first({name=collection_name})
 
+		move to object based construction
+			IterList an extension (not pure lib)
+				should use builder internally
+
     improvements/planned features:
-		show take in example
-		
-        add functions (chainers and functional):
-			any() -> bool,
-			all() -> bool,
-            add(_if), remove(_if)
-			at(index)
-			size, first, last
+		show all functions in itertest
+			change itertest name to console test or similar
 
 		remove any need to access iter_list.items
 			RF in shopkeeper example
 
-		# online after this + some clean-up, readme
+		readme
+
+		remove IterList from example, impl later on top of class system
+
+		### github ###
 		
+		simple documentation with examples for each 
+			like linq docs
+
         select, where with func
             i.e. lambda
 				able to read key and value
@@ -36,8 +41,6 @@ TODO:
 					.where(and([{age=age_comp}, {cash=cash_comp}]))
 					.where(or([{age=age_comp}, {cash=cash_comp}]))
 
-
-		for_each(action)
 
 		built in support for unique-id system
 
@@ -67,10 +70,10 @@ TODO:
 
 
 		actions (on data):
-		for_each
-			mathematical functions
-				Add, Sub, Mult, Div, Mod
-			Append/Erase on signal/event?
+		for_each(action)
+		mathematical functions
+			Add, Sub, Mult, Div, Mod
+		Append/Erase on signal/event?
 
 
 	test library - gut??

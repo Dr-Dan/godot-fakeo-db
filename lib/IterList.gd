@@ -86,15 +86,7 @@ func select(fields: Array):
 	for item in items:
 		var n = {}
 		for f in fields:
-#			if cmps.empty():
 			n[f] = item[f]
-#			continue
-								
-#			for key in cmps:
-#				if key in item:
-#					if f in item\
-#					and (cmps[key].eval(item[key])):
-#						n[f] = item[f]
 		if not n.empty():
 			result.append(n)
 	return get_script().new(result)
