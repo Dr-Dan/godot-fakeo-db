@@ -11,7 +11,8 @@ class Select:
 		for item in items:
 			var n = {}
 			for f in fields:
-				n[f] = item[f]
+				if f in item:
+					n[f] = item[f]
 			if not n.empty():
 				result.append(n)
 		return result
@@ -25,10 +26,14 @@ class Where:
 	func eval(items):
 		var result = []
 		for item in items:
+			var valid = true
 			for key in comps:
 				if key in item:
-					if comps[key].eval(item[key]):
-						result.append(item)
+					if not comps[key].eval(item[key]):
+						valid = false
+						break
+			if valid:
+				result.append(item)
 		return result
 
 class Take:
@@ -87,7 +92,7 @@ class At:
 		self.default = default
 
 	func eval(items):
-		if not items.empty() and index >= 0 and index < items.size():
+		if index >= 0 and index < items.size():
 			return items[index]
 		return default
 

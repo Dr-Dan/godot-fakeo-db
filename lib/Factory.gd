@@ -10,6 +10,12 @@ static func lt(item):
 static func eq(item):
 	return Comparers.Eq.new(item)
 
+static func gteq(item):
+	return or_([gt(item), eq(item)])
+	
+static func lteq(item):
+	return or_([lt(item), eq(item)])
+
 static func and_(items: Array):
 	return Comparers.And.new(items)
 
@@ -22,17 +28,18 @@ static func not_(item):
 static func in_(item):
 	return Comparers.In.new(item)
 
+# TODO: do this in parser class
 static func op(item:String, arg):
 	match item:
 		"<":
 			return lt(arg)
 		">":
 			return gt(arg)
-		"=":
+		"=", "==":
 			return eq(arg)			
-		"&", "and":
+		"and", "&", "&&":
 			return and_(arg)
-		"or", "|":
+		"or", "|", "||":
 			return or_(arg)			
 		"not", "!":
 			return not_(arg)

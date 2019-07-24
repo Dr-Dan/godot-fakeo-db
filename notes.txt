@@ -1,8 +1,17 @@
 TODO:
 
+	About:
+
+		Linq style collection search tool
+		collections must be array of: objects or dictionaries
+		queries can be created statically or at runtime
+
+# =================================================================
     Code taste:
+
         how similar to linq should it be?
             what ways can gdscript be uniquely leveraged/advantaged
+			should revolve more around database/mongo style than linq
 		generally move towards objects as opposed to raw dictionaries
 			wrap dictionary in default class
 			think mongo db c# (BSON)
@@ -16,17 +25,25 @@ TODO:
 			IterList an extension (not pure lib)
 				should use builder internally
 
+		chainer there to make things easy - detect types etc
+
+		iterators should limit possible functions
+			i.e. no Count().Select()
+			SelectIterator, EndQueryIterator
+# =================================================================
     improvements/planned features:	
-		convert Chainer to Iterator
+		
+		remove chainer
+		remove old example to history folder or .ignore
+		hide shopkeeper example, iterlist also
+
 		make sure it is obvious which functions need to take array as argument
 		readme/docs
 
-		hide shopkeeper example, iterlist also
-		rename Chainer? Enumerators?
-		
+		rename Enumerators?
+
+				
 		### github ###
-		remove any need to access iter_list.items
-			RF in shopkeeper example
 	
 		simple documentation with examples for each 
 			like linq docs
@@ -40,7 +57,24 @@ TODO:
 					.where(and([{age=age_comp}, {cash=cash_comp}]))
 					.where(or([{age=age_comp}, {cash=cash_comp}]))
 
+					.where(AllValues.new({age=age_comp, cash=cash_comp}))
+					.where(AnyValues.new({age=age_comp, cash=cash_comp}))
+					.where(CompValue.new({age=age_comp})) == .where({age=age_comp}) # detect dictionary
 
+					.where(PredKeyValueFunc.new(["name", "score"], score_is_invalid))
+					.where(PredItemFunc.new(score_is_invalid))
+
+					.select(GetValue.new(["field0", "field1"]))
+					.select(SelectorGetKeys.new()) | .select(SelectorGetValues.new())
+					.select(KeyValueFunc.new(["name", "score"], mult_by_2_func))
+					.select(SelectorDict.new({score=mult_by_2_selector})) # return [{score:N*2}]
+					.select({name=name_func, score=score_func}) # will be cast to SelectorDict
+					.select(SelectorItemFunc.new(score_func))
+
+		var query = [Where(pred), First()]
+		for itm in data.apply(query): do_thing(i)
+			returns new IterList
+		
 		built in support for unique-id system
 
 		functions
@@ -75,7 +109,6 @@ TODO:
 		Append/Erase on signal/event?
 
 		schema - some way to ensure inserted items fit template
-
 
 	test library - gut??
 

@@ -62,9 +62,10 @@ func run_test():
 	print_break()
 	house_search_test(name_table, addr_table)
 	print_break()
-	take_test(name_table)
-	print_break()
 	count_names_test(name_table)
+	print_break()
+	take_test(name_table)
+
 
 
 # ==============================================================
@@ -90,7 +91,7 @@ func print_lists(name_table, addr_table):
 # ==============================================================
 
 # store a query for later
-var age_comp = GLF.and_([GLF.gt(20), GLF.lt(100)])
+var age_comp = GLF.and_([GLF.gt(20), GLF.lt(70)])
 var age_comp_not = GLF.not_(age_comp)
 var fields = ["addr_id", "name", "age"]
 
@@ -106,10 +107,10 @@ func age_comp_builder_test(name_table):
 	var result = where_age.eval(name_table)
 	var result_not = where_not_age.eval(name_table)
 
-	print("age > 20 and age < 100")
+	print("age > 20 and age < 70")
 	print(result)
 	print_break_mini()
-	print("not (age > 20 and age < 100)")
+	print("not (age > 20 and age < 70)")
 	print(result_not)
 
 # ==============================================================
@@ -123,7 +124,7 @@ func house_search_test(name_table, addr_table):
 
 	var addr_ids = Chainer.new()\
 		.values("addr_id")\
-		.eval(valued_houses)	
+		.eval(valued_houses)
 
 	var query_homeowner = Chainer.new()\
 		.where({addr_id=GLF.in_(addr_ids)})\
@@ -153,7 +154,7 @@ func count_names_test(name_table):
 	.first(cmp_is_dan)\
 	.eval(name_table)
 
-	print("%d/%d name entries contain 'i'" % [result_name, name_table.size()])	
+	print("%d/%d name entries contain 'i'" % [result_name, name_table.size()])
 	print("dan's age is %d" % result_age.age)
 
 # ==============================================================

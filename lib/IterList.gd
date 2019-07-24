@@ -14,9 +14,11 @@ func _init(items=[]):
 	self.items = items
 	self.end = items.size()
 	
+# TODO: iterator shouldn't have size
 func size():
 	return items.size()
 
+# NOTE: this may be overridden for child classes
 func should_continue():
 	return (curr < end)
 
