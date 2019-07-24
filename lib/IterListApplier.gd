@@ -33,7 +33,6 @@ func _iter_next(arg):
 func _iter_get(arg):
 	return items[curr]
 	
-
 func apply(query):
 	var d = items
 	for i in query:

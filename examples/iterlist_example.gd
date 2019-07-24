@@ -7,8 +7,9 @@ const GLF = Factory
 
 var data = [
 	{name="Wooden Sword", type="melee", subtype="sword", dmg=2, range=1.2},
-	{name="Katana", type="melee", subtype="sword", dmg=12, range=1.6},
-	{name="Nice Spear", type="melee", subtype="spear", dmg=15, range=2.0},
+	{name="Katana", type="melee", subtype="sword", dmg=16, range=1.6},
+	{name="Nice Spear", type="melee", subtype="spear", dmg=13, range=2.0},
+	{name="Jan's Hammer", type="melee", subtype="blunt", dmg=30, range=1.3},
 	{name="John's Rock", type="ranged", subtype="thrown", dmg=21, range=10.0, firing_rate=0.5},
 	{name="Wooden Bow", type="ranged", subtype="bow", dmg=4, range=20.0, firing_rate=1.4},
 	{name="Glass Bow", type="ranged", subtype="bow", dmg=7, range=20.0, firing_rate=1.7},
@@ -32,11 +33,14 @@ func _run():
 	
 func test_dmg_where(data):
 	var result = data.apply([
-	Enumerators.Where.new({type=GLF.eq("melee")}),
+	Enumerators.Where.new({
+		type=GLF.eq("melee"), 
+		subtype=GLF.or_([GLF.eq("sword"), GLF.eq("spear")])
+		}),
 	Enumerators.Select.new(["name", "dmg"])
 	])
 	
-	print("melee weapons: dmg and name\n")	
+	print("melee weapons (sword, spear): dmg and name\n")	
 	print(result.items)
 	print_break_mini()
 	
@@ -57,7 +61,7 @@ func take_n_test(data, word, amt_take=2):
 	var cmp = GL.CmpFunctionWithArgs.new(funcref(self, "name_contains_word"), word)
 	var query = [Enumerators.Where.new({name=cmp}), Enumerators.Take.new(2)]
 	var result = data.apply(query)
-		
+	
 	print("first 2 results containing [%s]\n" % word)
 	for i in result:
 		print(i)
