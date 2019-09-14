@@ -4,7 +4,7 @@ extends Node
 """
 
 const ButtonInvItem = preload("res://examples/Shopkeeper/ButtonInventoryItem.tscn")
-const GLF = Factory
+const GLF = OperatorFactory
 
 class Actor:
 	var name: String
@@ -62,7 +62,7 @@ func create_shopkeeper():
 		InventoryItem.new(AXE, 2),
 		InventoryItem.new(SPELL_HEAL, 1),
 		InventoryItem.new(THE_JUICE, 1),
-		])
+	])
 			
 	var shopkeeper = WorldActor.new(SHOPKEEPER, 800)
 	add_child(shopkeeper)

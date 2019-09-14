@@ -2,8 +2,8 @@ tool
 extends EditorScript
 
 # TODO: rename or remove these
-const GL = Comparers
-const GLF = Factory
+const GL = Operators
+const GLF = OperatorFactory
 
 var data = [
 	{name="Wooden Sword", type="melee", subtype="sword", dmg=2, range=1.2},
@@ -58,8 +58,12 @@ func name_contains_word(name:String, letter:String):
 	return not name.empty() and letter in name
 
 func take_n_test(data, word, amt_take=2):
-	var cmp = GL.CmpFunctionWithArgs.new(funcref(self, "name_contains_word"), word)
-	var query = [Enumerators.Where.new({name=cmp}), Enumerators.Take.new(2)]
+	var cmp = GL.CmpFunctionWithArgs.new(
+		funcref(self, "name_contains_word"), word)
+	var query = [
+		Enumerators.Where.new({name=cmp}), 
+		Enumerators.Take.new(2)
+	]
 	var result = data.apply(query)
 	
 	print("first 2 results containing [%s]\n" % word)

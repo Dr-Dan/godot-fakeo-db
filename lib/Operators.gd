@@ -1,7 +1,6 @@
-#extends Resource
-class_name Comparers
+class_name Operators
 
-class Comparer:
+class OperatorBase:
 	func eval(item):
 		return true
 	
@@ -10,7 +9,7 @@ class Comparer:
 	returns true if field in eval item
 """
 class HasField:
-	extends Comparer
+	extends OperatorBase
 	var field
 
 	func _init(field: String):
@@ -27,7 +26,7 @@ class HasField:
 	returns true if all in 'cmps' are true
 """
 class And:
-	extends Comparer
+	extends OperatorBase
 	var cmps
 	func _init(cmps:Array):
 		self.cmps = cmps
@@ -42,7 +41,7 @@ class And:
 	returns true if any in 'cmps' are true
 """
 class Or:
-	extends Comparer
+	extends OperatorBase
 	var cmps
 	func _init(cmps:Array):
 		self.cmps = cmps
@@ -57,9 +56,9 @@ class Or:
 	returns false if 'cmp'is true and vice versa
 """
 class Not:
-	extends Comparer
+	extends OperatorBase
 	var cmp
-	func _init(cmp: Comparer):
+	func _init(cmp: OperatorBase):
 		self.cmp = cmp
 		
 	func eval(item):
@@ -71,7 +70,7 @@ class Not:
 	returns true for any item
 """
 class Any:
-	extends Comparer
+	extends OperatorBase
 
 	func _init():
 		pass
@@ -83,7 +82,7 @@ class Any:
 	returns false for any item
 """
 class None:
-	extends Comparer
+	extends OperatorBase
 
 	func _init():
 		pass
@@ -97,7 +96,7 @@ class None:
 	Less than
 """
 class LT:
-	extends Comparer
+	extends OperatorBase
 	var val
 	func _init(val):
 		self.val = val
@@ -109,7 +108,7 @@ class LT:
 	Greater than
 """
 class GT:
-	extends Comparer
+	extends OperatorBase
 	var val
 	func _init(val):
 		self.val = val
@@ -121,7 +120,7 @@ class GT:
 	Equal to
 """
 class Eq:
-	extends Comparer
+	extends OperatorBase
 	var val
 	func _init(val):
 		self.val = val
@@ -132,7 +131,7 @@ class Eq:
 # ------------------------------------------------------------ 
 # LIST OPERATORS
 class In:
-	extends Comparer
+	extends OperatorBase
 	var items = []
 	func _init(items):
 		self.items = items
@@ -141,7 +140,7 @@ class In:
 		return item in items
 		
 class Contains:
-	extends Comparer
+	extends OperatorBase
 	var item
 	func _init(item):
 		self.item = item
@@ -155,7 +154,7 @@ class Contains:
 	
 """
 class CmpFunction:
-	extends Comparer
+	extends OperatorBase
 	var func_ref
 	func _init(func_ref: FuncRef):
 		self.func_ref = func_ref
@@ -164,7 +163,7 @@ class CmpFunction:
 		return func_ref.call_func(item)
 			
 class CmpFunctionWithArgs:
-	extends Comparer
+	extends OperatorBase
 	var func_ref
 	var args
 	func _init(func_ref: FuncRef, args):

@@ -9,14 +9,33 @@ TODO:
 # =================================================================
     Code taste:
 
-        how similar to linq should it be?
-            what ways can gdscript be uniquely leveraged/advantaged
-			should revolve more around database/mongo style than linq
-		generally move towards objects as opposed to raw dictionaries
-			wrap dictionary in default class
-			think mongo db c# (BSON)
+		project returns selection of kv pairs, select allows functions and returns copy?
+			.project(["addr_id", "street", "value"], PROJECTION_INCLUDE)
+			.select({value=mult(2)})
 
-		library modules
+		should revolve more around database/mongo style than linq
+			database -> collection -> document
+
+			filt = QueryBuilder.Filter.new({health=Ops.Compare.gte(0)})
+			upd_fx = QueryBuilder.UpdateMath.new({health=Ops.Update.sub(1)})
+			upd_rm = QueryBuilder.UpdateRemove.new({health=Ops.Compare.lt(0)})
+			upd = QueryBuilder.Update.Chain.new([upd_fx, upd_rm])
+			data.update(filt, upd)
+
+						===== OR =====
+
+			upd = QueryBuilder.new()
+				.where({health=Ops.Compare.gte(0)})
+				.update({health=Ops.Update.sub(1)})
+				.rm_where({health=Ops.Compare.lt(0)})
+			result = upd.apply(data).to_list()
+
+		should first take arguments?
+			not really; .where({}).first_or_default()
+
+		generally move towards objects as opposed to raw dictionaries?
+			wrap dictionary in default class internally?
+			think mongo db c# (BSON)
 		
 		db class vs IterList of Lists
 			add collection vs IterList.first({name=collection_name})
@@ -25,25 +44,50 @@ TODO:
 			IterList an extension (not pure lib)
 				should use builder internally
 
-		chainer there to make things easy - detect types etc
+		iterators should limit possible functions
+			i.e. no Count().Select()
+			SelectIterator, EndQueryIterator
+			Where -> Update == valid
+			Select -> Update == NOT valid
+
+# =================================================================
+    improvements/planned features:	
+
 
 		iterators should limit possible functions
 			i.e. no Count().Select()
 			SelectIterator, EndQueryIterator
-# =================================================================
-    improvements/planned features:	
 		
-		remove chainer
-		remove old example to history folder or .ignore
-		hide shopkeeper example, iterlist also
+		make sure I'm not running all evals if calling first
+			may need to build a tree/linked list
+			should be able to iterate i.e. one run through query per result
+
+		built in support for unique-id system
+			is there a solution/function built in?
+
+		query types:
+			update_one, update_many, update_n
+			add
+			remove
 
 		make sure it is obvious which functions need to take array as argument
+			static typing
+
+		refactor shopkeeper example
+
 		readme/docs
 
 		rename Enumerators?
+			look up definition + look at other libs use of language
 				
+		remove messy/depreciated examples
+
 		### github ###
+
+		convert original example to gui + search options
 	
+		tests
+
 		simple documentation with examples for each 
 			like linq docs
 
@@ -74,8 +118,6 @@ TODO:
 		for itm in data.apply(query): do_thing(i)
 			returns new IterList
 		
-		built in support for unique-id system
-
 		functions
 			change:
 				append, remove -> return copy of original

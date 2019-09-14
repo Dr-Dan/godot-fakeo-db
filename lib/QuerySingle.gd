@@ -1,4 +1,4 @@
-class_name ChainerSingle
+class_name QuerySingle
 	
 var items = []
 

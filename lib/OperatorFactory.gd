@@ -1,14 +1,14 @@
 extends Resource
-class_name Factory
+class_name OperatorFactory
 
 static func gt(item):
-	return Comparers.GT.new(item)
+	return Operators.GT.new(item)
 	
 static func lt(item):
-	return Comparers.LT.new(item)
+	return Operators.LT.new(item)
 
 static func eq(item):
-	return Comparers.Eq.new(item)
+	return Operators.Eq.new(item)
 
 static func gteq(item):
 	return or_([gt(item), eq(item)])
@@ -17,16 +17,16 @@ static func lteq(item):
 	return or_([lt(item), eq(item)])
 
 static func and_(items: Array):
-	return Comparers.And.new(items)
+	return Operators.And.new(items)
 
 static func or_(items: Array):
-	return Comparers.Or.new(items)
+	return Operators.Or.new(items)
 
 static func not_(item):
-	return Comparers.Not.new(item)
+	return Operators.Not.new(item)
 
 static func in_(item):
-	return Comparers.In.new(item)
+	return Operators.In.new(item)
 
 # TODO: do this in parser class
 static func op(item:String, arg):

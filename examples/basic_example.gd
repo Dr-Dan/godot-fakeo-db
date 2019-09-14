@@ -2,8 +2,8 @@ tool
 extends EditorScript
 
 # TODO: rename or remove these
-const GL = Comparers
-const GLF = Factory
+const GL = Operators
+const GLF = OperatorFactory
 
 """
 To use: File > Run
@@ -77,9 +77,9 @@ func print_break_mini():
 
 
 func print_lists(name_table, addr_table):
-	var query_names = Chainer.new()\
+	var query_names = QueryBuilder.new()\
 	.select(["name", "age", "addr_id"])
-	var query_addr = Chainer.new()\
+	var query_addr = QueryBuilder.new()\
 	.select(["addr_id", "street", "value"])
 
 	print("PEOPLE:")
@@ -90,16 +90,16 @@ func print_lists(name_table, addr_table):
 
 # ==============================================================
 
-# store a query for later
+# store a query for later use
 var age_comp = GLF.and_([GLF.gt(20), GLF.lt(70)])
 var age_comp_not = GLF.not_(age_comp)
 var fields = ["addr_id", "name", "age"]
 
-var where_age = Chainer.new()\
+var where_age = QueryBuilder.new()\
 	.where({age=age_comp})\
 	.select(fields)
 
-var where_not_age = Chainer.new()\
+var where_not_age = QueryBuilder.new()\
 	.where({age=age_comp_not})\
 	.select(fields)
 
@@ -116,17 +116,17 @@ func age_comp_builder_test(name_table):
 # ==============================================================
 
 func house_search_test(name_table, addr_table):
-	var query_addr_value = Chainer.new()\
+	var query_addr_value = QueryBuilder.new()\
 		.where({value=GLF.gt(20000)})\
 		.select(["addr_id", "street", "value"])
 
 	var valued_houses = query_addr_value.eval(addr_table)
 
-	var addr_ids = Chainer.new()\
+	var addr_ids = QueryBuilder.new()\
 		.values("addr_id")\
 		.eval(valued_houses)
 
-	var query_homeowner = Chainer.new()\
+	var query_homeowner = QueryBuilder.new()\
 		.where({addr_id=GLF.in_(addr_ids)})\
 		.select(["name", "addr_id"])
 	var homeowners = query_homeowner.eval(name_table)
@@ -146,11 +146,11 @@ func count_names_test(name_table):
 	var cmp_has_i = GL.CmpFunction.new(funcref(self, "i_is_in_name"))
 	var cmp_is_dan = {name=GLF.eq("dan")}
 
-	var result_name = Chainer.new()\
+	var result_name = QueryBuilder.new()\
 	.count({name=cmp_has_i})\
 	.eval(name_table)
 
-	var result_age = Chainer.new()\
+	var result_age = QueryBuilder.new()\
 	.first(cmp_is_dan)\
 	.eval(name_table)
 
@@ -165,7 +165,7 @@ func name_starts_with_letter(name:String, letter:String):
 func take_test(name_table, amt_take=2):
 	var cmp = GL.CmpFunctionWithArgs.new(funcref(self, "name_starts_with_letter"), "a")
 
-	var query = Chainer.new()\
+	var query = QueryBuilder.new()\
 	.where({name=cmp})\
 	.take(amt_take)\
 	.select(["name", "age"])
