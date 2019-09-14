@@ -2,8 +2,8 @@ tool
 extends EditorScript
 
 # TODO: rename or remove these
-const GL = Operators
-const GLF = OperatorFactory
+const Op = Operators
+const OpFac = OperatorFactory
 
 var data = [
 	{name="Wooden Sword", type="melee", subtype="sword", dmg=2, range=1.2},
@@ -32,20 +32,24 @@ func _run():
 	take_n_test(test_data, "Bow")
 	
 func test_dmg_where(data):
-	var result = data.apply([
-	Enumerators.Where.new({
-		type=GLF.eq("melee"), 
-		subtype=GLF.or_([GLF.eq("sword"), GLF.eq("spear")])
+	var query_melee_dmg = [
+		Enumerators.Where.new({
+			type=OpFac.eq("melee"), 
+			subtype=OpFac.or_([
+				OpFac.eq("sword"), 
+				OpFac.eq("spear")
+			])
 		}),
-	Enumerators.Select.new(["name", "dmg"])
-	])
+		Enumerators.Select.new(["name", "dmg"])
+	]
+	var result = data.apply(query_melee_dmg)
 	
 	print("melee weapons (sword, spear): dmg and name\n")	
 	print(result.items)
 	print_break_mini()
 	
 	var query = [
-	Enumerators.Where.new({dmg=GLF.gteq(10)}),
+	Enumerators.Where.new({dmg=OpFac.gteq(10)}),
 	Enumerators.Select.new(["name", "dmg", "range", "firing_rate"])
 	]
 	var result1 = data.apply(query)
@@ -58,7 +62,7 @@ func name_contains_word(name:String, letter:String):
 	return not name.empty() and letter in name
 
 func take_n_test(data, word, amt_take=2):
-	var cmp = GL.CmpFunctionWithArgs.new(
+	var cmp = Op.CmpFunctionWithArgs.new(
 		funcref(self, "name_contains_word"), word)
 	var query = [
 		Enumerators.Where.new({name=cmp}), 

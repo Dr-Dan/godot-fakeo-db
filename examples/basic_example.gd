@@ -119,7 +119,7 @@ func house_search_test(name_table, addr_table):
 	var query_addr_value = QueryBuilder.new()\
 		.where({value=GLF.gt(20000)})\
 		.select(["addr_id", "street", "value"])
-
+	
 	var valued_houses = query_addr_value.eval(addr_table)
 
 	var addr_ids = QueryBuilder.new()\
