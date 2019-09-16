@@ -33,6 +33,7 @@ func _run():
 
 func test_iterlist():
 	print_break()
+	print("ITERLIST\n")
 	var i = IterList_new.new(data)\
 		.where({dmg=OpFac.gteq(10)})\
 		.take(3)\
@@ -48,11 +49,13 @@ var query = QueryBuilder_new.new()\
 		
 func test_query():
 	print_break()
+	print("QUERY\n")
 	for e in query.eval(data):
 		print(e)
 	
 func test_enumerators():
 	print_break()
+	print("ENUMERATOR\n")
 	var E = Enumerators_new.Where.new({dmg=OpFac.gteq(10)}, IterList.new(data))
 	var P = Enumerators_new.Project.new(["name", "id", "subtype"], E)
 	var T = Enumerators_new.Take.new(3, P)

@@ -22,10 +22,24 @@ func empty():
 	return size() == 0
 	
 func append(item):
+	# if not item in items:
 	items.append(item)
-	
+
+func append_many(items):
+	for i in items:
+		append(i)
+		
+func erase(item):
+	if item in items:
+		items.erase(item)
+		
+func erase_many(items):
+	for i in items:
+		erase(i)
+		
 func at(i):
 	return items[i]
+	
 # NOTE: this may be overridden for child classes
 func should_continue():
 	return (curr < end)

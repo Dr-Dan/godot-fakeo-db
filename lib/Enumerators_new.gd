@@ -1,9 +1,10 @@
 extends Resource
 class_name Enumerators_new
 
-const NONE = 0
-const COMPLETE = 2
-const RUNNING = 1
+const NONE = -1
+const START = 1
+const RUNNING = 2
+const COMPLETE = 3
 
 class Enumerator_new:
 #	extends "IterList.gd"
@@ -119,33 +120,7 @@ class Where:
 		if not advance(arg):
 			status = COMPLETE
 		return should_continue()
-		
-class Take:
-	extends Enumerator_new
-	var amt
 
-	func _init(amt: int, items).(items):
-		self.amt = amt
-
-	func _iter_init(arg):
-		status = RUNNING
-		curr = start
-		if items._iter_init(arg):
-			result = items._iter_get(arg)
-		else:
-			status = COMPLETE
-
-		return should_continue()
-
-	func _iter_next(arg):
-		curr += 1
-		if curr < amt and items._iter_next(arg):
-			result = items._iter_get(arg)
-		else:
-			status = COMPLETE
-
-		return should_continue()
-		
 class Project:
 	extends Enumerator_new
 	var fields
@@ -194,3 +169,31 @@ class Project:
 		if not advance(arg):
 			status = COMPLETE
 		return should_continue()
+		
+		
+class Take:
+	extends Enumerator_new
+	var amt
+
+	func _init(amt: int, items).(items):
+		self.amt = amt
+
+	func _iter_init(arg):
+		status = RUNNING
+		curr = start
+		if items._iter_init(arg):
+			result = items._iter_get(arg)
+		else:
+			status = COMPLETE
+
+		return should_continue()
+
+	func _iter_next(arg):
+		curr += 1
+		if curr < amt and items._iter_next(arg):
+			result = items._iter_get(arg)
+		else:
+			status = COMPLETE
+
+		return should_continue()
+				

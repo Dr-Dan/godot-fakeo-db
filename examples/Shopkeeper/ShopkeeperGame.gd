@@ -134,12 +134,12 @@ func get_cost(source, type) -> int:
 	return int(value)
 	
 func deposit_item(name, type, amt=1):
-	var inv = actor_data.first({name=GLF.eq(name)})
-	var i = inv.inventory.first({type=GLF.eq(type)})
+	var actor = actor_data.first({name=GLF.eq(name)})
+	var i = actor.inventory.first({type=GLF.eq(type)})
 	if i != null:
 		i.amt += amt
 	else:
-		inv.inventory.items.append(InventoryItem.new(type, 1))
+		actor.inventory.items.append(InventoryItem.new(type, 1))
 		
 func remove_item(name, type):
 	var actor = actor_data.first({name=GLF.eq(name)})

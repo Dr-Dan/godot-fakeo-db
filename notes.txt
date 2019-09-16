@@ -60,7 +60,7 @@ TODO:
 			i.e. no Count().Select()
 			SelectIterator, EndQueryIterator
 
-		
+		first callable with/without args?
 
 		query types (only on iterlist/editable):
 			update_one, update_many, update_n
