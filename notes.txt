@@ -53,25 +53,22 @@ TODO:
 # =================================================================
     improvements/planned features:	
 
-
+		first, last, at, count
+		????	first(comps), front() || last(comps), back()	????
+			OR first(comps=[])
 		iterators should limit possible functions
 			i.e. no Count().Select()
 			SelectIterator, EndQueryIterator
+
 		
-		make sure I'm not running all evals if calling first
-			may need to build a tree/linked list
-			should be able to iterate i.e. one run through query per result
 
-		built in support for unique-id system
-			is there a solution/function built in?
-
-		query types:
+		query types (only on iterlist/editable):
 			update_one, update_many, update_n
 			add
 			remove
 
-		make sure it is obvious which functions need to take array as argument
-			static typing
+		built in support for unique-id system
+			is there a solution/function built in?
 
 		refactor shopkeeper example
 
@@ -82,11 +79,12 @@ TODO:
 				
 		remove messy/depreciated examples
 
+		tests - at least run every function once
+
 		### github ###
 
 		convert original example to gui + search options
 	
-		tests
 
 		simple documentation with examples for each 
 			like linq docs
@@ -178,3 +176,10 @@ Shopkeeper example
 		
 	dialogue: (? separate example ?)
 		search wares, gossip
+
+NEW:
+	first(comps), front() || last(comps), back()
+	list.where(comps)
+		returns EnumeratorWhere
+	list.where(comps).front()
+		returns Object # having run where enumerator once + FrontEnumerator

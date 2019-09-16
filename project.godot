@@ -20,6 +20,11 @@ _global_script_classes=[ {
 "path": "res://lib/EnumeratorsSingle.gd"
 }, {
 "base": "Resource",
+"class": "Enumerators_new",
+"language": "GDScript",
+"path": "res://lib/Enumerators_new.gd"
+}, {
+"base": "Resource",
 "class": "InventoryItem",
 "language": "GDScript",
 "path": "res://examples/Shopkeeper/InventoryItem.gd"
@@ -33,6 +38,11 @@ _global_script_classes=[ {
 "class": "IterListApplier",
 "language": "GDScript",
 "path": "res://lib/IterListApplier.gd"
+}, {
+"base": "Reference",
+"class": "IterList_new",
+"language": "GDScript",
+"path": "res://lib/IterList_new.gd"
 }, {
 "base": "Resource",
 "class": "OperatorFactory",
@@ -50,6 +60,11 @@ _global_script_classes=[ {
 "path": "res://lib/QueryBuilder.gd"
 }, {
 "base": "Reference",
+"class": "QueryBuilder_new",
+"language": "GDScript",
+"path": "res://lib/QueryBuilder_new.gd"
+}, {
+"base": "Reference",
 "class": "QuerySingle",
 "language": "GDScript",
 "path": "res://lib/QuerySingle.gd"
@@ -62,12 +77,15 @@ _global_script_classes=[ {
 _global_script_class_icons={
 "Enumerators": "",
 "EnumeratorsSingle": "",
+"Enumerators_new": "",
 "InventoryItem": "",
 "IterList": "",
 "IterListApplier": "",
+"IterList_new": "",
 "OperatorFactory": "",
 "Operators": "",
 "QueryBuilder": "",
+"QueryBuilder_new": "",
 "QuerySingle": "",
 "WorldActor": ""
 }

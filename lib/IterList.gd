@@ -1,10 +1,10 @@
 #extends Resource
 class_name IterList
 
-var start 
+var start
 var curr
 var end
-var increment 
+var increment
 var items = []
 
 func _init(items=[]):
@@ -18,6 +18,14 @@ func _init(items=[]):
 func size():
 	return items.size()
 
+func empty():
+	return size() == 0
+	
+func append(item):
+	items.append(item)
+	
+func at(i):
+	return items[i]
 # NOTE: this may be overridden for child classes
 func should_continue():
 	return (curr < end)
@@ -92,14 +100,22 @@ func select(fields: Array):
 	return get_script().new(result)
 	
 
+#func first(cmps):
+#	for item in items:
+#		for key in cmps:
+#			if key in item:
+#				if cmps[key].eval(item[key]):
+#					return item
+#	return null
+	
 func first(cmps):
+	if items.empty(): return null
 	for item in items:
 		for key in cmps:
-			if key in item:
-				if cmps[key].eval(item[key]):
+			if key in item and cmps[key].eval(item[key]):
 					return item
 	return null
-	
+
 func take(cmps, amt):
 	var result = []
 	for item in items:
@@ -113,7 +129,7 @@ func take(cmps, amt):
 	return get_script().new(result)
 		
 func to_list(deep=false):
-	return items.duplicate(deep)	
+	return items.duplicate(deep)
 	
 
 #func select_grouped(cmps_dict, fields: Array):
