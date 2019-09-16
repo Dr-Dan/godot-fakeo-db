@@ -56,26 +56,21 @@ func test_query():
 func test_enumerators():
 	print_break()
 	print("ENUMERATOR\n")
-	var E = Enumerators_new.Where.new({dmg=OpFac.gteq(10)}, IterList.new(data))
-	var P = Enumerators_new.Project.new(["name", "id", "subtype"], E)
-	var T = Enumerators_new.Take.new(3, P)
-	var TE = Enumerators_new.Where.new({
-		subtype=OpFac.or_([OpFac.eq("spear"), OpFac.eq("blunt")])}, T)
+	var where = Enumerators_new.Where.new({dmg=OpFac.gteq(10)}, IterList.new(data))
+	var project = Enumerators_new.Project.new(["name", "id", "subtype"], where)
+	var take = Enumerators_new.Take.new(3, project)
 
-	for e in E:
+	for e in where:
 		print(e)
-	print_break()
 
-	for e in P:
+	print_break_mini()
+	for e in project:
 		print(e)
-	print_break()
 
-	for e in T:
+	print_break_mini()
+	for e in take:
 		print(e)
-	print_break()
-
-	for e in TE:
-		print(e)
+		
 	print_break()
 	
 # ==============================================================

@@ -53,9 +53,13 @@ TODO:
 # =================================================================
     improvements/planned features:	
 
+		RF enumerators_new 
+
 		first, last, at, count
 		????	first(comps), front() || last(comps), back()	????
 			OR first(comps=[])
+		
+		
 		iterators should limit possible functions
 			i.e. no Count().Select()
 			SelectIterator, EndQueryIterator
@@ -67,11 +71,6 @@ TODO:
 			add
 			remove
 
-		built in support for unique-id system
-			is there a solution/function built in?
-
-		refactor shopkeeper example
-
 		readme/docs
 
 		rename Enumerators?
@@ -81,10 +80,12 @@ TODO:
 
 		tests - at least run every function once
 
+		built in support for unique-id system
+			is there a solution/function built in?
+
 		### github ###
 
 		convert original example to gui + search options
-	
 
 		simple documentation with examples for each 
 			like linq docs
