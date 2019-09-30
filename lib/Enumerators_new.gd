@@ -45,7 +45,6 @@ class Enumerator_new:
 		result = items[curr]
 		return should_continue()
 
-    # TODO: return next evaluated item
 	func _iter_get(arg):
 		return result
 		
@@ -197,3 +196,18 @@ class Take:
 
 		return should_continue()
 				
+
+class First:
+	var comps = {}
+
+	func _init(comps: Dictionary):
+		self.comps = comps
+
+	func eval(items):
+		for item in items:
+			for key in comps:
+				if key in item:
+					if comps[key].eval(item[key]):
+						return item
+		return null 
+		

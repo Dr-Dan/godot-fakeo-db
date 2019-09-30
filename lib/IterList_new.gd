@@ -13,7 +13,23 @@ func _init(items:Array=[]):
 	curr = start
 	self.items = items
 	self.end = items.size()
+
+func should_continue():
+	return (curr < end)
+
+func _iter_init(arg):
+	curr = start
+	return should_continue()
+
+func _iter_next(arg):
+	curr += increment
+	return should_continue()
+
+func _iter_get(arg):
+	return items[curr]
 	
+# =================================================================
+
 # TODO: iterator shouldn't have size
 func size():
 	return items.size()
@@ -36,23 +52,9 @@ func erase(item):
 func erase_many(items):
 	for i in items:
 		erase(i)
-		
-	
-# NOTE: this may be overridden for child classes
-func should_continue():
-	return (curr < end)
 
-func _iter_init(arg):
-	curr = start
-	return should_continue()
+# =================================================================
 
-func _iter_next(arg):
-	curr += increment
-	return should_continue()
-
-func _iter_get(arg):
-	return items[curr]
-	
 func where(cmps):
 	return Enumerators_new.Where.new(cmps, self)
 		
@@ -64,42 +66,6 @@ func take(amt: int):
 		
 func to_list(deep=false):
 	return items.duplicate(deep)
-	
-#func get_fields(fields: Array):
-#	var result = []
-#	for item in items:
-#		var n = {}
-#		for f in fields:
-#			if f in item:
-#				n[f] = item[f]
-#		if not n.empty():
-#			result.append(n)
-#	return get_script().new(result)
-#
-#func get_values(field):
-#	var result = []
-#	for item in items:
-#		if field in item:
-#			result.append(item[field])
-##			if not n.empty():
-##				result.append(n)
-#	return result
-##	return get_script().new(result)
-#
-#func has_key(field):
-#	for item in items:
-#		if not field in item:
-#			return true
-#	return false
-	
-
-#	var result = []
-#	for item in items:
-#		for key in cmps:
-#			if key in item:
-#				if cmps[key].eval(item[key]):
-#					result.append(item)
-#	return get_script().new(result)
 	
 #func count(cmps) -> int:
 #	var result = 0
@@ -153,20 +119,3 @@ func to_list(deep=false):
 #		result[k] = get_script().new(result[k])
 #
 #	return result
-	
-
-#func where_k(cmps):
-#	var result = []
-#	for item in items:
-#		for key in cmps:
-#			if cmps[key].eval(item[key]):
-#				result.append(item)
-#	return result
-
-#func first_k(cmps):
-#	for item in items:
-#		for key in cmps:
-#			if cmps[key].eval(key):
-#				return item
-#	return null
-

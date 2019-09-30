@@ -16,23 +16,6 @@ TODO:
 		should revolve more around database/mongo style than linq
 			database -> collection -> document
 
-			filt = QueryBuilder.Filter.new({health=Ops.Compare.gte(0)})
-			upd_fx = QueryBuilder.UpdateMath.new({health=Ops.Update.sub(1)})
-			upd_rm = QueryBuilder.UpdateRemove.new({health=Ops.Compare.lt(0)})
-			upd = QueryBuilder.Update.Chain.new([upd_fx, upd_rm])
-			data.update(filt, upd)
-
-						===== OR =====
-
-			upd = QueryBuilder.new()
-				.where({health=Ops.Compare.gte(0)})
-				.update({health=Ops.Update.sub(1)})
-				.rm_where({health=Ops.Compare.lt(0)})
-			result = upd.apply(data).to_list()
-
-		should first take arguments?
-			not really; .where({}).first_or_default()
-
 		generally move towards objects as opposed to raw dictionaries?
 			wrap dictionary in default class internally?
 			think mongo db c# (BSON)
@@ -58,8 +41,30 @@ TODO:
 		first, last, at, count
 		????	first(comps), front() || last(comps), back()	????
 			OR first(comps=[])
+
+		iterlist
+			remove(at), insert(item, at)
 		
+
+		rename Enumerators?
+			look up definition + look at other libs use of language
+				
+		remove/ignore messy/depreciated examples
+			+ any unused files i.e. old Enumerator etc...
+			also notes
 		
+
+		tests - at least run every function once
+
+		readme/docs
+
+		### github ###
+
+# =================================================================
+
+		built in support for unique-id system
+			is there a solution/function built in?
+			
 		iterators should limit possible functions
 			i.e. no Count().Select()
 			SelectIterator, EndQueryIterator
@@ -71,52 +76,11 @@ TODO:
 			add
 			remove
 
-		readme/docs
-
-		rename Enumerators?
-			look up definition + look at other libs use of language
-				
-		remove messy/depreciated examples
-
-		tests - at least run every function once
-
-		built in support for unique-id system
-			is there a solution/function built in?
-
-		### github ###
-
 		convert original example to gui + search options
 
 		simple documentation with examples for each 
 			like linq docs
 
-        select, where with func
-            i.e. lambda
-				able to read key and value
-				var age_comp = GLF.and_([GLF.gt(20), GLF.lt(100)])
-				var cash_comp = GLF.gt(1200)
-				var chain = Builders.ChainerKV.start()\
-					.where(and([{age=age_comp}, {cash=cash_comp}]))
-					.where(or([{age=age_comp}, {cash=cash_comp}]))
-
-					.where(AllValues.new({age=age_comp, cash=cash_comp}))
-					.where(AnyValues.new({age=age_comp, cash=cash_comp}))
-					.where(CompValue.new({age=age_comp})) == .where({age=age_comp}) # detect dictionary
-
-					.where(PredKeyValueFunc.new(["name", "score"], score_is_invalid))
-					.where(PredItemFunc.new(score_is_invalid))
-
-					.select(GetValue.new(["field0", "field1"]))
-					.select(SelectorGetKeys.new()) | .select(SelectorGetValues.new())
-					.select(KeyValueFunc.new(["name", "score"], mult_by_2_func))
-					.select(SelectorDict.new({score=mult_by_2_selector})) # return [{score:N*2}]
-					.select({name=name_func, score=score_func}) # will be cast to SelectorDict
-					.select(SelectorItemFunc.new(score_func))
-
-		var query = [Where(pred), First()]
-		for itm in data.apply(query): do_thing(i)
-			returns new IterList
-		
 		functions
 			change:
 				append, remove -> return copy of original
