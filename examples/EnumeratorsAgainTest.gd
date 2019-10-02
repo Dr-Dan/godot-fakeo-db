@@ -17,7 +17,10 @@ var data = [
 
 var list = EnumeratorsAgain.ListEnumerator.new(data)
 var where = EnumeratorsAgain.Where.new(list, {dmg=OpFac.gteq(10)})
+var project = EnumeratorsAgain.Project.new(where, ["name", "dmg"])
+var take = EnumeratorsAgain.Take.new(project, 3)
+
 func _run():
-	for i in where:
+	for i in project:
 		print(i)
 		
