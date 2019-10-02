@@ -3,24 +3,69 @@ extends EditorScript
 
 const Op = Operators
 const OpFac = OperatorFactory
+const List = EnumeratorsDeferred.ListEnumerator
 
+
+class Weapon:
+	var name
+	var type
+	var subtype
+	var dmg
+	var atk_range
+
+	func _init(name ,type ,subtype ,dmg ,atk_range):
+		self.name = name
+		self.type = type
+		self.subtype = subtype
+		self.dmg = dmg
+		self.atk_range = atk_range
+	
+	
 var data = [
-	{name="Wooden Sword", type="melee", subtype="sword", dmg=2, range=1.2},
-	{name="Katana", type="melee", subtype="sword", dmg=16, range=1.6},
-	{name="Nice Spear", type="melee", subtype="spear", dmg=13, range=2.0},
-	{name="Jan's Hammer", type="melee", subtype="blunt", dmg=30, range=1.3},
-	{name="John's Rock", type="ranged", subtype="thrown", dmg=21, range=10.0, firing_rate=0.5},
-	{name="Wooden Bow", type="ranged", subtype="bow", dmg=4, range=20.0, firing_rate=1.4},
-	{name="Glass Bow", type="ranged", subtype="bow", dmg=7, range=20.0, firing_rate=1.7},
-	{name="Ancient Bow", type="ranged", subtype="bow", dmg=10, range=30.0, firing_rate=1.0},
+	Weapon.new("Wooden Sword", "melee", "sword", 2, 1.2),
+	Weapon.new("Katana", "melee", "sword", 16, 1.6),
+	Weapon.new("Nice Spear", "melee", "spear", 13, 2.0),
+	Weapon.new("Jan's Hammer", "melee", "blunt", 30, 1.3),
+	{name="John's Rock", type="ranged", subtype="thrown", dmg=21, atk_range=10.0, firing_rate=0.5},
+	{name="Wooden Bow", type="ranged", subtype="bow", dmg=4, atk_range=20.0, firing_rate=1.4},
+	{name="Glass Bow", type="ranged", subtype="bow", dmg=7, atk_range=20.0, firing_rate=1.7},
+	{name="Ancient Bow", type="ranged", subtype="bow", dmg=10, atk_range=30.0, firing_rate=1.0},
 ]
 
-var list = EnumeratorsAgain.ListEnumerator.new(data)
-var where = EnumeratorsAgain.Where.new(list, {dmg=OpFac.gteq(10)})
-var project = EnumeratorsAgain.Project.new(where, ["name", "dmg"])
-var take = EnumeratorsAgain.Take.new(project, 3)
+var list = List.new(data)
+var where = EnumeratorsDeferred.Where.new(list, {dmg=OpFac.gteq(10)})
+var project = EnumeratorsDeferred.Project.new(where, ["name", "dmg"])
+var take = EnumeratorsDeferred.Take.new(project, 3)
 
+var query = List.new(data)\
+	.where({subtype=OpFac.eq("bow")})\
+	.project(["name", "dmg", "atk_range"])
+
+var query2 = QueryBuilderDeferred.new()\
+	.where({subtype=OpFac.in_(["sword", "spear", "thrown"])})\
+	.project(["name", "subtype", "dmg", "atk_range"])
+		
+		
 func _run():
-	for i in project:
+	print_break()
+	print_break_mini()
+	for i in take:
 		print(i)
 		
+	print_break_mini()
+	print(take.at(1).name)
+
+	print_break_mini()
+	for i in query:
+		print(i)
+	
+	print_break_mini()
+	for i in query2.eval(data):
+		print(i)
+		
+# ==============================================================
+func print_break():
+	print("\n###############################")
+
+func print_break_mini():
+	print("\n--------------")

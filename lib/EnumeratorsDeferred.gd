@@ -1,4 +1,4 @@
-class_name EnumeratorsAgain
+class_name EnumeratorsDeferred
 
 class Enumerable:
 	const START = 0
@@ -26,13 +26,46 @@ class Enumerable:
 		
 	func _iter_get(arg):
 		return current
+		
+		
+	func to_list():
+		var arg = null
+		var r = []
+		if _iter_init(arg):
+			r.append(current)
+			while _iter_next(arg):
+				r.append(current)
+		return r
+		
+	func at(index):
+		var i = 0
+		if index >= 0 and _iter_init(null):
+			if index == 0:
+				return current
+			while _iter_next(null):
+				i+=1
+				if i == index:
+					return current
+		return null
+		
+		
+	func where(cmps):
+		return Where.new(self, cmps)
+			
+	func project(fields: Array):
+		return Project.new(self, fields)
+		
+	func take(amt):
+		return Take.new(self, amt)
+
+				
 				
 class ListEnumerator:
 	extends Enumerable
 	var index
 	var source
 	
-	func _init(source).():
+	func _init(source: Array).():
 		index = -1
 		self.source = source
 
@@ -51,9 +84,18 @@ class ListEnumerator:
 		current = source[index]
 		return true
 		
+	func to_list():
+		return [] + source
+		
+	func at(index):
+		if index >= 0 and index < len(source):
+			return source[index]
+		return null
+				
 	func reset():
 		.reset()
 		index = -1
+
 
 class Where:
 	extends Enumerable
@@ -77,7 +119,7 @@ class Where:
 		
 	func _iter_init(arg):
 		._iter_init(arg)
-		source._iter_init(arg)		
+		source._iter_init(arg)
 		
 		var item = source.current
 		if Operators.item_valid(item, preds):
@@ -85,6 +127,7 @@ class Where:
 			return true
 
 		return _iter_next(arg)
+				
 				
 class Project:
 	extends Enumerable
@@ -114,9 +157,10 @@ class Project:
 		
 	func _iter_init(arg):
 		._iter_init(arg)
-		source._iter_init(arg)		
+		source._iter_init(arg)
 		current = get_result(source.current)
 		return true
+		
 		
 class Take:
 	extends Enumerable
@@ -142,7 +186,7 @@ class Take:
 		
 	func _iter_init(arg):
 		._iter_init(arg)
-		source._iter_init(arg)		
+		source._iter_init(arg)
 		
 		i = 0
 		current = source.current

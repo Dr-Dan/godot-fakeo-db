@@ -38,6 +38,10 @@ TODO:
 			first(comps) == where(c)[0] == where(c).first()
 				first enumerator function only -> evaluate one step and return
 
+		wrap predicate dict in object 
+			where(PredFunc.new(funcref))
+			where(Comp.new({name=eq.new()}))
+
 		RF enumerators_new 
 
 		naming
