@@ -30,11 +30,13 @@ TODO:
 			Select -> Update == NOT valid
 
 # =================================================================
-    improvements/planned features:	
+    improvements/planned features:			
 
 		remove iterlist
 			replace with enumerable
 			to modify list just use enumerable.items or to_list()
+			first(comps) == where(c)[0] == where(c).first()
+				first enumerator function only -> evaluate one step and return
 
 		RF enumerators_new 
 
