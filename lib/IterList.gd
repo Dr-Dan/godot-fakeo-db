@@ -98,8 +98,7 @@ func count(cmps) -> int:
 	var result = 0
 	for item in items:
 		for key in cmps:
-			if key in item:
-				if cmps[key].eval(item[key]):
+			if key in item and cmps[key].eval(item[key]):
 					result += 1
 	return result
 		
@@ -126,8 +125,7 @@ func take(cmps, amt):
 	var result = []
 	for item in items:
 		for key in cmps:
-			if key in item:
-				if cmps[key].eval(item[key]):
+			if key in item and cmps[key].eval(item[key]):
 					result.append(item)
 					if result.size() >= amt:
 						return get_script().new(result)

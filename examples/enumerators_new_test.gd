@@ -1,7 +1,7 @@
 tool
 extends EditorScript
 
-# TODO: rename or remove these
+
 const Op = Operators
 const OpFac = OperatorFactory
 
