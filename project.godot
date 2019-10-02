@@ -14,11 +14,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://lib/Enumerators.gd"
 }, {
-"base": "Reference",
-"class": "EnumeratorsSingle",
-"language": "GDScript",
-"path": "res://lib/EnumeratorsSingle.gd"
-}, {
 "base": "Resource",
 "class": "Enumerators_new",
 "language": "GDScript",
@@ -33,11 +28,6 @@ _global_script_classes=[ {
 "class": "IterList",
 "language": "GDScript",
 "path": "res://lib/IterList.gd"
-}, {
-"base": "Reference",
-"class": "IterListApplier",
-"language": "GDScript",
-"path": "res://lib/IterListApplier.gd"
 }, {
 "base": "Reference",
 "class": "IterList_new",
@@ -64,11 +54,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://lib/QueryBuilder_new.gd"
 }, {
-"base": "Reference",
-"class": "QuerySingle",
-"language": "GDScript",
-"path": "res://lib/QuerySingle.gd"
-}, {
 "base": "Node",
 "class": "WorldActor",
 "language": "GDScript",
@@ -76,17 +61,14 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "Enumerators": "",
-"EnumeratorsSingle": "",
 "Enumerators_new": "",
 "InventoryItem": "",
 "IterList": "",
-"IterListApplier": "",
 "IterList_new": "",
 "OperatorFactory": "",
 "Operators": "",
 "QueryBuilder": "",
 "QueryBuilder_new": "",
-"QuerySingle": "",
 "WorldActor": ""
 }
 

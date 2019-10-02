@@ -19,7 +19,10 @@ func take(amt):
 	next = Enumerators_new.Take.new(amt, next)
 	return self
 		
-		
+func first(comps):
+	next = Enumerators_new.First.new(comps, next)
+	return self
+			
 func eval(data):
 	start._init(data)
 	return next

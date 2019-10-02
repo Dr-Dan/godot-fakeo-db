@@ -1,5 +1,13 @@
 class_name Operators
 
+static func item_valid(item, comps: Dictionary):
+	for key in comps:
+		if key in item:
+			if not comps[key].eval(item[key]):
+				return false
+	return true
+
+	
 class OperatorBase:
 	func eval(item):
 		return true

@@ -114,14 +114,6 @@ func select(fields: Array):
 	return get_script().new(result)
 	
 
-#func first(cmps):
-#	for item in items:
-#		for key in cmps:
-#			if key in item:
-#				if cmps[key].eval(item[key]):
-#					return item
-#	return null
-	
 func first(cmps):
 	if items.empty(): return null
 	for item in items:

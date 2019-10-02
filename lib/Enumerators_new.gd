@@ -69,6 +69,9 @@ class Enumerator_new:
 	func take(amt):
 		return Take.new(amt, self)
 		
+	func first(cmps):
+		return First.new(cmps, self)
+	
 class Where:
 	extends Enumerator_new
 	var comps = {}
@@ -76,31 +79,25 @@ class Where:
 	func _init(comps: Dictionary, items).(items):
 		self.comps = comps
 
-	func item_valid(item):
-		for key in comps:
-			if key in item:
-				if not comps[key].eval(item[key]):
-					return false
-		return true
-			
-	func advance(arg, init=false):
+	func advance_init(arg):
 		var item = null
-		if init:
-			if items._iter_init(arg):
-				item = items._iter_get(arg)
-				if item_valid(item):
-					result = item
-					return true
-			else:
-				result = null
-				return false
-				
+		if items._iter_init(arg):
+			item = items._iter_get(arg)
+			if Operators.item_valid(item, comps):
+				result = item
+				return true
+		# else:
+		result = null
+		return false
+			
+	func advance(arg):
+		var item = null
 		while true:
 			if items._iter_next(arg):
 				item = items._iter_get(arg)
 			else:
 				break
-			if item_valid(item):
+			if Operators.item_valid(item, comps):
 				result = item
 				return true
 
@@ -111,7 +108,9 @@ class Where:
 	func _iter_init(arg):
 		status = RUNNING
 		curr = start
-		if not advance(arg, true):
+		if advance_init(arg):
+			status = COMPLETE
+		elif not advance(arg):
 			status = COMPLETE
 		return should_continue()
 
@@ -198,16 +197,49 @@ class Take:
 				
 
 class First:
+	extends Enumerator_new
 	var comps = {}
 
-	func _init(comps: Dictionary):
+	func _init(comps: Dictionary, items).(items):
 		self.comps = comps
 
-	func eval(items):
-		for item in items:
-			for key in comps:
-				if key in item:
-					if comps[key].eval(item[key]):
-						return item
-		return null 
-		
+	func value():
+		advance(null, true)
+		return result
+
+	func advance(arg, init=false):
+		var item = null
+		if init:
+			if items._iter_init(arg):
+				item = items._iter_get(arg)
+				if Operators.item_valid(item, comps):
+					result = item
+					return true
+			else:
+				result = null
+				return false
+
+		while true:
+			if items._iter_next(arg):
+				item = items._iter_get(arg)
+			else:
+				break
+			if Operators.item_valid(item, comps):
+				result = item
+				return true
+
+		result = null
+		return false
+
+
+	func _iter_init(arg):
+		status = RUNNING
+		curr = start
+		if not advance(arg, true):
+			status = COMPLETE
+		return should_continue()
+
+	func _iter_next(arg):
+		if result != null or advance(arg):
+			status = COMPLETE
+		return should_continue()

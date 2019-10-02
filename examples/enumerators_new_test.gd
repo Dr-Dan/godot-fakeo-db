@@ -20,7 +20,7 @@ func _run():
 	for i in range(data.size()):
 		data[i]["id"] = i
 	
-	var test_data = IterListApplier.new(data)
+	var test_data = IterList_new.new(data)
 	
 	print_break()
 	print("WEAPON DATA\n")
@@ -37,7 +37,7 @@ func test_iterlist():
 	var i = IterList_new.new(data)\
 		.where({dmg=OpFac.gteq(10)})\
 		.take(3)\
-		.project(["name", "id", "subtype"])
+		.project(["name", "id", "dmg"])
 		
 	for e in i:
 		print(e)
@@ -45,13 +45,17 @@ func test_iterlist():
 var query = QueryBuilder_new.new()\
 	.where({dmg=OpFac.gteq(10)})\
 	.take(3)\
-	.project(["name", "id", "subtype"])
+	.project(["name", "id", "subtype"])\
 		
 func test_query():
 	print_break()
 	print("QUERY\n")
-	for e in query.eval(data):
+	var result = query.eval(data)
+	for e in result:
 		print(e)
+		
+	print_break_mini()
+	print(result.first({}).value())
 	
 func test_enumerators():
 	print_break()
@@ -59,6 +63,11 @@ func test_enumerators():
 	var where = Enumerators_new.Where.new({dmg=OpFac.gteq(10)}, IterList.new(data))
 	var project = Enumerators_new.Project.new(["name", "id", "subtype"], where)
 	var take = Enumerators_new.Take.new(3, project)
+	var first = Enumerators_new.First.new({dmg=OpFac.gteq(20)}, where)
+
+	print(first.value())
+		
+	print_break_mini()
 
 	for e in where:
 		print(e)
@@ -72,7 +81,7 @@ func test_enumerators():
 		print(e)
 		
 	print_break()
-	
+
 # ==============================================================
 func print_break():
 	print("\n###############################")

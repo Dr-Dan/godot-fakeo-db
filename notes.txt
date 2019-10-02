@@ -23,10 +23,6 @@ TODO:
 		db class vs IterList of Lists
 			add collection vs IterList.first({name=collection_name})
 
-		move to object based construction
-			IterList an extension (not pure lib)
-				should use builder internally
-
 		iterators should limit possible functions
 			i.e. no Count().Select()
 			SelectIterator, EndQueryIterator
@@ -36,27 +32,30 @@ TODO:
 # =================================================================
     improvements/planned features:	
 
+		remove iterlist
+			replace with enumerable
+			to modify list just use enumerable.items or to_list()
+
 		RF enumerators_new 
 
-		first, last, at, count
-		????	first(comps), front() || last(comps), back()	????
-			OR first(comps=[])
-
-		iterlist
-			remove(at), insert(item, at)
-		
-
-		rename Enumerators?
-			look up definition + look at other libs use of language
+		naming
+			Enumerators?
+				change to enumerable
+			Operators
+				change to comparers?
+				operators should change things
+				OR Operators.Compare, Operators.Effect
 				
 		remove/ignore messy/depreciated examples
 			+ any unused files i.e. old Enumerator etc...
 			also notes
 		
-
 		tests - at least run every function once
 
 		readme/docs
+
+		iterlist
+			remove(at), insert(item, at)
 
 		### github ###
 

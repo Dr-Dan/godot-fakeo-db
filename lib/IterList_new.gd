@@ -53,6 +53,11 @@ func erase_many(items):
 	for i in items:
 		erase(i)
 
+func at(i: int):
+	if i < items.size():
+		return items[i]
+	return null
+
 # =================================================================
 
 func where(cmps):
@@ -64,6 +69,9 @@ func project(fields: Array):
 func take(amt: int):
 	return Enumerators_new.Take.new(amt, self)
 		
+func first(cmps):
+	return Enumerators_new.First.new(cmps, self)
+		
 func to_list(deep=false):
 	return items.duplicate(deep)
 	
@@ -74,48 +82,4 @@ func to_list(deep=false):
 #			if key in item:
 #				if cmps[key].eval(item[key]):
 #					result += 1
-#	return result
-
-
-#func first(cmps):
-#	for item in items:
-#		for key in cmps:
-#			if key in item:
-#				if cmps[key].eval(item[key]):
-#					return item
-#	return null
-	
-#func first(cmps):
-#	if items.empty(): return null
-#	for item in items:
-#		for key in cmps:
-#			if key in item and cmps[key].eval(item[key]):
-#					return item
-#	return null
-
-
-
-#func select_grouped(cmps_dict, fields: Array):
-#	var result = {}
-#	for k in cmps_dict:
-#		result[k] = []
-#
-#	for item in items:
-#		for result_key in cmps_dict:
-#			var data = {}
-#			var comp_dict = cmps_dict[result_key]
-#
-#			for comp_k in comp_dict:
-#				if comp_k in item:
-#
-#					for f in fields:
-#						if f in item\
-#						and comp_dict[comp_k].eval(item[comp_k]):
-#							data[f] = item[f]
-#			if not data.empty():
-#				result[result_key].append(data)
-#
-#	for k in cmps_dict:
-#		result[k] = get_script().new(result[k])
-#
 #	return result
