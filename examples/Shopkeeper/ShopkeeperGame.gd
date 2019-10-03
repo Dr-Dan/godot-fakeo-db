@@ -79,14 +79,10 @@ func get_cost(type) -> int:
 func item_clicked(btn, actor, type):
 	if actor.name == PLAYER:
 		if transfer_cash($Shopkeeper, $Player, get_cost(type)*actor.shop_mult_bonus):
-			deposit_item($Shopkeeper, type, 1)
-			remove_item($Player, type)
-			pass
+			transfer_item($Player.inventory, $Shopkeeper.inventory, type)
 	else:
 		if transfer_cash($Player, $Shopkeeper, get_cost(type)*actor.shop_mult_bonus):
-			deposit_item($Player, type, 1)
-			remove_item($Shopkeeper, type)
-			pass
+			transfer_item($Shopkeeper.inventory, $Player.inventory, type)
 	update_gui()
 
 ##############################################################################
@@ -97,21 +93,9 @@ static func transfer_cash(source, target, amt:int) -> bool:
 		source.cash -= amt
 		return true
 	return false
-
-static func deposit_item(target, type, amt=1):
-	var item = List.new(target.inventory.items)\
-	.where({type=GLF.eq(type)}).at(0)
-	if item != null:
-		item.amt += amt
-	else:
-		target.inventory.add_child(InventoryItem.new().setup(type, 1))
-
-static func remove_item(actor, type):
-	var item = List.new(actor.inventory.items)\
-	.where({type=GLF.eq(type)}).at(0)
-
-	if item != null:
-		item.amt -= 1
-		if item.amt <= 0:
-			actor.inventory.items.erase(item)
-			item.free()
+	
+static func transfer_item(source, target, type) -> bool:
+	if source.remove_item(type):
+		target.deposit_item(type, 1)
+		return true
+	return false

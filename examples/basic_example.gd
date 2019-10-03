@@ -3,6 +3,7 @@ extends EditorScript
 
 const GL = Operators
 const GLF = OperatorFactory
+const List = EnumeratorsDeferred.ListEnumerator
 
 """
 To use: File > Run
@@ -36,7 +37,7 @@ func _run():
 	run_test()
 	
 func run_test():
-	var name_table = [
+	var name_table = List.new([
 	{name="mike", age=22, addr_id=0},
 	{name="mindy", age=16, addr_id=1},
 	{name="trish", age=49, addr_id=2},
@@ -44,26 +45,25 @@ func run_test():
 	Human.new("dan", 30, 2),
 	Human.new("andy", 76, 2),
 	Human.new("ariel", 65, 3),
-	]
+	])
 
-	var addr_table = [
+	var addr_table = List.new([
 	{addr_id=0, street="vale road", value=20000},
 	{addr_id=1, street="the lane", value=10000},
 	{addr_id=2, street="london road", value=35250},
-	{addr_id=3, street="diamond mews", value=100000},
 	Address.new(3, "diamond mews", 100000)
-	]
+	])
 	
 	print_break()
 	print_lists(name_table, addr_table)
-#	print_break()
-#	age_comp_builder_test(name_table)
-#	print_break()
-#	house_search_test(name_table, addr_table)
-#	print_break()
-#	count_names_test(name_table)
-#	print_break()
-#	take_test(name_table)
+	print_break()
+	age_comp_builder_test(name_table)
+	print_break()
+	house_search_test(name_table, addr_table)
+	print_break()
+	count_names_test(name_table)
+	print_break()
+	take_test(name_table)
 
 
 # ==============================================================
@@ -75,28 +75,24 @@ func print_break_mini():
 
 
 func print_lists(name_table, addr_table):
-	var query_names = QueryBuilderDeferred.new()\
-	.project(["name", "age", "addr_id"])\
-	.eval(name_table)
+	var query_names = name_table\
+	.project(["name", "age", "addr_id"])
 	
-	var query_addr = QueryBuilderDeferred.new()\
-	.project(["addr_id", "street", "value"])\
-	.eval(addr_table)
+	var query_addr = addr_table\
+	.project(["addr_id", "street", "value"])
 
 	print("PEOPLE:")
 	for i in query_names: print(i)
-#	print(query_names.to_list())
 	print("\n--------------")
 	print("ADDRESSES:")
-#	for i in query_addr: print(i)
-	print(query_addr.to_list())
+	for i in query_addr: print(i)
 
 # ==============================================================
 
 # store a query for later use
 var age_comp = GLF.and_([GLF.gt(20), GLF.lt(70)])
 var age_comp_not = GLF.not_(age_comp)
-var fields = ["addr_id", "name", "age"]
+var fields = ["name", "age"]
 
 var where_age = QueryBuilderDeferred.new()\
 	.where({age=age_comp})\
@@ -107,38 +103,49 @@ var where_not_age = QueryBuilderDeferred.new()\
 	.project(fields)
 
 func age_comp_builder_test(name_table):
+	""" 
+	 even at this point no actual iteration has taken place
+		 eval() sets the root of the query and could also be
+		 called outside the function.
+	"""
 	var result = where_age.eval(name_table)
 	var result_not = where_not_age.eval(name_table)
 
+	# execution is deferred until to_list() is called
 	print("age > 20 and age < 70")
-	print(result)
+	print(result.to_list())
 	print_break_mini()
 	print("not (age > 20 and age < 70)")
-	print(result_not)
+	print(result_not.to_list())
 
 # ==============================================================
 
-func house_search_test(name_table, addr_table):
-	var query_addr_value = QueryBuilder.new()\
-		.where({value=GLF.gt(20000)})\
-		.select(["addr_id", "street", "value"])
+func get_addr(item):
+	return item.addr_id
 	
-	var valued_houses = query_addr_value.eval(addr_table)
+func house_search_test(name_table, addr_table):
+	var valued_houses = addr_table\
+		.where({value=GLF.gt(20000)})\
+		.project(["addr_id", "street", "value"])
 
-	var addr_ids = QueryBuilder.new()\
-		.values("addr_id")\
-		.eval(valued_houses)
+	""" 
+	NOTE: Some functions(i.e. where, project) will not 
+		work on addr_id once it is filled with integers.
+		It can still be iterated over however.
+	In the future; where() will be able to handle this.
+	"""
+	var addr_ids = valued_houses\
+		.select(funcref(self, "get_addr"))
 
-	var query_homeowner = QueryBuilder.new()\
+	var homeowners = name_table\
 		.where({addr_id=GLF.in_(addr_ids)})\
-		.select(["name", "addr_id"])
-	var homeowners = query_homeowner.eval(name_table)
+		.project(["name", "addr_id"])
 
 	print("house value > 20000")
-	print(valued_houses)
+	print(valued_houses.to_list())
 	print_break_mini()
 	print("homeowners where house value > 20000 (addr_id in 'addr_ids')")
-	print(homeowners)
+	print(homeowners.to_list())
 	
 # ==============================================================
 
@@ -148,16 +155,16 @@ func i_is_in_name(name:String):
 func count_names_test(name_table):
 	var cmp_has_i = GL.CmpFunction.new(funcref(self, "i_is_in_name"))
 	var cmp_is_dan = {name=GLF.eq("dan")}
+	
+	var result_name = name_table\
+	.where({name=cmp_has_i})\
+	.count()
 
-	var result_name = QueryBuilder.new()\
-	.count({name=cmp_has_i})\
-	.eval(name_table)
+	var result_age = name_table\
+	.where(cmp_is_dan)\
+	.at(0)
 
-	var result_age = QueryBuilder.new()\
-	.first(cmp_is_dan)\
-	.eval(name_table)
-
-	print("%d/%d name entries contain 'i'" % [result_name, name_table.size()])
+	print("%d/%d name entries contain 'i'" % [result_name, name_table.count()])
 	print("dan's age is %d" % result_age.age)
 
 # ==============================================================
@@ -168,12 +175,10 @@ func name_starts_with_letter(name:String, letter:String):
 func take_test(name_table, amt_take=2):
 	var cmp = GL.CmpFunctionWithArgs.new(funcref(self, "name_starts_with_letter"), "a")
 
-	var query = QueryBuilder.new()\
+	var result = name_table\
 	.where({name=cmp})\
 	.take(amt_take)\
-	.select(["name", "age"])
+	.project(["name"])
 
-	var result = query.eval(name_table)
 	print("take %d entries where name starts with 'a':" % amt_take)
-	print(result)
-
+	print(result.to_list())

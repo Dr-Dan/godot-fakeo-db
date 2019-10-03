@@ -50,6 +50,8 @@ class Enumerable:
 					return current
 		return null
 		
+	func count():
+		return to_list().size()
 		
 	func where(cmps):
 		return Where.new(self, cmps)
@@ -59,7 +61,10 @@ class Enumerable:
 		
 	func take(amt):
 		return Take.new(self, amt)
-
+		
+	func select(select_func: FuncRef):
+		return Select.new(self, select_func)
+		
 				
 				
 class ListEnumerator:
@@ -192,3 +197,36 @@ class Take:
 	func reset():
 		.reset()
 		i = -1
+
+
+class Select:
+	extends Enumerable
+	
+	var select_ref
+	var func_arg = null
+	
+	func _init(source, select_ref, arg=null).(source):
+		self.select_ref = select_ref
+		self.func_arg = arg
+
+	func get_result(item):
+		if func_arg == null:
+			return select_ref.call_func(item)
+		else:
+			return select_ref.call_func(item, func_arg)
+
+	func _iter_next(arg):
+		if state == RUNNING:
+			if source._iter_next(arg):
+				current = get_result(source.current)
+				return true
+
+			reset()
+		return false
+		
+	func _iter_init(arg):
+		._iter_init(arg)
+		if not source._iter_init(arg): return false
+		current = get_result(source.current)
+		return true
+		

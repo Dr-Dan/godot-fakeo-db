@@ -140,12 +140,14 @@ class Eq:
 # LIST OPERATORS
 class In:
 	extends OperatorBase
-	var items = []
-	func _init(items):
-		self.items = items
+	var container
+	func _init(container):
+		self.container = container
 		
 	func eval(item):
-		return item in items
+		for i in container:
+			if item == i: return true
+		return false
 		
 class Contains:
 	extends OperatorBase
@@ -153,8 +155,11 @@ class Contains:
 	func _init(item):
 		self.item = item
 		
-	func eval(item):
-		return self.item in item
+	func eval(container):
+		for i in container:
+			if item == i: return true
+		return false
+#		return self.item in item
 
 # ------------------------------------------------------------ 
 # FUNCREF

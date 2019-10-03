@@ -9,63 +9,33 @@ TODO:
 # =================================================================
     Code taste:
 
-		project returns selection of kv pairs, select allows functions and returns copy?
-			.project(["addr_id", "street", "value"], PROJECTION_INCLUDE)
-			.select({value=mult(2)})
-
-		should revolve more around database/mongo style than linq
-			database -> collection -> document
-
-		generally move towards objects as opposed to raw dictionaries?
-			wrap dictionary in default class internally?
-			think mongo db c# (BSON)
-		
-		db class vs IterList of Lists
-			add collection vs IterList.first({name=collection_name})
-
-		iterators should limit possible functions
-			i.e. no Count().Select()
-			SelectIterator, EndQueryIterator
-			Where -> Update == valid
-			Select -> Update == NOT valid
-
 # =================================================================
-    improvements/planned features:			
-
-		remove iterlist
-			replace with enumerable
-			to modify list just use enumerable.items or to_list()
-			first(comps) == where(c)[0] == where(c).first()
-				first enumerator function only -> evaluate one step and return
-
-		wrap predicate dict in object 
-			where(PredFunc.new(funcref))
-			where(Comp.new({name=eq.new()}))
-
-		RF enumerators_new 
+    improvements/planned features:		
 
 		naming
-			Enumerators?
-				change to enumerable
+			Enumerator/ble
 			Operators
 				change to comparers?
 				operators should change things
 				OR Operators.Compare, Operators.Effect
 				
-		remove/ignore messy/depreciated examples
-			+ any unused files i.e. old Enumerator etc...
-			also notes
-		
-		tests - at least run every function once
-
 		readme/docs
+			github pages
 
-		iterlist
-			remove(at), insert(item, at)
+		More relevant use of library in example
+			multiple shops?
+			search inventories, compare prices etc...
 
 		### github ###
 
 # =================================================================
+		tests
+			include gut? test branch?
+
+		wrap predicate dict in object 
+			where(PredFunc.new(funcref))
+			where(Comp.new({name=eq.new()}))
+			select(Efct.new({cost=mult.new(5)}))
 
 		built in support for unique-id system
 			is there a solution/function built in?
@@ -73,8 +43,6 @@ TODO:
 		iterators should limit possible functions
 			i.e. no Count().Select()
 			SelectIterator, EndQueryIterator
-
-		first callable with/without args?
 
 		query types (only on iterlist/editable):
 			update_one, update_many, update_n
@@ -84,7 +52,7 @@ TODO:
 		convert original example to gui + search options
 
 		simple documentation with examples for each 
-			like linq docs
+			like linq, mongodb docs
 
 		functions
 			change:
@@ -125,20 +93,6 @@ TODO:
 		requires id system
 		
 Shopkeeper example
-	use builder method to avoid duplicate comparisons
-
-	how to handle multiplication of values by price
-		for_each??
-		pass edited list to gui for display
-
-	show item stats
-		in hover/tooltip
-		or use center panel
-
-	refactor gui code
-		set nodes in gui scene, get using variable
-		set player name from exported var
-		
 	UI:
 		;::;
 		®∫®¬g
@@ -146,10 +100,3 @@ Shopkeeper example
 		
 	dialogue: (? separate example ?)
 		search wares, gossip
-
-NEW:
-	first(comps), front() || last(comps), back()
-	list.where(comps)
-		returns EnumeratorWhere
-	list.where(comps).front()
-		returns Object # having run where enumerator once + FrontEnumerator

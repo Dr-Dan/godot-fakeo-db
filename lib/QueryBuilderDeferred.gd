@@ -6,7 +6,7 @@ var next
 func _init():
 	pass
 	
-func _set_next(e: EnumeratorsDeferred.Enumerable):
+func _set_next(e):
 	if start == null:
 		start = e
 	next = e
@@ -23,6 +23,10 @@ func take(amt):
 	_set_next(EnumeratorsDeferred.Take.new(next, amt))
 	return self
 
+func select(select_func: FuncRef):
+	_set_next(EnumeratorsDeferred.Select.new(next, select_func))
+	return self
+	
 func eval(data):
 	if data is Array:
 		data = EnumeratorsDeferred.ListEnumerator.new(data)
