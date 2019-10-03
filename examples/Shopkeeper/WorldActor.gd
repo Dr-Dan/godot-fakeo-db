@@ -2,16 +2,21 @@ extends Node
 
 class_name WorldActor
 
-export var _start_inv = {}
-export var cash: int
+enum ItemType{
+	NONE,
+	MEAT,
+	AXE,
+	SWORD,
+	SPELL_HEAL,
+	SCROLL_FIRE,
+	THE_JUICE,
+}
 
-onready var inventory = IterList.new()
+export var cash: int
+export var shop_mult_bonus: float = 1.0
+
+onready var inventory = $Inventory
 
 func _init(name="", cash=0):
 	self.cash = cash
 	self.name = name
-	
-func _ready() -> void:	
-	for k in _start_inv.keys():
-		var inv = InventoryItem.new(k, _start_inv[k])
-		inventory.items.append(inv)

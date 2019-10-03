@@ -1,9 +1,10 @@
-extends Resource
+extends Node
 class_name InventoryItem
 
-var type: String
-var amt: int
+export (WorldActor.ItemType) var type = WorldActor.ItemType.NONE
+export (int) var amt
 
-func _init(type, amt=1):
+func setup(type, amt):
 	self.type = type
 	self.amt = amt
+	return self

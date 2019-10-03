@@ -19,7 +19,12 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://lib/EnumeratorsDeferred.gd"
 }, {
-"base": "Resource",
+"base": "Node",
+"class": "Inventory",
+"language": "GDScript",
+"path": "res://examples/Shopkeeper/Inventory.gd"
+}, {
+"base": "Node",
 "class": "InventoryItem",
 "language": "GDScript",
 "path": "res://examples/Shopkeeper/InventoryItem.gd"
@@ -49,6 +54,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://lib/QueryBuilderDeferred.gd"
 }, {
+"base": "MarginContainer",
+"class": "ShopGUI",
+"language": "GDScript",
+"path": "res://examples/Shopkeeper/GUI.gd"
+}, {
 "base": "Node",
 "class": "WorldActor",
 "language": "GDScript",
@@ -57,12 +67,14 @@ _global_script_classes=[ {
 _global_script_class_icons={
 "Enumerators": "",
 "EnumeratorsDeferred": "",
+"Inventory": "",
 "InventoryItem": "",
 "IterList": "",
 "OperatorFactory": "",
 "Operators": "",
 "QueryBuilder": "",
 "QueryBuilderDeferred": "",
+"ShopGUI": "",
 "WorldActor": ""
 }
 

@@ -1,13 +1,8 @@
 extends Node
 
-# Declare member variables here. Examples:
-# var a: int = 2
-# var b: String = "text"
+class_name Inventory
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
+var items = [] setget ,_get_items
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta: float) -> void:
-#	pass
+func _get_items():
+	return get_children()

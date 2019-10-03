@@ -1,5 +1,7 @@
 extends MarginContainer
 
+class_name ShopGUI
+
 signal item_pressed(side, item_type)
 
 const ButtonInvItem = preload("res://examples/Shopkeeper/ButtonInventoryItem.tscn")
@@ -17,8 +19,12 @@ onready var panels = {
 	RIGHT:{panel=r_panel, name=""}, 
 	}
 	
+func get_panel(side):
+	if side in panels:
+		return panels[side].panel
+		
 func setup_panel(side, panel_name):
-	panels[side].name = panel_name
+	panels[side].panel.display_name = panel_name
 	
 func update_actor_inventory(inventory, side, cost_strategy):
 	var container = panels[side].panel

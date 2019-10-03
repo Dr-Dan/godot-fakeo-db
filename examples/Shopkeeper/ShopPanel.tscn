@@ -1,10 +1,13 @@
-[gd_scene format=2]
+[gd_scene load_steps=2 format=2]
 
-[node name="PlayerPanel" type="VBoxContainer"]
+[ext_resource path="res://examples/Shopkeeper/ShopPanel.gd" type="Script" id=1]
+
+[node name="ShopPanel" type="VBoxContainer"]
 margin_right = 338.0
 margin_bottom = 600.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+script = ExtResource( 1 )
 
 [node name="Name" type="PanelContainer" parent="."]
 margin_right = 338.0

@@ -1,7 +1,6 @@
 tool
 extends EditorScript
 
-# TODO: rename or remove these
 const GL = Operators
 const GLF = OperatorFactory
 
@@ -57,15 +56,14 @@ func run_test():
 	
 	print_break()
 	print_lists(name_table, addr_table)
-	print_break()
-	age_comp_builder_test(name_table)
-	print_break()
-	house_search_test(name_table, addr_table)
-	print_break()
-	count_names_test(name_table)
-	print_break()
-	take_test(name_table)
-
+#	print_break()
+#	age_comp_builder_test(name_table)
+#	print_break()
+#	house_search_test(name_table, addr_table)
+#	print_break()
+#	count_names_test(name_table)
+#	print_break()
+#	take_test(name_table)
 
 
 # ==============================================================
@@ -77,16 +75,21 @@ func print_break_mini():
 
 
 func print_lists(name_table, addr_table):
-	var query_names = QueryBuilder.new()\
-	.select(["name", "age", "addr_id"])
-	var query_addr = QueryBuilder.new()\
-	.select(["addr_id", "street", "value"])
+	var query_names = QueryBuilderDeferred.new()\
+	.project(["name", "age", "addr_id"])\
+	.eval(name_table)
+	
+	var query_addr = QueryBuilderDeferred.new()\
+	.project(["addr_id", "street", "value"])\
+	.eval(addr_table)
 
 	print("PEOPLE:")
-	print(query_names.eval(name_table))
+	for i in query_names: print(i)
+#	print(query_names.to_list())
 	print("\n--------------")
 	print("ADDRESSES:")
-	print(query_addr.eval(addr_table))
+#	for i in query_addr: print(i)
+	print(query_addr.to_list())
 
 # ==============================================================
 
@@ -95,13 +98,13 @@ var age_comp = GLF.and_([GLF.gt(20), GLF.lt(70)])
 var age_comp_not = GLF.not_(age_comp)
 var fields = ["addr_id", "name", "age"]
 
-var where_age = QueryBuilder.new()\
+var where_age = QueryBuilderDeferred.new()\
 	.where({age=age_comp})\
-	.select(fields)
+	.project(fields)
 
-var where_not_age = QueryBuilder.new()\
+var where_not_age = QueryBuilderDeferred.new()\
 	.where({age=age_comp_not})\
-	.select(fields)
+	.project(fields)
 
 func age_comp_builder_test(name_table):
 	var result = where_age.eval(name_table)

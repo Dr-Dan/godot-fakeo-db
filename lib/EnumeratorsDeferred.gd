@@ -6,8 +6,10 @@ class Enumerable:
 
 	var state: int
 	var current
+	var source
 
-	func _init():
+	func _init(source):
+		self.source = source
 		self.state = START
 		self.current = null
 
@@ -63,11 +65,9 @@ class Enumerable:
 class ListEnumerator:
 	extends Enumerable
 	var index
-	var source
 	
-	func _init(source: Array).():
+	func _init(source: Array).(source):
 		index = -1
-		self.source = source
 
 	func _iter_next(arg):
 		if state == RUNNING:
@@ -81,8 +81,10 @@ class ListEnumerator:
 	func _iter_init(arg):
 		._iter_init(arg)
 		index = 0
-		current = source[index]
-		return true
+		if index < source.size():
+			current = source[index]
+			return true
+		return false
 		
 	func to_list():
 		return [] + source
@@ -101,11 +103,9 @@ class Where:
 	extends Enumerable
 
 	var preds
-	var source
 	
-	func _init(source, preds).():
+	func _init(source, preds).(source):
 		self.preds = preds
-		self.source = source
 
 	func _iter_next(arg):
 		if state == RUNNING:
@@ -119,7 +119,7 @@ class Where:
 		
 	func _iter_init(arg):
 		._iter_init(arg)
-		source._iter_init(arg)
+		if not source._iter_init(arg): return false
 		
 		var item = source.current
 		if Operators.item_valid(item, preds):
@@ -133,11 +133,9 @@ class Project:
 	extends Enumerable
 	
 	var fields
-	var source
 	
-	func _init(source, fields).():
+	func _init(source, fields).(source):
 		self.fields = fields
-		self.source = source
 	
 	func get_result(item):
 		var n = {}
@@ -157,7 +155,7 @@ class Project:
 		
 	func _iter_init(arg):
 		._iter_init(arg)
-		source._iter_init(arg)
+		if not source._iter_init(arg): return false
 		current = get_result(source.current)
 		return true
 		
@@ -167,9 +165,8 @@ class Take:
 	
 	var count: int
 	var i: int
-	var source
 	
-	func _init(source, count:int).():
+	func _init(source, count:int).(source):
 		self.source = source
 		self.count = count
 		self.i=-1
@@ -186,8 +183,8 @@ class Take:
 		
 	func _iter_init(arg):
 		._iter_init(arg)
-		source._iter_init(arg)
-		
+		if not source._iter_init(arg): return false
+
 		i = 0
 		current = source.current
 		return true

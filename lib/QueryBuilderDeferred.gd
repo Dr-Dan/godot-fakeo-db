@@ -3,29 +3,28 @@ class_name QueryBuilderDeferred
 var start
 var next
 
-# TODO: could just set eval(e:Enuerable) input as start
 func _init():
-	start = EnumeratorsDeferred.ListEnumerator.new([])
-	next = start
+	pass
 	
-#func get_start(e):
-#	if start == null:
-#		return e
-#	else:
-#		return start
+func _set_next(e: EnumeratorsDeferred.Enumerable):
+	if start == null:
+		start = e
+	next = e
 		
 func project(fields):
-	next = EnumeratorsDeferred.Project.new(next, fields)
+	_set_next(EnumeratorsDeferred.Project.new(next, fields))
 	return self
 
 func where(comps):
-	next = EnumeratorsDeferred.Where.new(next, comps)
+	_set_next(EnumeratorsDeferred.Where.new(next, comps))
 	return self
 
 func take(amt):
-	next = EnumeratorsDeferred.Take.new(next, amt)
+	_set_next(EnumeratorsDeferred.Take.new(next, amt))
 	return self
 
 func eval(data):
-	start._init(data)
+	if data is Array:
+		data = EnumeratorsDeferred.ListEnumerator.new(data)
+	start.source = data
 	return next
