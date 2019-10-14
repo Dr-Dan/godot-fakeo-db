@@ -90,7 +90,7 @@ func print_lists(name_table, addr_table):
 # ==============================================================
 
 # store a query for later use
-var age_comp = GLF.and_([GLF.gt(20), GLF.lt(70)])
+var age_comp = GLF.and_([GLF.gt(20), GLF.lt(70)]) # 20 < age < 70
 var age_comp_not = GLF.not_(age_comp)
 var fields = ["name", "age"]
 
@@ -125,7 +125,7 @@ func get_addr(item):
 	
 func house_search_test(name_table, addr_table):
 	var valued_houses = addr_table\
-		.where({value=GLF.gt(20000)})\
+		.where({value=GLF.gteq(20000)})\
 		.project(["addr_id", "street", "value"])
 
 	""" 

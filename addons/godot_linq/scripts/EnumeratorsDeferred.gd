@@ -62,8 +62,8 @@ class Enumerable:
 	func take(amt):
 		return Take.new(self, amt)
 		
-	func select(select_func: FuncRef):
-		return Select.new(self, select_func)
+	func select(select_func: FuncRef, arg=null):
+		return Select.new(self, select_func, arg)
 		
 				
 				

@@ -3,7 +3,7 @@ extends Node
 """
 """
 
-const ButtonInvItem = preload("res://examples/Shopkeeper/ButtonInventoryItem.tscn")
+const ButtonInvItem = preload("res://examples/Shopkeeper/scenes/ButtonInventoryItem.tscn")
 const GLF = OperatorFactory
 const List = EnumeratorsDeferred.ListEnumerator
 const IType = WorldActor.ItemType
@@ -64,6 +64,7 @@ func clear_inventory_gui(container):
 
 func create_button(mult, shp_item):
 	var info = item_data.where({type=GLF.eq(shp_item.type)}).at(0)	
+	if info == null: return null
 	var txt = "%s\nvalue:%d\namt %d" %\
 		[info.display_name, get_cost(info.type) * mult, shp_item.amt]
 

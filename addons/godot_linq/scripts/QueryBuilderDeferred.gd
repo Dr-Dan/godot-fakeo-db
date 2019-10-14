@@ -23,8 +23,8 @@ func take(amt):
 	_set_next(EnumeratorsDeferred.Take.new(next, amt))
 	return self
 
-func select(select_func: FuncRef):
-	_set_next(EnumeratorsDeferred.Select.new(next, select_func))
+func select(select_func: FuncRef, arg=null):
+	_set_next(EnumeratorsDeferred.Select.new(next, select_func, arg))
 	return self
 	
 func eval(data):

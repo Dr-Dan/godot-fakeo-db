@@ -9,8 +9,43 @@ TODO:
 # =================================================================
     Code taste:
 
+	.where(
+		CmprBuilder.and_({age=eq(4), name=eq("mike")}))
+								CONVERT
+	Where.new(
+		CmprObj.And.new([CmprObj.new("age", cmps["age"]), CmprObj.new("name", cmps["name"])])
+
+	.foreach(UpdFunc.new(funcref(self, "slct_func"), arg))
+	.foreach(Upd.And.new([Upd.Add.new("age", 1), Upd.Set("mood", "bad"))])
+
+	.where(Cmpr.And.new([CmprObj.Eq("age", 4), CmprObj.Eq("name", "mike")])
+
+	class Cmpr:
+		var field
+		var val
+
+		func _init(field, val):
+			self.field = field
+			self.val = val
+			
+		func eval(item):
+			return true
+		
+	class Lt:
+		extends Cmpr
+		var field
+		var val
+
+		func _init(field, val).(field, val):
+			pass
+			
+		func eval(item):
+			return item[field] < val
+
 # =================================================================
     improvements/planned features:		
+
+		wrap predicate dict in object 
 
 		naming
 			Enumerator/ble
@@ -32,10 +67,6 @@ TODO:
 		tests
 			include gut? test branch?
 
-		wrap predicate dict in object 
-			where(PredFunc.new(funcref))
-			where(Comp.new({name=eq.new()}))
-			select(Efct.new({cost=mult.new(5)}))
 
 		built in support for unique-id system
 			is there a solution/function built in?

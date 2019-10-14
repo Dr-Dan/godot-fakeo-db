@@ -1,7 +1,6 @@
 tool
 extends EditorScript
 
-const Op = Operators
 const OpFac = OperatorFactory
 const List = EnumeratorsDeferred.ListEnumerator
 

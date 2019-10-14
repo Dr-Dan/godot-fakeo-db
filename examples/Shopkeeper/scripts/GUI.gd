@@ -4,7 +4,7 @@ class_name ShopGUI
 
 signal item_pressed(side, item_type)
 
-const ButtonInvItem = preload("res://examples/Shopkeeper/ButtonInventoryItem.tscn")
+const ButtonInvItem = preload("res://examples/Shopkeeper/scenes/ButtonInventoryItem.tscn")
 const gui_base = "HBoxContainer"
 
 const LEFT = 0

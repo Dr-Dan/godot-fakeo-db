@@ -12,57 +12,57 @@ _global_script_classes=[ {
 "base": "Reference",
 "class": "Enumerators",
 "language": "GDScript",
-"path": "res://lib/Enumerators.gd"
+"path": "res://addons/godot_linq/scripts/Enumerators.gd"
 }, {
 "base": "Reference",
 "class": "EnumeratorsDeferred",
 "language": "GDScript",
-"path": "res://lib/EnumeratorsDeferred.gd"
+"path": "res://addons/godot_linq/scripts/EnumeratorsDeferred.gd"
 }, {
 "base": "Node",
 "class": "Inventory",
 "language": "GDScript",
-"path": "res://examples/Shopkeeper/Inventory.gd"
+"path": "res://examples/Shopkeeper/scripts/Inventory.gd"
 }, {
 "base": "Node",
 "class": "InventoryItem",
 "language": "GDScript",
-"path": "res://examples/Shopkeeper/InventoryItem.gd"
+"path": "res://examples/Shopkeeper/scripts/InventoryItem.gd"
 }, {
 "base": "Reference",
 "class": "IterList",
 "language": "GDScript",
-"path": "res://lib/IterList.gd"
+"path": "res://addons/godot_linq/scripts/IterList.gd"
 }, {
 "base": "Resource",
 "class": "OperatorFactory",
 "language": "GDScript",
-"path": "res://lib/OperatorFactory.gd"
+"path": "res://addons/godot_linq/scripts/OperatorFactory.gd"
 }, {
 "base": "Reference",
 "class": "Operators",
 "language": "GDScript",
-"path": "res://lib/Operators.gd"
+"path": "res://addons/godot_linq/scripts/Operators.gd"
 }, {
 "base": "Reference",
 "class": "QueryBuilder",
 "language": "GDScript",
-"path": "res://lib/QueryBuilder.gd"
+"path": "res://addons/godot_linq/scripts/QueryBuilder.gd"
 }, {
 "base": "Reference",
 "class": "QueryBuilderDeferred",
 "language": "GDScript",
-"path": "res://lib/QueryBuilderDeferred.gd"
+"path": "res://addons/godot_linq/scripts/QueryBuilderDeferred.gd"
 }, {
 "base": "MarginContainer",
 "class": "ShopGUI",
 "language": "GDScript",
-"path": "res://examples/Shopkeeper/GUI.gd"
+"path": "res://examples/Shopkeeper/scripts/GUI.gd"
 }, {
 "base": "Node",
 "class": "WorldActor",
 "language": "GDScript",
-"path": "res://examples/Shopkeeper/WorldActor.gd"
+"path": "res://examples/Shopkeeper/scripts/WorldActor.gd"
 } ]
 _global_script_class_icons={
 "Enumerators": "",
@@ -81,7 +81,7 @@ _global_script_class_icons={
 [application]
 
 config/name="GodotLINQ"
-run/main_scene="res://examples/Shopkeeper/ShopkeeperMainScene.tscn"
+run/main_scene="res://examples/Shopkeeper/scenes/ShopkeeperMainScene.tscn"
 config/icon="res://icon.png"
 
 [rendering]
