@@ -1,7 +1,19 @@
+tool
 extends Node
 class_name InventoryItem
 
-export (WorldActor.ItemType) var type = WorldActor.ItemType.NONE
+enum ItemType{
+	NONE,
+	MEAT,
+	AXE,
+	SWORD,
+	SPELL_HEAL,
+	SCROLL_FIRE,
+	THE_JUICE,
+	GOLD_PLATE,
+}
+
+export (ItemType) var type = ItemType.NONE
 export (int) var amt
 
 func setup(type, amt):

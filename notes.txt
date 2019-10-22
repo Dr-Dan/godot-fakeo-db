@@ -64,6 +64,13 @@ TODO:
 		### github ###
 
 # =================================================================
+
+		database, collection/list node
+			get items on_enter
+			editor gui
+				view data; 
+					filter - generate to target node??
+				add?, remove?, edit?
 		tests
 			include gut? test branch?
 
@@ -131,3 +138,7 @@ Shopkeeper example
 		
 	dialogue: (? separate example ?)
 		search wares, gossip
+
+	use more library features:
+		filters, 
+		sort

@@ -3,8 +3,6 @@
 [ext_resource path="res://examples/Shopkeeper/scripts/GUI.gd" type="Script" id=1]
 [ext_resource path="res://examples/Shopkeeper/scenes/ShopPanel.tscn" type="PackedScene" id=2]
 
-
-
 [node name="GUI" type="MarginContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -19,8 +17,12 @@ margin_bottom = 600.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="PlayerPanel" parent="HBoxContainer" instance=ExtResource( 2 )]
+[node name="LeftPanel" parent="HBoxContainer" instance=ExtResource( 2 )]
 editor/display_folded = true
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_right = 338.0
+margin_bottom = 600.0
 
 [node name="Container" type="MarginContainer" parent="HBoxContainer"]
 margin_left = 342.0
@@ -29,7 +31,10 @@ margin_bottom = 600.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="ShopkeeperPanel" parent="HBoxContainer" instance=ExtResource( 2 )]
+[node name="RightPanel" parent="HBoxContainer" instance=ExtResource( 2 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_left = 684.0
 margin_right = 1024.0
+margin_bottom = 600.0
 

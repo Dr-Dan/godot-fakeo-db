@@ -36,6 +36,11 @@ var where = EnumeratorsDeferred.Where.new(list, {dmg=OpFac.gteq(10)})
 var project = EnumeratorsDeferred.Project.new(where, ["name", "dmg"])
 var take = EnumeratorsDeferred.Take.new(project, 3)
 
+func get_name_and_dmg_mult(item, mult):
+	return [item.name, item.dmg * mult]
+
+var select = EnumeratorsDeferred.Select.new(where, funcref(self, "get_name_and_dmg_mult"), 20)
+
 var query = List.new(data)\
 	.where({subtype=OpFac.eq("bow")})\
 	.project(["name", "dmg", "atk_range"])
@@ -61,6 +66,10 @@ func _run():
 	print_break_mini()
 	for i in query2.eval(data):
 		print(i)
+
+	print_break_mini()
+	for i in select:
+		print(i)		
 		
 # ==============================================================
 func print_break():

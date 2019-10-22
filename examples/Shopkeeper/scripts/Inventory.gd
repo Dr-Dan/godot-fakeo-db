@@ -15,8 +15,7 @@ func to_enumerator():
 	
 func deposit_item(type, amt=1):
 	var item = to_enumerator()\
-	.where({type=OperatorFactory.eq(type)})\
-	.at(0)
+	.first({type=OperatorFactory.eq(type)})
 	
 	if item != null:
 		item.amt += amt
@@ -25,8 +24,7 @@ func deposit_item(type, amt=1):
 
 func remove_item(type):
 	var item = to_enumerator()\
-	.where({type=OperatorFactory.eq(type)})\
-	.at(0)
+	.first({type=OperatorFactory.eq(type)})
 
 	if item != null:
 		item.amt -= 1
@@ -34,3 +32,7 @@ func remove_item(type):
 			item.free()
 		return true
 	return false
+	
+func clear():
+	for c in _get_items():
+		c.queue_free()

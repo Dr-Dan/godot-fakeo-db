@@ -10,6 +10,11 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Reference",
+"class": "ButtonFactory",
+"language": "GDScript",
+"path": "res://examples/Shopkeeper/scripts/ButtonFactory.gd"
+}, {
+"base": "Reference",
 "class": "Enumerators",
 "language": "GDScript",
 "path": "res://addons/godot_linq/scripts/Enumerators.gd"
@@ -65,6 +70,7 @@ _global_script_classes=[ {
 "path": "res://examples/Shopkeeper/scripts/WorldActor.gd"
 } ]
 _global_script_class_icons={
+"ButtonFactory": "",
 "Enumerators": "",
 "EnumeratorsDeferred": "",
 "Inventory": "",
@@ -83,6 +89,11 @@ _global_script_class_icons={
 config/name="GodotLINQ"
 run/main_scene="res://examples/Shopkeeper/scenes/ShopkeeperMainScene.tscn"
 config/icon="res://icon.png"
+
+[display]
+
+window/stretch/mode="2d"
+window/stretch/aspect="keep"
 
 [rendering]
 

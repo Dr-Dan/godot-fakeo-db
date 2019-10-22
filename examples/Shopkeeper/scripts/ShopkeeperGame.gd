@@ -1,13 +1,11 @@
 extends Node
 
-"""
-"""
-
 const ButtonInvItem = preload("res://examples/Shopkeeper/scenes/ButtonInventoryItem.tscn")
 const GLF = OperatorFactory
 const List = EnumeratorsDeferred.ListEnumerator
-const IType = WorldActor.ItemType
 const Query = QueryBuilderDeferred
+
+const IType = InventoryItem.ItemType
 
 const PLAYER = "Player"
 const SHOPKEEPER = "Shopkeeper"
@@ -21,6 +19,7 @@ onready var item_data = List.new([
 	{type=IType.SPELL_HEAL, display_name="Heal Spell", value=120, descr="Refills a substantial amount of HP."},
 	{type=IType.SCROLL_FIRE, display_name="Fire Scroll", value=300, descr="Deals a small amount of fire damage.\nDestroyed on use."},
 	{type=IType.THE_JUICE, display_name="JUICE", value=500, descr="Nice."},
+	{type=IType.GOLD_PLATE, display_name="Golden Plate", value=200, descr="An ornamental gold plate"},
 ])
 
 onready var gui = $GUI
@@ -28,6 +27,12 @@ onready var gui = $GUI
 ##############################################################################
 
 export var shopkeeper_mult = 1.5
+var btn_factory = ButtonFactory.new()
+
+onready var player = $Actors/Player
+onready var shopkeeper = $Actors/Shopkeeper
+
+##############################################################################
 
 func _ready():
 	update_gui()
@@ -35,55 +40,39 @@ func _ready():
 ##############################################################################
 
 func update_gui():
-	var p_panel = gui.get_panel(0)
-	var s_panel = gui.get_panel(1)
+	var p_panel = gui.panels.left
+	var s_panel = gui.panels.right
 	
 	p_panel.display_name = PLAYER
 	s_panel.display_name = SHOPKEEPER
 	
-	p_panel.cash = $Player.cash
-	s_panel.cash = $Shopkeeper.cash
+	p_panel.cash = player.cash
+	s_panel.cash = shopkeeper.cash
 		
-	update_actor_gui($Shopkeeper, s_panel)
-	update_actor_gui($Player, p_panel)
+	update_actor_gui(shopkeeper, s_panel)
+	update_actor_gui(player, p_panel)
 
-
-func update_actor_gui(actor, container):
-	clear_inventory_gui(container)
-
-	for shp_item in actor.inventory.get_children():
-		var btn = create_button(actor.shop_mult_bonus, shp_item)
-		
-		btn.connect("button_down", self, "item_clicked", [btn, actor, shp_item.type])
-		container.get_node("Inventory").add_child(btn)
-
-func clear_inventory_gui(container):
-	for c in container.get_node("Inventory").get_children():
-		c.queue_free()
-
-
-func create_button(mult, shp_item):
-	var info = item_data.where({type=GLF.eq(shp_item.type)}).at(0)	
-	if info == null: return null
-	var txt = "%s\nvalue:%d\namt %d" %\
-		[info.display_name, get_cost(info.type) * mult, shp_item.amt]
-
-	var btn = ButtonInvItem.instance()
-	btn.get_node("Label").text = txt
-	btn.hint_tooltip = info.descr
+func select_as_btn(shp_item, actor):
+	var info = item_data.first({type=GLF.eq(shp_item.type)})
+	var cost = info.value * actor.shop_mult_bonus
+	var btn = btn_factory.create_button(info.display_name, shp_item.amt, cost, info.descr)
+	btn.connect("button_down", self, "item_clicked", [actor.name, shp_item.type, cost])
 	return btn
+		
+func update_actor_gui(actor, container):
+	container.clear_inventory()
+	var btns = actor.inventory.to_enumerator().select(funcref(self, "select_as_btn"), actor)
+	for btn in btns:
+		container.inventory.add_child(btn)
 
-func get_cost(type) -> int:
-	var value = item_data.where({type=GLF.eq(type)}).at(0).value
-	return int(value)
-	
-func item_clicked(btn, actor, type):
-	if actor.name == PLAYER:
-		if transfer_cash($Shopkeeper, $Player, get_cost(type)*actor.shop_mult_bonus):
-			transfer_item($Player.inventory, $Shopkeeper.inventory, type)
-	else:
-		if transfer_cash($Player, $Shopkeeper, get_cost(type)*actor.shop_mult_bonus):
-			transfer_item($Shopkeeper.inventory, $Player.inventory, type)
+func item_clicked(owner_name, type, cost):
+	match owner_name:
+		PLAYER:
+			if transfer_cash(shopkeeper, player, cost):
+				transfer_item(player.inventory, shopkeeper.inventory, type)
+		SHOPKEEPER:
+			if transfer_cash(player, shopkeeper, cost):
+				transfer_item(shopkeeper.inventory, player.inventory, type)
 	update_gui()
 
 ##############################################################################

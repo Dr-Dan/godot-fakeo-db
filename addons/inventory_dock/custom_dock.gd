@@ -18,7 +18,7 @@ func _enter_tree():
 	add_control_to_dock(DOCK_SLOT_LEFT_UL, dock)
     # Note that LEFT_UL means the left of the editor, upper-left dock
 	
-var IType = WorldActor.ItemType
+var IType = InventoryItem.ItemType
 func _selection_changed():
 	clear_inventory_gui()
 	

@@ -2,22 +2,21 @@
 
 [ext_resource path="res://examples/Shopkeeper/scripts/ShopPanel.gd" type="Script" id=1]
 
-
 [node name="ShopPanel" type="VBoxContainer"]
-margin_right = 338.0
-margin_bottom = 600.0
+anchor_right = 1.0
+anchor_bottom = 1.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource( 1 )
 
 [node name="Name" type="PanelContainer" parent="."]
-margin_right = 338.0
+margin_right = 1024.0
 margin_bottom = 28.0
 
 [node name="Label" type="Label" parent="Name"]
 margin_left = 7.0
 margin_top = 7.0
-margin_right = 331.0
+margin_right = 1017.0
 margin_bottom = 21.0
 text = "Shopkeeper"
 align = 1
@@ -25,7 +24,7 @@ valign = 1
 
 [node name="Inventory" type="GridContainer" parent="."]
 margin_top = 32.0
-margin_right = 338.0
+margin_right = 1024.0
 margin_bottom = 568.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -33,13 +32,13 @@ columns = 4
 
 [node name="Cash" type="PanelContainer" parent="."]
 margin_top = 572.0
-margin_right = 338.0
+margin_right = 1024.0
 margin_bottom = 600.0
 
 [node name="Items" type="HBoxContainer" parent="Cash"]
 margin_left = 7.0
 margin_top = 7.0
-margin_right = 331.0
+margin_right = 1017.0
 margin_bottom = 21.0
 
 [node name="Symbol" type="Label" parent="Cash/Items"]

@@ -50,6 +50,9 @@ class Enumerable:
 					return current
 		return null
 		
+	func first(cmps):
+		return Where.new(self, cmps).at(0)
+		
 	func count():
 		return to_list().size()
 		
@@ -205,6 +208,7 @@ class Select:
 	var select_ref
 	var func_arg = null
 	
+	# expects a func_ref 
 	func _init(source, select_ref, arg=null).(source):
 		self.select_ref = select_ref
 		self.func_arg = arg

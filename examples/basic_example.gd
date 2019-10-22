@@ -90,6 +90,7 @@ func print_lists(name_table, addr_table):
 # ==============================================================
 
 # store a query for later use
+# execution is deferred until to_list() is called later
 var age_comp = GLF.and_([GLF.gt(20), GLF.lt(70)]) # 20 < age < 70
 var age_comp_not = GLF.not_(age_comp)
 var fields = ["name", "age"]
@@ -111,7 +112,9 @@ func age_comp_builder_test(name_table):
 	var result = where_age.eval(name_table)
 	var result_not = where_not_age.eval(name_table)
 
-	# execution is deferred until to_list() is called
+	# to_list has the added benefit of returning dictionaries which print nicely
+	# TODO: check this is true
+	# BUT edits won't affect the original data
 	print("age > 20 and age < 70")
 	print(result.to_list())
 	print_break_mini()
@@ -130,9 +133,8 @@ func house_search_test(name_table, addr_table):
 
 	""" 
 	NOTE: Some functions(i.e. where, project) will not 
-		work on addr_id once it is filled with integers.
+		work on lists if they do not contain dictionaries or objects
 		It can still be iterated over however.
-	In the future; where() will be able to handle this.
 	"""
 	var addr_ids = valued_houses\
 		.select(funcref(self, "get_addr"))
