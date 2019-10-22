@@ -74,6 +74,8 @@ TODO:
 		tests
 			include gut? test branch?
 
+		threaded/synchro search (stretch goal)
+			could just port to c++?
 
 		built in support for unique-id system
 			is there a solution/function built in?
