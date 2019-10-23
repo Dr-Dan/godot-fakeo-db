@@ -69,7 +69,7 @@ class Enumerable:
 		return Select.new(self, select_func, arg)
 		
 				
-				
+# Pretty much does the same as the native list but is compatible with other enumerators
 class ListEnumerator:
 	extends Enumerable
 	var index
@@ -106,7 +106,7 @@ class ListEnumerator:
 		.reset()
 		index = -1
 
-
+# Get all where preds evaluate to true
 class Where:
 	extends Enumerable
 
@@ -137,6 +137,7 @@ class Where:
 		return _iter_next(arg)
 				
 				
+# Get data projected into a specified format
 class Project:
 	extends Enumerable
 	
@@ -167,7 +168,7 @@ class Project:
 		current = get_result(source.current)
 		return true
 		
-		
+# Take first N items from source
 class Take:
 	extends Enumerable
 	
@@ -202,6 +203,7 @@ class Take:
 		i = -1
 
 
+# Select from source using a given function reference
 class Select:
 	extends Enumerable
 	

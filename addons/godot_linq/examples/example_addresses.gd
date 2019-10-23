@@ -56,12 +56,16 @@ func run_test():
 	
 	print_break()
 	print_lists(name_table, addr_table)
+	
 	print_break()
 	age_comp_builder_test(name_table)
+	
 	print_break()
 	house_search_test(name_table, addr_table)
+	
 	print_break()
 	count_names_test(name_table)
+	
 	print_break()
 	take_test(name_table)
 

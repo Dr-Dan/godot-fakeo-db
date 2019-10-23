@@ -1,5 +1,5 @@
 class_name ButtonFactory
-const ButtonInvItem = preload("res://examples/Shopkeeper/scenes/ButtonInventoryItem.tscn")
+const ButtonInvItem = preload("../scenes/ButtonInventoryItem.tscn")
 
 # TODO: take items list in constructor?
 
@@ -14,7 +14,7 @@ func _instantiate_button(text, tooltip=""):
 	btn.hint_tooltip = tooltip
 	return btn
 	
-func create_button(display_name, amt, cost, tooltip):
+func create_button_inv_item(display_name, amt, cost, tooltip):
 	var text = _create_button_text(display_name, amt, cost)
 	var btn = _instantiate_button(text, tooltip)
 	return btn

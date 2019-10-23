@@ -1,6 +1,8 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://examples/Shopkeeper/scripts/ShopPanel.gd" type="Script" id=1]
+[ext_resource path="res://addons/godot_linq/examples/Shopkeeper/scripts/ShopPanel.gd" type="Script" id=1]
+
+
 
 [node name="ShopPanel" type="VBoxContainer"]
 margin_right = 338.0

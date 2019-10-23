@@ -1,6 +1,6 @@
 extends Node
 
-const ButtonInvItem = preload("res://examples/Shopkeeper/scenes/ButtonInventoryItem.tscn")
+const ButtonInvItem = preload("../scenes/ButtonInventoryItem.tscn")
 const GLF = OperatorFactory
 const List = EnumeratorsDeferred.ListEnumerator
 const Query = QueryBuilderDeferred
@@ -51,19 +51,19 @@ func update_gui():
 		
 	update_actor_gui(shopkeeper, s_panel)
 	update_actor_gui(player, p_panel)
-
-func select_as_btn(shp_item, actor):
-	var info = item_data.first({type=GLF.eq(shp_item.type)})
-	var cost = info.value * actor.shop_mult_bonus
-	var btn = btn_factory.create_button(info.display_name, shp_item.amt, cost, info.descr)
-	btn.connect("button_down", self, "item_clicked", [actor.name, shp_item.type, cost])
-	return btn
 		
 func update_actor_gui(actor, container):
 	container.clear_inventory()
 	var btns = actor.inventory.to_enumerator().select(funcref(self, "select_as_btn"), actor)
 	for btn in btns:
 		container.inventory.add_child(btn)
+
+func select_as_btn(shp_item, actor):
+	var info = item_data.first({type=GLF.eq(shp_item.type)})
+	var cost = info.value * actor.shop_mult_bonus
+	var btn = btn_factory.create_button_inv_item(info.display_name, shp_item.amt, cost, info.descr)
+	btn.connect("button_down", self, "item_clicked", [actor.name, shp_item.type, cost])
+	return btn
 
 func item_clicked(owner_name, type, cost):
 	match owner_name:

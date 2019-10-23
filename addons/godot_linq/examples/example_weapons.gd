@@ -5,6 +5,10 @@ const OpFac = OperatorFactory
 const List = EnumeratorsDeferred.ListEnumerator
 
 
+"""
+To use: File > Run
+"""
+
 class Weapon:
 	var name
 	var type
@@ -31,6 +35,8 @@ var data = [
 	{name="Ancient Bow", type="ranged", subtype="bow", dmg=10, atk_range=30.0, firing_rate=1.0},
 ]
 
+# ==============================================================
+
 var list = List.new(data)
 var where = EnumeratorsDeferred.Where.new(list, {dmg=OpFac.gteq(10)})
 var project = EnumeratorsDeferred.Project.new(where, ["name", "dmg"])
@@ -49,6 +55,7 @@ var query2 = QueryBuilderDeferred.new()\
 	.where({subtype=OpFac.in_(["sword", "spear", "thrown"])})\
 	.project(["name", "subtype", "dmg", "atk_range"])
 		
+# ==============================================================
 		
 func _run():
 	print_break()
