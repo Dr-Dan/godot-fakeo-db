@@ -1,4 +1,4 @@
-# Godot-Easy Data Queries
+# Godot - Easy Queries
 
 A library that offers Linq/MongoDB style data operations in Godot written in GdScript.
 
@@ -71,7 +71,8 @@ var project = EnumeratorsDeferred.Project.new(where, fields)
 ## Planned features
 
 * Documentation/Wiki
-* more OO operator/filter system
+* move to a generally more OO approach
+  * more OO operator/filter system
 * ability to use any list as argument
 * godot editor-interface
 * Mongo style Databases and Collections
