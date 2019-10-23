@@ -1,4 +1,4 @@
-# Godot-EzData
+# Godot-EasyDataQueries
 
 A library that replicates Linq/MongoDB style data access in Godot written in GdScript.
 
