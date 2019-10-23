@@ -1,19 +1,21 @@
-# Godot-EasyDataQueries
+# Godot-Easy Data Queries
 
-A library that replicates Linq/MongoDB style data access in Godot written in GdScript.
-
+A library that offers Linq/MongoDB style data operations in Godot written in GdScript.
 
 ## Usage
 
 Enumerables offer deferred execution and can be iterated over in a for loop.
 
-At present only dictionaries and lists of objects are compatible but this will change in the future.
+Comparers are used to filter fields.
 
 There is also the QueryBuilder class that allows for queries to be created without a predefined list.
+
+At present only dictionaries and lists of objects are compatible but this will change in the future.
 
 ### Quick Example
 ```
 const List = EnumeratorsDeferred.ListEnumerator
+const OpFac = OperatorFactory
 
 var data = [
 	Weapon.new("Wooden Sword", "melee", "sword", 2, 1.2),
@@ -36,7 +38,7 @@ func _run():
 		  print(i)
 ```
 
-### Also
+### And...
 
 ```
 # this
