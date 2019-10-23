@@ -71,6 +71,7 @@ var project = EnumeratorsDeferred.Project.new(where, fields)
 * Documentation/Wiki
 * more OO operator/filter system
 * ability to use any list as argument
+* godot editor-interface
 * Mongo style Databases and Collections
 * update operations - add, remove, update
 * foreach
