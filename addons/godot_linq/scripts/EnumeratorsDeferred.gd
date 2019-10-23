@@ -38,7 +38,10 @@ class Enumerable:
 			while _iter_next(arg):
 				r.append(current)
 		return r
-		
+	# ===============================================================================
+	# Instant evaluation
+
+	# get item at index in enumerable
 	func at(index):
 		var i = 0
 		if index >= 0 and _iter_init(null):
@@ -50,12 +53,16 @@ class Enumerable:
 					return current
 		return null
 		
+	# get first in enumerable that satisfies conditions
 	func first(cmps):
 		return Where.new(self, cmps).at(0)
-		
+
 	func count():
 		return to_list().size()
-		
+			
+	# ===============================================================================
+	# Deferred evaluation
+
 	func where(cmps):
 		return Where.new(self, cmps)
 			
