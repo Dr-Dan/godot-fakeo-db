@@ -1,6 +1,6 @@
-# GodotDataBuddy
+# Godot-EzDatabase
 
-A library for Linq/MongoDB style data access in Godot.
+A library that replicates Linq/MongoDB style data access in Godot written in GdScript.
 
 
 ## Usage
