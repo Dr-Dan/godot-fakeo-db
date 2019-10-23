@@ -1,6 +1,6 @@
 extends Node
 
-class_name Inventory
+const InventoryItem = preload("InventoryItem.gd")
 
 export var items = [] setget ,_get_items
 

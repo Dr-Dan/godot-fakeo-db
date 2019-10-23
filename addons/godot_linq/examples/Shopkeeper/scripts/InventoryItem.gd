@@ -1,6 +1,4 @@
-tool
 extends Node
-class_name InventoryItem
 
 enum ItemType{
 	NONE,

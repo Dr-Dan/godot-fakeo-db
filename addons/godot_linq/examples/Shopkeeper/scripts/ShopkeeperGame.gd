@@ -5,7 +5,7 @@ const GLF = OperatorFactory
 const List = EnumeratorsDeferred.ListEnumerator
 const Query = QueryBuilderDeferred
 
-const IType = InventoryItem.ItemType
+const IType = preload("InventoryItem.gd").ItemType
 
 const PLAYER = "Player"
 const SHOPKEEPER = "Shopkeeper"
