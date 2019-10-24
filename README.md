@@ -13,7 +13,7 @@ There is also the QueryBuilder class that allows for queries to be created witho
 At present only dictionaries and lists of objects are compatible but this will change in the future.
 
 ### Quick Example
-```
+```gdscript
 const List = EnumeratorsDeferred.ListEnumerator
 const OpFac = OperatorFactory
 
@@ -40,18 +40,18 @@ func _run():
 
 ### And...
 
-```
+```gdscript
 # this
 var query = EnumeratorsDeferred.ListEnumerator.new(data).where(comparers).project(fields)
 ```
 
-```
+```gdscript
 # is the same as
 var query = QueryBuilder.new().where(comparers).project(fields)
 query.eval(data)
 ```
 
-```
+```gdscript
 # which is the same as
 var list = List.new(data)
 var where = EnumeratorsDeferred.Where.new(list, comparers)
