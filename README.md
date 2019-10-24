@@ -67,6 +67,9 @@ var project = EnumeratorsDeferred.Project.new(where, fields)
 * Take - take first N results
 * Select - get values in a form specified by the user
 
+## Installation
+
+Either download from the Godot Asset Store or just copy 'addons/easy_queries' into the 'addons' folder in your project.
 
 ## Planned features
 
