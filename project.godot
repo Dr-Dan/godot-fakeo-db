@@ -1,0 +1,51 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+_global_script_classes=[ {
+"base": "Reference",
+"class": "ButtonFactory",
+"language": "GDScript",
+"path": "res://addons/easy_queries/examples/Shopkeeper/scripts/ButtonFactory.gd"
+}, {
+"base": "Reference",
+"class": "IterList",
+"language": "GDScript",
+"path": "res://addons/easy_queries/scripts/IterList.gd"
+}, {
+"base": "Node",
+"class": "WorldActor",
+"language": "GDScript",
+"path": "res://addons/easy_queries/examples/Shopkeeper/scripts/WorldActor.gd"
+} ]
+_global_script_class_icons={
+"ButtonFactory": "",
+"IterList": "",
+"WorldActor": ""
+}
+
+[application]
+
+config/name="EasyQueries"
+config/icon="res://icon.png"
+
+[autoload]
+
+EasyQueries="*res://addons/easy_queries/scripts/EasyQueries.gd"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "easy_queries" )
+
+[rendering]
+
+quality/driver/driver_name="GLES2"
+vram_compression/import_etc=true
+vram_compression/import_etc2=false
+environment/default_environment="res://default_env.tres"

@@ -1,4 +1,4 @@
-class_name Enumerators
+#class_name Enumerators
 
 class Select:
 	var fields = []

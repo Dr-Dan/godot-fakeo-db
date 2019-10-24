@@ -1,4 +1,5 @@
-class_name EnumeratorsDeferred
+# class_name EnumeratorsDeferred
+const Operators = preload("res://addons/easy_queries/scripts/Operators.gd")
 
 class Enumerable:
 	const START = 0

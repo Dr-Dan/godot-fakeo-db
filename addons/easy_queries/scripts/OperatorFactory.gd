@@ -1,5 +1,7 @@
 extends Resource
-class_name OperatorFactory
+#class_name OperatorFactory
+
+const Operators = preload("res://addons/easy_queries/scripts/Operators.gd")
 
 static func gt(item):
 	return Operators.GT.new(item)

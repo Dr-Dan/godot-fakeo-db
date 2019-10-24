@@ -71,6 +71,8 @@ var project = EnumeratorsDeferred.Project.new(where, fields)
 
 Either download from the Godot Asset Store or just copy 'addons/easy_queries' into the 'addons' folder in your project.
 
+There is no need 
+
 ## Planned features
 
 * Documentation/Wiki

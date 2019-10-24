@@ -1,6 +1,7 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://addons/godot_linq/examples/Shopkeeper/scripts/InventoryItem.gd" type="Script" id=1]
+[ext_resource path="res://addons/easy_queries/examples/Shopkeeper/scripts/InventoryItem.gd" type="Script" id=1]
+
 
 
 

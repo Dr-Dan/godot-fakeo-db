@@ -1,4 +1,5 @@
-class_name QueryBuilderDeferred
+#class_name QueryBuilderDeferred
+const EnumeratorsDeferred = preload("res://addons/easy_queries/scripts/EnumeratorsDeferred.gd")
 
 var start
 var next

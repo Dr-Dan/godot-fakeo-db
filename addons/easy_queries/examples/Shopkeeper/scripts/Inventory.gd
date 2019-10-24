@@ -1,5 +1,6 @@
 extends Node
 
+const EasyQueries = preload("res://addons/easy_queries/scripts/EasyQueries.gd")
 const InventoryItem = preload("InventoryItem.gd")
 
 export var items = [] setget ,_get_items
@@ -11,11 +12,11 @@ func _get_items():
 	return get_children()
 
 func to_enumerator():
-	return EnumeratorsDeferred.ListEnumerator.new(_get_items())
+	return EasyQueries.Enumerators.ListEnumerator.new(_get_items())
 	
 func deposit_item(type, amt=1):
 	var item = to_enumerator()\
-	.first({type=OperatorFactory.eq(type)})
+	.first({type=EasyQueries.OperatorFactory.eq(type)})
 	
 	if item != null:
 		item.amt += amt
@@ -24,7 +25,7 @@ func deposit_item(type, amt=1):
 
 func remove_item(type):
 	var item = to_enumerator()\
-	.first({type=OperatorFactory.eq(type)})
+	.first({type=EasyQueries.OperatorFactory.eq(type)})
 
 	if item != null:
 		item.amt -= 1
