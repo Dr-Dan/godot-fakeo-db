@@ -29,14 +29,6 @@ _global_script_class_icons={
 config/name="EasyQueries"
 config/icon="res://icon.png"
 
-[autoload]
-
-EasyQueries="*res://addons/easy_queries/scripts/EasyQueries.gd"
-
-[editor_plugins]
-
-enabled=PoolStringArray( "easy_queries" )
-
 [rendering]
 
 quality/driver/driver_name="GLES2"

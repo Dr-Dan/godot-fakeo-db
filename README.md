@@ -69,9 +69,9 @@ var project = EnumeratorsDeferred.Project.new(where, fields)
 
 ## Installation
 
-Either download from the Godot Asset Store or just copy 'addons/easy_queries' into the 'addons' folder in your project.
+1. Either download from the Godot Asset Store or just copy 'addons/easy_queries' into the 'addons' folder in your project.
 
-There is no need 
+2. Project > Project Settings > Plugins (Tab at the top) > EasyQueries
 
 ## Planned features
 
