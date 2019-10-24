@@ -1,6 +1,6 @@
 # Godot - Easy Queries
 
-A library that offers Linq/MongoDB style data operations in Godot written in GdScript.
+A library that offers Linq/MongoDB style data operations in Godot.
 
 ## Features
 
