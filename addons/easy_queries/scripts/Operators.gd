@@ -13,8 +13,8 @@ class OperatorBase:
 		return true
 	
 """
-	eval takes String
-	returns true if field in eval item
+	returns true if field in item. 
+		i.e. 'item.field' exists
 """
 class HasField:
 	extends OperatorBase
@@ -31,7 +31,12 @@ class HasField:
 # ------------------------------------------------------------ 
 # LOGICAL OPERATORS
 """
-	returns true if all in 'cmps' are true
+	returns true if all operators in 'cmps' are true
+	Expects an array of operators
+
+	usage:
+		var comp = OpFac.And.new([OpFac.gt(20), OpFac.lt(70)]) # 20 < age < 70
+
 """
 class And:
 	extends OperatorBase
@@ -46,8 +51,13 @@ class And:
 		return true
 	
 """
-	returns true if any in 'cmps' are true
-"""
+	returns true if any operators in 'cmps' are true
+	Expects an array of operators
+
+	usage:
+		var comp = OpFac.Or.new([OpFac.gt(20), OpFac.lt(70)]) # 20 < age < 70
+
+	"""
 class Or:
 	extends OperatorBase
 	var cmps
@@ -61,12 +71,12 @@ class Or:
 		return false
 	
 """
-	returns false if 'cmp'is true and vice versa
+	returns false if 'cmp' is true and vice versa
 """
 class Not:
 	extends OperatorBase
 	var cmp
-	func _init(cmp: OperatorBase):
+	func _init(cmp):
 		self.cmp = cmp
 		
 	func eval(item):
@@ -164,7 +174,13 @@ class Contains:
 # ------------------------------------------------------------ 
 # FUNCREF
 """
-	
+	Validate an item using a custom function
+
+	usage:
+		func validate(item):
+			...
+			return true
+		CmpFunctionWithArgs.new(funcref(self, "check_args"))	
 """
 class CmpFunction:
 	extends OperatorBase
@@ -174,7 +190,16 @@ class CmpFunction:
 		
 	func eval(item):
 		return func_ref.call_func(item)
-			
+		
+"""
+	Validate an item using a custom function. Also passes an argument to said function.
+
+	usage:
+		func validate(item, arg):
+			...
+			return true
+		CmpFunctionWithArgs.new(funcref(self, "check_args"), arg)
+"""		
 class CmpFunctionWithArgs:
 	extends OperatorBase
 	var func_ref

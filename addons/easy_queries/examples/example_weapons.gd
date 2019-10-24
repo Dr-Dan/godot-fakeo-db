@@ -3,7 +3,7 @@ extends EditorScript
 
 const EQ = preload("../scripts/EasyQueries.gd")
 const OpFac = EQ.OperatorFactory
-const List = EQ.Enumerators.ListEnumerator
+const List = EQ.Enumerables.ListEnumerator
 
 
 """
@@ -39,14 +39,14 @@ var data = [
 # ==============================================================
 
 var list = List.new(data)
-var where = EQ.Enumerators.Where.new(list, {dmg=OpFac.gteq(10)})
-var project = EQ.Enumerators.Project.new(where, ["name", "dmg"])
-var take = EQ.Enumerators.Take.new(project, 3)
+var where = EQ.Enumerables.Where.new(list, {dmg=OpFac.gteq(10)})
+var project = EQ.Enumerables.Project.new(where, ["name", "dmg"])
+var take = EQ.Enumerables.Take.new(project, 3)
 
 func get_name_and_dmg_mult(item, mult):
 	return [item.name, item.dmg * mult]
 
-var select = EQ.Enumerators.Select.new(where, funcref(self, "get_name_and_dmg_mult"), 20)
+var select = EQ.Enumerables.Select.new(where, funcref(self, "get_name_and_dmg_mult"), 20)
 
 var query = List.new(data)\
 	.where({subtype=OpFac.eq("bow")})\

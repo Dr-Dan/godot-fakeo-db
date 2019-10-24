@@ -3,7 +3,7 @@ extends EditorScript
 
 const EQ = preload("../scripts/EasyQueries.gd")
 const OpFac = EQ.OperatorFactory
-const List = EQ.Enumerators.ListEnumerator
+const List = EQ.Enumerables.ListEnumerator
 
 """
 To use: File > Run

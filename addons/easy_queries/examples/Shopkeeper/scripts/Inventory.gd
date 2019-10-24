@@ -12,7 +12,7 @@ func _get_items():
 	return get_children()
 
 func to_enumerator():
-	return EasyQueries.Enumerators.ListEnumerator.new(_get_items())
+	return EasyQueries.Enumerables.ListEnumerator.new(_get_items())
 	
 func deposit_item(type, amt=1):
 	var item = to_enumerator()\

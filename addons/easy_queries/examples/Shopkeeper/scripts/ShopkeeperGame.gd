@@ -4,7 +4,7 @@ const EasyQueries = preload("../../../scripts/EasyQueries.gd")
 const ButtonInvItem = preload("../scenes/ButtonInventoryItem.tscn")
 
 const GLF = EasyQueries.OperatorFactory
-const List = EasyQueries.Enumerators.ListEnumerator
+const List = EasyQueries.Enumerables.ListEnumerator
 const Query = EasyQueries.QueryBuilder
 
 const IType = preload("InventoryItem.gd").ItemType
