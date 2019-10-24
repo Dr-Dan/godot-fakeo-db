@@ -14,8 +14,7 @@ At present only dictionaries and lists of objects are compatible but this will c
 
 ### Quick Example
 ```gdscript
-const List = EnumeratorsDeferred.ListEnumerator
-const OpFac = OperatorFactory
+const OpFac = EasyQueries.OperatorFactory
 
 var data = [
 	Weapon.new("Wooden Sword", "melee", "sword", 2, 1.2),
@@ -29,7 +28,7 @@ var data = [
 ]
 
 # select all where subtype is bow. Project to dictionary with {"name", "dmg", "atk_range"} as fields.
-var query = List.new(data)\
+var query = EasyQueries.ListEnumerator.new(data)\
 	.where({subtype=OpFac.eq("bow")})\
 	.project(["name", "dmg", "atk_range"])
 
@@ -42,30 +41,55 @@ func _run():
 
 ```gdscript
 # this
-var query = EnumeratorsDeferred.ListEnumerator.new(data).where(comparers).project(fields)
+var query = EasyQueries.ListEnumerator.new(data).where(comparers).project(fields)
 ```
 
 ```gdscript
 # is the same as
-var query = QueryBuilder.new().where(comparers).project(fields)
+var query = EasyQueries.QueryBuilder.new().where(comparers).project(fields)
 query.eval(data)
 ```
 
 ```gdscript
 # which is the same as
 var list = List.new(data)
-var where = EnumeratorsDeferred.Where.new(list, comparers)
-var project = EnumeratorsDeferred.Project.new(where, fields)
+var where = EasyQueries.Enumerables.Where.new(list, comparers)
+var project = EasyQueries.Enumerables.Project.new(where, fields)
 
 ```
 
-
-### Enumerable Overview
+## Overview
+### Enumerables
 * ListEnumerator - wrap a list with this
 * Where - get all satisfying a condition
 * Project - project chosen fields into dictionary
 * Take - take first N results
 * Select - get values in a form specified by the user
+
+* count(), first() and at(index) can be called on enumerator
+ * note that these will cause immediate evaluation
+
+### Operators
+* HasField
+
+* And
+* Or
+
+* Not
+
+* Any
+* None
+
+* LT
+* GT
+* Eq
+
+* In
+* Contains
+
+* CmpFunction
+* CmpFunctionWithArgs
+
 
 ## Installation
 
