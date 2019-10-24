@@ -2,15 +2,14 @@
 
 A library that offers Linq/MongoDB style data operations in Godot written in GdScript.
 
-## Usage
+## Features
 
-Enumerables offer deferred execution and can be iterated over in a for loop.
+* Filter lists using custom queries
+ * query Dictionaries and Objects alike
+* Deferred execution of queries
+* Easy to extend with custom operators and enumerables
 
-Comparers are used to filter fields.
-
-There is also the QueryBuilder class that allows for queries to be created without a predefined list.
-
-At present only dictionaries and lists of objects are compatible but this will change in the future.
+Note: At present only lists of dictionaries and objects are compatible but this will change in the future.
 
 ### Quick Example
 ```gdscript
@@ -27,7 +26,7 @@ var data = [
 	{name="Ancient Bow", type="ranged", subtype="bow", dmg=10, atk_range=30.0, firing_rate=1.0},
 ]
 
-# select all where subtype is bow. Project to dictionary with {"name", "dmg", "atk_range"} as fields.
+# select all where subtype is 'bow'. Project to dictionary with {"name", "dmg", "atk_range"} as fields.
 var query = EasyQueries.ListEnumerator.new(data)\
 	.where({subtype=OpFac.eq("bow")})\
 	.project(["name", "dmg", "atk_range"])
@@ -59,17 +58,18 @@ var project = EasyQueries.Enumerables.Project.new(where, fields)
 ```
 
 ## Overview
-### Enumerables
+### [Enumerables](../master/addons/easy_queries/scripts/Enumerables.gd)
 * ListEnumerator - wrap a list with this
 * Where - get all satisfying a condition
 * Project - project chosen fields into dictionary
 * Take - take first N results
 * Select - get values in a form specified by the user
 
-* count(), first() and at(index) can be called on enumerator
+* count(), first() and at(index) can be called from enumerator
  * note that these will cause immediate evaluation
 
-### Operators
+### [Operators](../master/addons/easy_queries/scripts/Operators.gd)
+
 * HasField
 
 * And
@@ -100,13 +100,11 @@ var project = EasyQueries.Enumerables.Project.new(where, fields)
 ## Planned features
 
 * Documentation/Wiki
-* move to a generally more OO approach
-  * more OO operator/filter system
-* ability to use any list as argument
+* ability to search non-object filled lists
 * godot editor-interface
-* Mongo style Databases and Collections
+* MongoDB style Databases and Collections
 * update operations - add, remove, update
 * foreach
 * ability to create Enumerables as searchable nodes
 * tests
-
+* enter queries as Strings as in SQL
