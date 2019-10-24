@@ -1,6 +1,3 @@
-#extends Resource
-class_name IterList
-
 var start
 var curr
 var end
@@ -85,7 +82,7 @@ func has_key(field):
 	return false
 	
 
-func where(cmps) -> IterList:
+func where(cmps):
 	var result = []
 	for item in items:
 		for key in cmps:
@@ -134,46 +131,3 @@ func take(cmps, amt):
 		
 func to_list(deep=false):
 	return items.duplicate(deep)
-	
-
-#func select_grouped(cmps_dict, fields: Array):
-#	var result = {}
-#	for k in cmps_dict:
-#		result[k] = []
-#
-#	for item in items:
-#		for result_key in cmps_dict:
-#			var data = {}
-#			var comp_dict = cmps_dict[result_key]
-#
-#			for comp_k in comp_dict:
-#				if comp_k in item:
-#
-#					for f in fields:
-#						if f in item\
-#						and comp_dict[comp_k].eval(item[comp_k]):
-#							data[f] = item[f]
-#			if not data.empty():
-#				result[result_key].append(data)
-#
-#	for k in cmps_dict:
-#		result[k] = get_script().new(result[k])
-#
-#	return result
-	
-
-#func where_k(cmps):
-#	var result = []
-#	for item in items:
-#		for key in cmps:
-#			if cmps[key].eval(item[key]):
-#				result.append(item)
-#	return result
-
-#func first_k(cmps):
-#	for item in items:
-#		for key in cmps:
-#			if cmps[key].eval(key):
-#				return item
-#	return null
-

@@ -1,8 +1,8 @@
 extends Node
 
-const EasyQueries = preload("res://addons/easy_queries/scripts/EasyQueries.gd")
-
+const EasyQueries = preload("../../../scripts/EasyQueries.gd")
 const ButtonInvItem = preload("../scenes/ButtonInventoryItem.tscn")
+
 const GLF = EasyQueries.OperatorFactory
 const List = EasyQueries.Enumerators.ListEnumerator
 const Query = EasyQueries.QueryBuilder

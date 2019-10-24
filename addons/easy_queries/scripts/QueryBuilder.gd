@@ -1,4 +1,4 @@
-#class_name QueryBuilder
+
 const Enumerators = preload("res://addons/easy_queries/scripts/Enumerators.gd")
 var items = []
 

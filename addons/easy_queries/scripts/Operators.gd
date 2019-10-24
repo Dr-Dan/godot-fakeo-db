@@ -1,4 +1,4 @@
-#class_name Operators
+
 
 static func item_valid(item, comps: Dictionary):
 	for key in comps:

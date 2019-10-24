@@ -1,5 +1,4 @@
 extends Resource
-#class_name OperatorFactory
 
 const Operators = preload("res://addons/easy_queries/scripts/Operators.gd")
 

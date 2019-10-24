@@ -1,9 +1,9 @@
 tool
 extends EditorScript
 
-const GL = Operators
-const GLF = OperatorFactory
-const List = EnumeratorsDeferred.ListEnumerator
+const EQ = preload("../scripts/EasyQueries.gd")
+const OpFac = EQ.OperatorFactory
+const List = EQ.Enumerators.ListEnumerator
 
 """
 To use: File > Run
@@ -34,9 +34,6 @@ class Address:
 # ==============================================================
 			
 func _run():
-	run_test()
-	
-func run_test():
 	var name_table = List.new([
 	{name="mike", age=22, addr_id=0},
 	{name="mindy", age=16, addr_id=1},
@@ -95,15 +92,15 @@ func print_lists(name_table, addr_table):
 
 # store a query for later use
 # execution is deferred until to_list() is called later
-var age_comp = GLF.and_([GLF.gt(20), GLF.lt(70)]) # 20 < age < 70
-var age_comp_not = GLF.not_(age_comp)
+var age_comp = OpFac.and_([OpFac.gt(20), OpFac.lt(70)]) # 20 < age < 70
+var age_comp_not = OpFac.not_(age_comp)
 var fields = ["name", "age"]
 
-var where_age = QueryBuilderDeferred.new()\
+var where_age = EQ.QueryBuilder.new()\
 	.where({age=age_comp})\
 	.project(fields)
 
-var where_not_age = QueryBuilderDeferred.new()\
+var where_not_age = EQ.QueryBuilder.new()\
 	.where({age=age_comp_not})\
 	.project(fields)
 
@@ -132,7 +129,7 @@ func get_addr(item):
 	
 func house_search_test(name_table, addr_table):
 	var valued_houses = addr_table\
-		.where({value=GLF.gteq(20000)})\
+		.where({value=OpFac.gteq(20000)})\
 		.project(["addr_id", "street", "value"])
 
 	""" 
@@ -144,7 +141,7 @@ func house_search_test(name_table, addr_table):
 		.select(funcref(self, "get_addr"))
 
 	var homeowners = name_table\
-		.where({addr_id=GLF.in_(addr_ids)})\
+		.where({addr_id=OpFac.in_(addr_ids)})\
 		.project(["name", "addr_id"])
 
 	print("house value > 20000")
@@ -159,8 +156,8 @@ func i_is_in_name(name:String):
 	return "i" in name
 
 func count_names_test(name_table):
-	var cmp_has_i = GL.CmpFunction.new(funcref(self, "i_is_in_name"))
-	var cmp_is_dan = {name=GLF.eq("dan")}
+	var cmp_has_i = EQ.Operators.CmpFunction.new(funcref(self, "i_is_in_name"))
+	var cmp_is_dan = {name=OpFac.eq("dan")}
 	
 	var result_name = name_table\
 	.where({name=cmp_has_i})\
@@ -179,7 +176,7 @@ func name_starts_with_letter(name:String, letter:String):
 	return not name.empty() and name[0].to_lower() == letter
 
 func take_test(name_table, amt_take=2):
-	var cmp = GL.CmpFunctionWithArgs.new(funcref(self, "name_starts_with_letter"), "a")
+	var cmp = EQ.Operators.CmpFunctionWithArgs.new(funcref(self, "name_starts_with_letter"), "a")
 
 	var result = name_table\
 	.where({name=cmp})\

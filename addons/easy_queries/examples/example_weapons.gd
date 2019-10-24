@@ -1,8 +1,9 @@
 tool
 extends EditorScript
 
-const OpFac = OperatorFactory
-const List = EnumeratorsDeferred.ListEnumerator
+const EQ = preload("../scripts/EasyQueries.gd")
+const OpFac = EQ.OperatorFactory
+const List = EQ.Enumerators.ListEnumerator
 
 
 """
@@ -38,20 +39,20 @@ var data = [
 # ==============================================================
 
 var list = List.new(data)
-var where = EnumeratorsDeferred.Where.new(list, {dmg=OpFac.gteq(10)})
-var project = EnumeratorsDeferred.Project.new(where, ["name", "dmg"])
-var take = EnumeratorsDeferred.Take.new(project, 3)
+var where = EQ.Enumerators.Where.new(list, {dmg=OpFac.gteq(10)})
+var project = EQ.Enumerators.Project.new(where, ["name", "dmg"])
+var take = EQ.Enumerators.Take.new(project, 3)
 
 func get_name_and_dmg_mult(item, mult):
 	return [item.name, item.dmg * mult]
 
-var select = EnumeratorsDeferred.Select.new(where, funcref(self, "get_name_and_dmg_mult"), 20)
+var select = EQ.Enumerators.Select.new(where, funcref(self, "get_name_and_dmg_mult"), 20)
 
 var query = List.new(data)\
 	.where({subtype=OpFac.eq("bow")})\
 	.project(["name", "dmg", "atk_range"])
 
-var query2 = QueryBuilderDeferred.new()\
+var query2 = EQ.QueryBuilder.new()\
 	.where({subtype=OpFac.in_(["sword", "spear", "thrown"])})\
 	.project(["name", "subtype", "dmg", "atk_range"])
 		
