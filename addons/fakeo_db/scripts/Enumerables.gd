@@ -1,4 +1,4 @@
-const Operators = preload("res://addons/easy_queries/scripts/Operators.gd")
+const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
 
 class Enumerable:
 	const START = 0
@@ -77,7 +77,7 @@ class Enumerable:
 		
 				
 # Pretty much does the same as the native list but is compatible with other enumerators
-class ListEnumerator:
+class List:
 	extends Enumerable
 	var index
 	

@@ -1,1 +1,11 @@
-*.import
+.DS_Store
+.#*
+*~
+
+# Godot-specific ignores
+.import/
+default_env.tres
+
+# Project specific
+addons/fakeo_db/examples/Shopkeeper
+addons/fakeo_db/examples/example_weapons.gd

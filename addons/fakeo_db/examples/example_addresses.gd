@@ -1,9 +1,9 @@
 tool
 extends EditorScript
 
-const EQ = preload("../scripts/EasyQueries.gd")
-const OpFac = EQ.OperatorFactory
-const List = EQ.Enumerables.ListEnumerator
+const Fakeo = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
+const OpFac = Fakeo.OperatorFactory
+const List = Fakeo.Enumerables.List
 
 """
 To use: File > Run
@@ -96,11 +96,11 @@ var age_comp = OpFac.and_([OpFac.gt(20), OpFac.lt(70)]) # 20 < age < 70
 var age_comp_not = OpFac.not_(age_comp)
 var fields = ["name", "age"]
 
-var where_age = EQ.QueryBuilder.new()\
+var where_age = Fakeo.QueryBuilder.new()\
 	.where({age=age_comp})\
 	.project(fields)
 
-var where_not_age = EQ.QueryBuilder.new()\
+var where_not_age = Fakeo.QueryBuilder.new()\
 	.where({age=age_comp_not})\
 	.project(fields)
 
@@ -113,9 +113,8 @@ func age_comp_builder_test(name_table):
 	var result = where_age.eval(name_table)
 	var result_not = where_not_age.eval(name_table)
 
-	# to_list has the added benefit of returning dictionaries which print nicely
-	# TODO: check this is true
-	# BUT edits won't affect the original data
+	# to_list() has the added benefit of returning dictionaries which print nicely
+	# however changes to the result won't affect the original
 	print("age > 20 and age < 70")
 	print(result.to_list())
 	print_break_mini()
@@ -156,7 +155,7 @@ func i_is_in_name(name:String):
 	return "i" in name
 
 func count_names_test(name_table):
-	var cmp_has_i = EQ.Operators.CmpFunction.new(funcref(self, "i_is_in_name"))
+	var cmp_has_i = Fakeo.Operators.CmpFunction.new(funcref(self, "i_is_in_name"))
 	var cmp_is_dan = {name=OpFac.eq("dan")}
 	
 	var result_name = name_table\
@@ -176,7 +175,7 @@ func name_starts_with_letter(name:String, letter:String):
 	return not name.empty() and name[0].to_lower() == letter
 
 func take_test(name_table, amt_take=2):
-	var cmp = EQ.Operators.CmpFunctionWithArgs.new(funcref(self, "name_starts_with_letter"), "a")
+	var cmp = Fakeo.Operators.CmpFunctionWithArgs.new(funcref(self, "name_starts_with_letter"), "a")
 
 	var result = name_table\
 	.where({name=cmp})\

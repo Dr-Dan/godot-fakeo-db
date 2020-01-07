@@ -1,4 +1,4 @@
-const Enumerables = preload("res://addons/easy_queries/scripts/Enumerables.gd")
+const Enumerables = preload("res://addons/fakeo_db/scripts/Enumerables.gd")
 
 var start
 var next
@@ -29,6 +29,6 @@ func select(select_func: FuncRef, arg=null):
 	
 func eval(data):
 	if data is Array:
-		data = Enumerables.ListEnumerator.new(data)
+		data = Enumerables.List.new(data)
 	start.source = data
 	return next

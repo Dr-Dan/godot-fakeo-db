@@ -1,6 +1,6 @@
 extends Resource
 
-const Operators = preload("res://addons/easy_queries/scripts/Operators.gd")
+const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
 
 static func gt(item):
 	return Operators.GT.new(item)

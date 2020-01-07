@@ -12,21 +12,27 @@ _global_script_classes=[ {
 "base": "Reference",
 "class": "ButtonFactory",
 "language": "GDScript",
-"path": "res://addons/easy_queries/examples/Shopkeeper/scripts/ButtonFactory.gd"
+"path": "res://addons/fakeo_db/examples/Shopkeeper/scripts/ButtonFactory.gd"
+}, {
+"base": "Enumerable",
+"class": "Collection",
+"language": "GDScript",
+"path": "res://addons/fakeo_db/scripts/Database/Collection.gd"
 }, {
 "base": "Node",
 "class": "WorldActor",
 "language": "GDScript",
-"path": "res://addons/easy_queries/examples/Shopkeeper/scripts/WorldActor.gd"
+"path": "res://addons/fakeo_db/examples/Shopkeeper/scripts/WorldActor.gd"
 } ]
 _global_script_class_icons={
 "ButtonFactory": "",
+"Collection": "",
 "WorldActor": ""
 }
 
 [application]
 
-config/name="EasyQueries"
+config/name="FakeoDB"
 config/icon="res://icon.png"
 
 [rendering]
