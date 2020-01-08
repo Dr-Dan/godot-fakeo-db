@@ -10,7 +10,8 @@ Linq/MongoDB stuff in GDScript without any database faffery.
 
 Note: At present only lists of dictionaries and objects are compatible i.e. no search on lists of primitives
 
-### Quick Example
+## Quick Example
+
 ```gdscript
 const Fakeo = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
 const OpFac = FakeoDB.OperatorFactory
@@ -72,8 +73,6 @@ var project = Enumerables.Project.new(where, fields)
 * count(), first() and at(index) can be called from enumerables
   * note that these will cause immediate evaluation
 
-
-
 ### [Operators](../master/addons/fakeo_db/scripts/Operators.gd)
 
 * HasField
@@ -101,7 +100,7 @@ var project = Enumerables.Project.new(where, fields)
 
 1. Either download from the Godot Asset Store or just copy fakeo_db into the 'addons' folder in your project.
 
-2. Enable plugin: Project > Project Settings > Plugins
+2. (Optional) Enable plugin: Project > Project Settings > Plugins
 
 ## Planned features
 
