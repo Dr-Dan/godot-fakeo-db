@@ -155,7 +155,7 @@ func i_is_in_name(name:String):
 	return "i" in name
 
 func count_names_test(name_table):
-	var cmp_has_i = Fakeo.Operators.CmpFunction.new(funcref(self, "i_is_in_name"))
+	var cmp_has_i = OpFac.cmp_func(funcref(self, "i_is_in_name"))
 	var cmp_is_dan = {name=OpFac.eq("dan")}
 	
 	var result_name = name_table\
@@ -175,7 +175,7 @@ func name_starts_with_letter(name:String, letter:String):
 	return not name.empty() and name[0].to_lower() == letter
 
 func take_test(name_table, amt_take=2):
-	var cmp = Fakeo.Operators.CmpFunctionWithArgs.new(funcref(self, "name_starts_with_letter"), "a")
+	var cmp = OpFac.cmp_func_args(funcref(self, "name_starts_with_letter"), "a")
 
 	var result = name_table\
 	.where({name=cmp})\

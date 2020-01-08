@@ -29,7 +29,12 @@ static func not_(item):
 static func in_(item):
 	return Operators.In.new(item)
 
-# TODO: do this in parser class
+static func cmp_func(func_ref: FuncRef):
+	return Operators.CmpFunction.new(func_ref)
+
+static func cmp_func_args(func_ref: FuncRef, args):
+	return Operators.CmpFunctionWithArgs.new(func_ref, args)
+
 static func op(item:String, arg):
 	match item:
 		"<":

@@ -1,6 +1,6 @@
 # Fakeo DB
 
-Linq/MongoDB stuff in GDScript without any database faffery.
+Linq/MongoDB stuff in GDScript without any actual database faffery.
 
 ## Features
 

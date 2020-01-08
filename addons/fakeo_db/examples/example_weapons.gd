@@ -37,7 +37,9 @@ var data = [
 ]
 
 # ==============================================================
+# Three ways
 
+# nested
 var list = List.new(data)
 var where = Fakeo.Enumerables.Where.new(list, {dmg=OpFac.gteq(10)})
 var project = Fakeo.Enumerables.Project.new(where, ["name", "dmg"])
@@ -48,10 +50,12 @@ func get_name_and_dmg_mult(item, mult):
 
 var select = Fakeo.Enumerables.Select.new(where, funcref(self, "get_name_and_dmg_mult"), 20)
 
+# enumerable + chaining
 var query = List.new(data)\
 	.where({subtype=OpFac.eq("bow"), dmg=OpFac.gteq(7)})\
 	.project(["name", "dmg", "atk_range"])
 
+# query builder + chaining (eval() later...)
 var query2 = Fakeo.QueryBuilder.new()\
 	.where({subtype=OpFac.in_(["sword", "spear", "thrown"])})\
 	.project(["name", "subtype", "dmg", "atk_range"])
@@ -65,6 +69,10 @@ func _run():
 		print(i)
 		
 	print_break_mini()
+	for i in select:
+		print(i)		
+
+	print_break_mini()
 	print(take.at(1).name)
 
 	print_break_mini()
@@ -74,10 +82,7 @@ func _run():
 	print_break_mini()
 	for i in query2.eval(data):
 		print(i)
-
-	print_break_mini()
-	for i in select:
-		print(i)		
+		
 		
 # ==============================================================
 func print_break():
