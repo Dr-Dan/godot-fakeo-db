@@ -26,7 +26,8 @@ var data = [
 	{name="Ancient Bow", type="ranged", subtype="bow", dmg=10, atk_range=30.0, firing_rate=1.0},
 ]
 
-# select all where subtype is 'bow' and dmg >=7. Project to dictionary with {"name", "dmg", "atk_range"} as fields.
+# select all where subtype is 'bow' and dmg >=7. 
+# Project to dictionary with {"name", "dmg", "atk_range"} as fields.
 var query = FakeoDB.List.new(data)\
 	.where({subtype=OpFac.eq("bow"), dmg=OpFac.gteq(7)})\
 	.project(["name", "dmg", "atk_range"])
