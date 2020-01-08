@@ -11,3 +11,7 @@ func get_collection(name) -> Collection:
 		
 	collections[name] = Collection.new()
 	return collections[name]
+
+func erase(name):
+	if name in collections:
+		collections.erase(name)

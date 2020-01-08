@@ -1,6 +1,6 @@
 # Fakeo DB
 
-Linq/MongoDB stuff in Godot.
+Linq/MongoDB stuff in GDScript without any database faffery.
 
 ## Features
 
@@ -8,28 +8,32 @@ Linq/MongoDB stuff in Godot.
 * Deferred execution of queries
 * Easy to extend with custom operators and enumerables
 
-Note: At present only lists of dictionaries and objects are compatible but this will change in the future. 
+Note: At present only lists of dictionaries and objects are compatible i.e. no search on lists of primitives
 
 ### Quick Example
 ```gdscript
+const Fakeo = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
 const OpFac = FakeoDB.OperatorFactory
 
 var data = [
 	Weapon.new("Wooden Sword", "melee", "sword", 2, 1.2),
-	Weapon.new("Nice Spear", "melee", "spear", 13, 2.0),
-	Weapon.new("Jan's Hammer", "melee", "blunt", 30, 1.3),
+	...
+	Weapon.new("Bone Hammer", "melee", "blunt", 30, 1.3),
 	{name="John's Rock", type="ranged", subtype="thrown", dmg=21, atk_range=10.0, firing_rate=0.5},
-	{name="Wooden Bow", type="ranged", subtype="bow", dmg=4, atk_range=20.0, firing_rate=1.4},
-	{name="Glass Bow", type="ranged", subtype="bow", dmg=7, atk_range=20.0, firing_rate=1.7}
+	...
+	{name="Glass Bow", type="ranged", subtype="bow", dmg=7, atk_range=20.0, firing_rate=1.7},
+	{name="Ancient Bow", type="ranged", subtype="bow", dmg=10, atk_range=30.0, firing_rate=1.0},
 ]
 
-# select all where subtype is 'bow'. Project to dictionary with {"name", "dmg", "atk_range"} as fields.
-var query = FakeoDB.ListEnumerator.new(data)\
-	.where({subtype=OpFac.eq("bow")})\
+# select all where subtype is 'bow' and dmg >=7. Project to dictionary with {"name", "dmg", "atk_range"} as fields.
+var query = FakeoDB.List.new(data)\
+	.where({subtype=OpFac.eq("bow"), dmg=OpFac.gteq(7)})\
 	.project(["name", "dmg", "atk_range"])
 
 func _run():
-  	for i in query:
+	print(query.to_list()) 
+	# OR
+  	for i in query: # in a for loop
 		  print(i)
 ```
 
@@ -37,21 +41,20 @@ func _run():
 
 ```gdscript
 # this
-var query = FakeoDB.ListEnumerator.new(data).where(comparers).project(fields)
+var query = List.new(data).where(comparers).project(fields)
 ```
 
 ```gdscript
 # is the same as
-var qb = FakeoDB.QueryBuilder.new().where(comparers).project(fields)
+var qb = QueryBuilder.new().where(comparers).project(fields)
 query = qb.eval(data)
 ```
 
 ```gdscript
 # which is the same as
 var list = List.new(data)
-var where = FakeoDB.Enumerables.Where.new(list, comparers)
-var project = FakeoDB.Enumerables.Project.new(where, fields)
-
+var where = Enumerables.Where.new(list, comparers)
+var project = Enumerables.Project.new(where, fields)
 ```
 
 ## Overview
@@ -68,6 +71,8 @@ var project = FakeoDB.Enumerables.Project.new(where, fields)
 
 * count(), first() and at(index) can be called from enumerables
   * note that these will cause immediate evaluation
+
+
 
 ### [Operators](../master/addons/fakeo_db/scripts/Operators.gd)
 
