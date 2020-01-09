@@ -42,7 +42,7 @@ class Enumerable:
 	# Instant evaluation
 
 	# get item at index in enumerable
-	func at(index):
+	func at(index, default=null):
 		var i = 0
 		if index >= 0 and _iter_init(null):
 			if index == 0:
@@ -51,7 +51,7 @@ class Enumerable:
 				i+=1
 				if i == index:
 					return current
-		return null
+		return default
 		
 	# get first in enumerable that satisfies conditions
 	func first(cmps):
@@ -104,10 +104,10 @@ class List:
 	func to_list():
 		return [] + source
 		
-	func at(index):
+	func at(index, default):
 		if index >= 0 and index < len(source):
 			return source[index]
-		return null
+		return default
 				
 	func reset():
 		.reset()

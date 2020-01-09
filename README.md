@@ -105,8 +105,7 @@ var project = Enumerables.Project.new(where, fields)
 
 ## Planned features
 
-* Better examples
-* ability to search any list i.e. ints, strings
-* godot in-editor interface for database
-* update operations - add, remove, update
-* tests
+- [ ] Better examples
+- [ ] ability to search any list i.e. ints, strings
+- [ ] godot in-editor interface for database
+- [ ] update functions and signals on collections
