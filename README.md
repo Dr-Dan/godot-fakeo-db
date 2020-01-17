@@ -7,7 +7,6 @@ An attempt to replicate Linq/MongoDB behaviors in GDScript.
 * Filter lists using custom queries
 * Deferred execution
 * Easy to extend operators and enumerables
-* 
 
 Note: At present only lists of dictionaries and objects are compatible i.e. no search on lists of primitives
 
