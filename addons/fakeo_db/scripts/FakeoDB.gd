@@ -6,8 +6,6 @@ const QueryBuilder = preload("res://addons/fakeo_db/scripts/QueryBuilder.gd")
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
 const OperatorFactory = preload("res://addons/fakeo_db/scripts/OperatorFactory.gd")
 
-const Database = preload("res://addons/fakeo_db/scripts/Database/Database.gd")
-
 static func list(array:Array):
 	return Enumerables.List.new(array)
 	

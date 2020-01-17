@@ -6,6 +6,9 @@ func add_collection(c:Collection, name):
 	assert(not name in collections)
 	collections[name] = c
 
+func has_collection(name):
+	pass
+	
 func get_collection(name) -> Collection:
 	if name in collections:
 		return collections[name]

@@ -78,13 +78,10 @@ var query = fdb.list(data)\
 ```
 
 ## Overview
-### [Database](../master/addons/fakeo_db/scripts/Database)
-* Database - Stores collections
-
 ### [Enumerables](../master/addons/fakeo_db/scripts/Enumerables.gd)
 * List - wrap a list with this to use where, project etc.
-* Collection - an enumerable with append, erase functions and signals
-* Where - get all satisfying a condition. Accepts functions and dictionaries.
+* Collection - an enumerable with append, erase functions and signals on change
+* Where - get all satisfying a condition. Accepts functions and dictionaries
 * Project - project chosen fields into dictionary
 * Take - take first N results
 * Select - applies a function to each item and returns the result
@@ -126,5 +123,5 @@ var query = fdb.list(data)\
 
 - [ ] Better examples
 - [ ] ability to search any list i.e. ints, strings
-- [ ] godot in-editor interface for database
 - [ ] update functions on collections
+- [ ] data viewer gui
