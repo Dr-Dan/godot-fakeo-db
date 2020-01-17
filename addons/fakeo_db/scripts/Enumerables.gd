@@ -30,7 +30,7 @@ class Enumerable:
 		return current
 		
 		
-	func to_list():
+	func to_array():
 		var arg = null
 		var r = []
 		if _iter_init(arg):
@@ -42,7 +42,7 @@ class Enumerable:
 	# Instant evaluation
 
 	# get item at index in enumerable
-	func at(index, default=null):
+	func at(index):
 		var i = 0
 		if index >= 0 and _iter_init(null):
 			if index == 0:
@@ -51,14 +51,19 @@ class Enumerable:
 				i+=1
 				if i == index:
 					return current
-		return default
+		return null
 		
 	# get first in enumerable that satisfies conditions
 	func first(cmps):
 		return Where.new(self, cmps).at(0)
+		
+	# returns true if any match conditions
+	func any(cmps):
+		var d = first(cmps)
+		return d != null
 
 	func count():
-		return to_list().size()
+		return to_array().size()
 			
 	# ===============================================================================
 	# Deferred evaluation
@@ -101,32 +106,42 @@ class List:
 			return true
 		return false
 		
-	func to_list():
+	func to_array():
 		return [] + source
 		
-	func at(index, default):
+	func at(index):
 		if index >= 0 and index < len(source):
 			return source[index]
-		return default
+		return null
 				
 	func reset():
 		.reset()
 		index = -1
 
 # Get all where preds evaluate to true
+# preds must be a FuncRef or a Dictionary
 class Where:
 	extends Enumerable
 
 	var preds
+	var is_fref = false
 	
 	func _init(source, preds).(source):
 		self.preds = preds
+		if preds is FuncRef:
+			is_fref = true
+			
+	func get_result(item):
+		if is_fref:
+			return preds.call_func(item)
+		else:
+			return Operators.item_valid(item, preds)
 
 	func _iter_next(arg):
 		if state == RUNNING:
 			while source._iter_next(arg):
 				var item = source.current
-				if Operators.item_valid(item, preds):
+				if get_result(item):
 					current = item
 					return true
 			reset()
@@ -137,20 +152,21 @@ class Where:
 		if not source._iter_init(arg): return false
 		
 		var item = source.current
-		if Operators.item_valid(item, preds):
+		if get_result(source.current):
 			current = item
 			return true
 
 		return _iter_next(arg)
 				
 				
-# Get data projected into a specified format
+# Returns fields matching names in fields array
+# ["name", "id"] => {name="the_name", id=0}
 class Project:
 	extends Enumerable
 	
 	var fields
 	
-	func _init(source, fields).(source):
+	func _init(source, fields:Array).(source):
 		self.fields = fields
 	
 	func get_result(item):
@@ -209,7 +225,6 @@ class Take:
 		.reset()
 		i = -1
 
-
 # Select from source using a given function reference
 class Select:
 	extends Enumerable
@@ -243,3 +258,36 @@ class Select:
 		current = get_result(source.current)
 		return true
 		
+class Collection:
+	extends List
+	signal on_item_added(item)
+	signal on_item_erased(item)
+	signal on_cleared
+	
+	func _init(source:Array=[]).(source):
+		pass
+		
+	func append(item):
+		source.append(item)
+		emit_signal("on_item_added", item)
+				
+	func erase(item):
+		if item in source:
+			source.erase(item)
+			emit_signal("on_item_erased", item)
+			
+	func erase_at(index):
+		assert(index>=0)
+		if index < source.size():
+			var item = source[index]
+			erase(item)	
+			
+	func empty():
+		return source.empty()
+	
+	func clear():
+		emit_signal("on_cleared")
+		source.clear()
+		
+	func size():
+		return source.size()	

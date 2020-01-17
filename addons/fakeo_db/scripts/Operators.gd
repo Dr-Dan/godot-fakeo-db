@@ -5,6 +5,8 @@ static func item_valid(item, comps: Dictionary):
 		if key in item:
 			if not comps[key].eval(item[key]):
 				return false
+		else:
+			return false
 	return true
 
 	

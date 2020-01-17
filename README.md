@@ -1,21 +1,23 @@
 # Fakeo DB
 
-Linq/MongoDB stuff in GDScript without any actual database faffery.
+An attempt to replicate Linq/MongoDB behaviors in GDScript.
 
 ## Features
 
 * Filter lists using custom queries
-* Deferred execution of queries
-* Easy to extend with custom operators and enumerables
+* Deferred execution
+* Easy to extend operators and enumerables
+* 
 
 Note: At present only lists of dictionaries and objects are compatible i.e. no search on lists of primitives
 
 ## Quick Example
 
 ```gdscript
-const Fakeo = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
-const OpFac = FakeoDB.OperatorFactory
+const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
+const ops = FakeoDB.OperatorFactory
 
+# Combine objects and dictionaries
 var data = [
 	Weapon.new("Wooden Sword", "melee", "sword", 2, 1.2),
 	...
@@ -28,12 +30,12 @@ var data = [
 
 # select all where subtype is 'bow' and dmg >=7. 
 # Project to dictionary with {"name", "dmg", "atk_range"} as fields.
-var query = FakeoDB.List.new(data)\
-	.where({subtype=OpFac.eq("bow"), dmg=OpFac.gteq(7)})\
+var query = fdb.list(data)\
+	.where({subtype=ops.eq("bow"), dmg=ops.gteq(7)})\
 	.project(["name", "dmg", "atk_range"])
 
 func _run():
-	print(query.to_list()) 
+	print(query.to_array()) 
 	# OR
   	for i in query: # in a for loop
 		  print(i)
@@ -59,20 +61,37 @@ var where = Enumerables.Where.new(list, comparers)
 var project = Enumerables.Project.new(where, fields)
 ```
 
+### Also...
+
+```gdscript
+var query = fdb.list(data)\
+	.where({subtype=ops.eq("bow"), dmg=ops.gteq(7)})
+```
+
+```gdscript
+# is the same as
+func _bow_condition(item):
+	return item.subtype == "bow" and item.dmg >= 7
+
+var query = fdb.list(data)\
+	.where(funcref(self, "_bow_condition"))
+```
+
 ## Overview
 ### [Database](../master/addons/fakeo_db/scripts/Database)
-* Collection - an enumerable with append, erase functions and signals
 * Database - Stores collections
 
 ### [Enumerables](../master/addons/fakeo_db/scripts/Enumerables.gd)
 * List - wrap a list with this to use where, project etc.
-* Where - get all satisfying a condition
+* Collection - an enumerable with append, erase functions and signals
+* Where - get all satisfying a condition. Accepts functions and dictionaries.
 * Project - project chosen fields into dictionary
 * Take - take first N results
-* Select - get values in a form specified by the user
+* Select - applies a function to each item and returns the result
 
-* count(), first() and at(index) can be called from enumerables
+* count(), at(index), first(pred), any(pred) can be called from enumerables
   * note that these will cause immediate evaluation
+  * first and any both accept FuncRef and Dictionary types as predicates
 
 ### [Operators](../master/addons/fakeo_db/scripts/Operators.gd)
 
@@ -108,4 +127,4 @@ var project = Enumerables.Project.new(where, fields)
 - [ ] Better examples
 - [ ] ability to search any list i.e. ints, strings
 - [ ] godot in-editor interface for database
-- [ ] update functions and signals on collections
+- [ ] update functions on collections

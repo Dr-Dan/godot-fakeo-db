@@ -1,9 +1,9 @@
 tool
 extends EditorScript
 
-const Fakeo = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
-const OpFac = Fakeo.OperatorFactory
-const List = Fakeo.Enumerables.List
+const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
+const ops = fdb.OperatorFactory
+const List = fdb.Enumerables.List
 
 
 """
@@ -41,25 +41,33 @@ var data = [
 
 # nested
 var list = List.new(data)
-var where = Fakeo.Enumerables.Where.new(list, {dmg=OpFac.gteq(10)})
-var project = Fakeo.Enumerables.Project.new(where, ["name", "dmg"])
-var take = Fakeo.Enumerables.Take.new(project, 3)
+var where = fdb.Enumerables.Where.new(list, {dmg=ops.gteq(10)})
+var project = fdb.Enumerables.Project.new(where, ["name", "dmg"])
+var take = fdb.Enumerables.Take.new(project, 3)
 
 func get_name_and_dmg_mult(item, mult):
 	return [item.name, item.dmg * mult]
 
-var select = Fakeo.Enumerables.Select.new(where, funcref(self, "get_name_and_dmg_mult"), 20)
+var select = fdb.Enumerables.Select.new(where, funcref(self, "get_name_and_dmg_mult"), 20)
 
 # enumerable + chaining
 var query = List.new(data)\
-	.where({subtype=OpFac.eq("bow"), dmg=OpFac.gteq(7)})\
+	.where({subtype=ops.eq("bow"), dmg=ops.gteq(7)})\
 	.project(["name", "dmg", "atk_range"])
 
 # query builder + chaining (eval() later...)
-var query2 = Fakeo.QueryBuilder.new()\
-	.where({subtype=OpFac.in_(["sword", "spear", "thrown"])})\
+var query2 = fdb.QueryBuilder.new()\
+	.where({subtype=ops.in_(["sword", "spear", "thrown"])})\
 	.project(["name", "subtype", "dmg", "atk_range"])
 		
+# using a funcref
+# this can also be used in the first and any functions of Enumerator class
+func _damage_or_sword(item):
+	return item.dmg > 20 or item.name=="Wooden Sword"
+	
+var query3 = fdb.QueryBuilder.new()\
+	.where(funcref(self, "_damage_or_sword"))\
+	.project(["name", "subtype", "dmg",])
 # ==============================================================
 		
 func _run():
@@ -83,6 +91,9 @@ func _run():
 	for i in query2.eval(data):
 		print(i)
 		
+	print_break_mini()
+	for i in query3.eval(data):
+		print(i)
 		
 # ==============================================================
 func print_break():

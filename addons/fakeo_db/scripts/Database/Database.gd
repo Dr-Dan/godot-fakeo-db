@@ -1,4 +1,5 @@
-const Collection = preload("res://addons/fakeo_db/scripts/Database/Collection.gd")
+const Collection = preload("res://addons/fakeo_db/scripts/Enumerables.gd").Collection
+
 var collections = {}
 
 func add_collection(c:Collection, name):

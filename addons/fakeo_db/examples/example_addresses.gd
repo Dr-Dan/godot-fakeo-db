@@ -1,9 +1,9 @@
 tool
 extends EditorScript
 
-const Fakeo = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
-const OpFac = Fakeo.OperatorFactory
-const List = Fakeo.Enumerables.List
+const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
+const OpFac = fdb.OperatorFactory
+const List = fdb.Enumerables.List
 
 """
 To use: File > Run
@@ -90,17 +90,18 @@ func print_lists(name_table, addr_table):
 
 # ==============================================================
 
+
 # store a query for later use
-# execution is deferred until to_list() is called later
+# execution is deferred until to_array() is called later
 var age_comp = OpFac.and_([OpFac.gt(20), OpFac.lt(70)]) # 20 < age < 70
 var age_comp_not = OpFac.not_(age_comp)
 var fields = ["name", "age"]
 
-var where_age = Fakeo.QueryBuilder.new()\
+var where_age = fdb.QueryBuilder.new()\
 	.where({age=age_comp})\
 	.project(fields)
 
-var where_not_age = Fakeo.QueryBuilder.new()\
+var where_not_age = fdb.QueryBuilder.new()\
 	.where({age=age_comp_not})\
 	.project(fields)
 
@@ -113,13 +114,13 @@ func age_comp_builder_test(name_table):
 	var result = where_age.eval(name_table)
 	var result_not = where_not_age.eval(name_table)
 
-	# to_list() has the added benefit of returning dictionaries which print nicely
+	# to_array() has the added benefit of returning dictionaries which print nicely
 	# however changes to the result won't affect the original
 	print("age > 20 and age < 70")
-	print(result.to_list())
+	print(result.to_array())
 	print_break_mini()
 	print("not (age > 20 and age < 70)")
-	print(result_not.to_list())
+	print(result_not.to_array())
 
 # ==============================================================
 
@@ -144,10 +145,10 @@ func house_search_test(name_table, addr_table):
 		.project(["name", "addr_id"])
 
 	print("house value > 20000")
-	print(valued_houses.to_list())
+	print(valued_houses.to_array())
 	print_break_mini()
 	print("homeowners where house value > 20000 (addr_id in 'addr_ids')")
-	print(homeowners.to_list())
+	print(homeowners.to_array())
 	
 # ==============================================================
 
@@ -183,4 +184,4 @@ func take_test(name_table, amt_take=2):
 	.project(["name"])
 
 	print("take %d entries where name starts with 'a':" % amt_take)
-	print(result.to_list())
+	print(result.to_array())
