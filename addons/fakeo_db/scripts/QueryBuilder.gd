@@ -16,7 +16,8 @@ func project(fields):
 	return self
 
 func where(comps):
-	_set_next(Enumerables.Where.new(next, comps))
+	var where_cls = Enumerables.Enumerable.get_where_type(comps)
+	_set_next(where_cls.new(next, comps))
 	return self
 
 func take(amt):

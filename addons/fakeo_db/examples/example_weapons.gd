@@ -3,7 +3,6 @@ extends EditorScript
 
 const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
 const ops = fdb.OperatorFactory
-const List = fdb.Enumerables.List
 
 
 """
@@ -40,8 +39,8 @@ var data = [
 # Three ways
 
 # nested
-var list = List.new(data)
-var where = fdb.Enumerables.Where.new(list, {dmg=ops.gteq(10)})
+var list = fdb.list(data)
+var where = fdb.Enumerables.WhereDict.new(list, {dmg=ops.gteq(10)})
 var project = fdb.Enumerables.Project.new(where, ["name", "dmg"])
 var take = fdb.Enumerables.Take.new(project, 3)
 
@@ -51,7 +50,7 @@ func get_name_and_dmg_mult(item, mult):
 var select = fdb.Enumerables.Select.new(where, funcref(self, "get_name_and_dmg_mult"), 20)
 
 # enumerable + chaining
-var query = List.new(data)\
+var query = fdb.list(data)\
 	.where({subtype=ops.eq("bow"), dmg=ops.gteq(7)})\
 	.project(["name", "dmg", "atk_range"])
 

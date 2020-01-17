@@ -111,6 +111,7 @@ class None:
 		return false
 # ------------------------------------------------------------ 
 # COMPARITIVE OPERATORS
+# handle dictionary value only
 
 """
 	Less than

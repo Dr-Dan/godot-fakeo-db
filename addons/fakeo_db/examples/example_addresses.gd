@@ -2,8 +2,8 @@ tool
 extends EditorScript
 
 const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
-const OpFac = fdb.OperatorFactory
-const List = fdb.Enumerables.List
+const ops = fdb.OperatorFactory
+
 
 """
 To use: File > Run
@@ -34,7 +34,7 @@ class Address:
 # ==============================================================
 			
 func _run():
-	var name_table = List.new([
+	var name_table = fdb.list([
 	{name="mike", age=22, addr_id=0},
 	{name="mindy", age=16, addr_id=1},
 	{name="trish", age=49, addr_id=2},
@@ -44,12 +44,13 @@ func _run():
 	Human.new("ariel", 65, 3),
 	])
 
-	var addr_table = List.new([
+	var addr_table = fdb.list([
 	{addr_id=0, street="vale road", value=20000},
 	{addr_id=1, street="the lane", value=10000},
 	{addr_id=2, street="london road", value=35250},
 	Address.new(3, "diamond mews", 100000)
 	])
+	
 	
 	print_break()
 	print_lists(name_table, addr_table)
@@ -66,7 +67,7 @@ func _run():
 	print_break()
 	take_test(name_table)
 
-
+	
 # ==============================================================
 func print_break():
 	print("\n###############################")
@@ -90,11 +91,10 @@ func print_lists(name_table, addr_table):
 
 # ==============================================================
 
-
 # store a query for later use
 # execution is deferred until to_array() is called later
-var age_comp = OpFac.and_([OpFac.gt(20), OpFac.lt(70)]) # 20 < age < 70
-var age_comp_not = OpFac.not_(age_comp)
+var age_comp = ops.and_([ops.gt(20), ops.lt(70)]) # 20 < age < 70
+var age_comp_not = ops.not_(age_comp)
 var fields = ["name", "age"]
 
 var where_age = fdb.QueryBuilder.new()\
@@ -108,7 +108,7 @@ var where_not_age = fdb.QueryBuilder.new()\
 func age_comp_builder_test(name_table):
 	""" 
 	 even at this point no actual iteration has taken place
-		 eval() sets the root of the query and could also be
+		 eval() sets the root array of the query and could also be
 		 called outside the function.
 	"""
 	var result = where_age.eval(name_table)
@@ -129,19 +129,14 @@ func get_addr(item):
 	
 func house_search_test(name_table, addr_table):
 	var valued_houses = addr_table\
-		.where({value=OpFac.gteq(20000)})\
+		.where({value=ops.gteq(20000)})\
 		.project(["addr_id", "street", "value"])
 
-	""" 
-	NOTE: Some functions(i.e. where, project) will not 
-		work on lists if they do not contain dictionaries or objects
-		It can still be iterated over however.
-	"""
 	var addr_ids = valued_houses\
 		.select(funcref(self, "get_addr"))
 
 	var homeowners = name_table\
-		.where({addr_id=OpFac.in_(addr_ids)})\
+		.where({addr_id=ops.in_(addr_ids)})\
 		.project(["name", "addr_id"])
 
 	print("house value > 20000")
@@ -156,8 +151,8 @@ func i_is_in_name(name:String):
 	return "i" in name
 
 func count_names_test(name_table):
-	var cmp_has_i = OpFac.cmp_func(funcref(self, "i_is_in_name"))
-	var cmp_is_dan = {name=OpFac.eq("dan")}
+	var cmp_has_i = ops.cmp_func(funcref(self, "i_is_in_name"))
+	var cmp_is_dan = {name=ops.eq("dan")}
 	
 	var result_name = name_table\
 	.where({name=cmp_has_i})\
@@ -176,7 +171,7 @@ func name_starts_with_letter(name:String, letter:String):
 	return not name.empty() and name[0].to_lower() == letter
 
 func take_test(name_table, amt_take=2):
-	var cmp = OpFac.cmp_func_args(funcref(self, "name_starts_with_letter"), "a")
+	var cmp = ops.cmp_func_args(funcref(self, "name_starts_with_letter"), "a")
 
 	var result = name_table\
 	.where({name=cmp})\

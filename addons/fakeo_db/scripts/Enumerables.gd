@@ -1,4 +1,5 @@
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
+#const OpBase = Operators.OperatorBase
 
 class Enumerable:
 	const START = 0
@@ -55,7 +56,7 @@ class Enumerable:
 		
 	# get first in enumerable that satisfies conditions
 	func first(cmps):
-		return Where.new(self, cmps).at(0)
+		return where(cmps).at(0)
 		
 	# returns true if any match conditions
 	func any(cmps):
@@ -67,9 +68,19 @@ class Enumerable:
 			
 	# ===============================================================================
 	# Deferred evaluation
+	
+	static func get_where_type(cmps):
+		if cmps is FuncRef:
+			return WhereFunc
+		elif cmps is Operators.OperatorBase:
+			return WhereOp
+		# if cmps is not a Dictionary; at this point it is not a valid type
+		assert(cmps is Dictionary)
+		return WhereDict
 
 	func where(cmps):
-		return Where.new(self, cmps)
+		var cls = get_where_type(cmps)
+		return cls.new(self, cmps)
 			
 	func project(fields: Array):
 		return Project.new(self, fields)
@@ -81,7 +92,7 @@ class Enumerable:
 		return Select.new(self, select_func, arg)
 		
 				
-# Pretty much does the same as the native list but is compatible with other enumerators
+# Pretty much does the same as the native array but is compatible with other enumerators
 class List:
 	extends Enumerable
 	var index
@@ -119,23 +130,18 @@ class List:
 		index = -1
 
 # Get all where preds evaluate to true
-# preds must be a FuncRef or a Dictionary
-class Where:
+# This is a base class and should be extended, not used directly
+class WhereBase:
 	extends Enumerable
 
 	var preds
-	var is_fref = false
-	
+
 	func _init(source, preds).(source):
 		self.preds = preds
-		if preds is FuncRef:
-			is_fref = true
-			
+
 	func get_result(item):
-		if is_fref:
-			return preds.call_func(item)
-		else:
-			return Operators.item_valid(item, preds)
+		printerr("Using base where class!")
+		return false
 
 	func _iter_next(arg):
 		if state == RUNNING:
@@ -158,8 +164,40 @@ class Where:
 
 		return _iter_next(arg)
 				
+# expects comps in the form of {field0=ops.eq(value), field1=ops.gt(value)}
+# Note: this will only work with Lists of Objects or Dictionaries
+class WhereDict:
+	extends WhereBase
+
+	func _init(source, preds:Dictionary).(source, preds):
+		pass
+		
+	func get_result(item):
+		return Operators.item_valid(item, preds)
 				
-# Returns fields matching names in fields array
+# expects only a FuncRef. The function taking a single argument and returning a bool
+class WhereFunc:
+	extends WhereBase
+	
+	func _init(source, preds:FuncRef).(source, preds):
+		pass
+		
+	func get_result(item):
+		return preds.call_func(item)
+
+# expects a class with a function 'eval(item)' that returns a bool
+class WhereOp:
+	extends WhereBase
+	
+	func _init(source, preds).(source, preds):
+		pass
+		
+	func get_result(item):
+		return preds.eval(item)
+
+								
+				
+# Returns only the fields matching names in the 'fields' array
 # ["name", "id"] => {name="the_name", id=0}
 class Project:
 	extends Enumerable
