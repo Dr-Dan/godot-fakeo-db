@@ -109,12 +109,12 @@ var employees = fdb.list([{name="Al", age=44, salary=20000}, Item.new("Jackie", 
 # fine, single operator expects single argument
 numbers.where(ops.and([ops.gt(1), ops.lt(4)]))
 
-# funcref taking one argument
+# valid if funcref takes one argument
 func _is_between_1_4(item):
 	return item > 1 and item < 4
 numbers.where(funcref(self, "_is_between_1_4"))
 
-# valid if class has eval(item) function or extends OperatorBase
+# valid if 'IsBetween' class has eval(item) function or extends OperatorBase
 numbers.where(IsBetween.new(1,4))
 
 employees.where({age=ops.gt(30))
