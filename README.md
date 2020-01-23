@@ -107,7 +107,7 @@ var employees = fdb.list([{name="Al", age=44, salary=20000}, Item.new("Jackie", 
 # VALID
 
 # fine, single operator expects single argument
-numbers.where(ops.and([ops.gt(1), ops.lt(4)]))
+numbers.where(ops.and_([ops.gt(1), ops.lt(4)]))
 
 # valid if funcref takes one argument
 func _is_between_1_4(item):
