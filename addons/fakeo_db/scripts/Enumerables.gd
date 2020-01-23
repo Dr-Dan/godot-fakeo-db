@@ -170,8 +170,10 @@ class WhereDict:
 	extends WhereBase
 
 	func _init(source, preds:Dictionary).(source, preds):
-		pass
-		
+		for p in preds:
+			if not preds[p] is Operators.OperatorBase:
+				preds[p] = Operators.Eq.new(preds[p])
+
 	func get_result(item):
 		return Operators.item_valid(item, preds)
 				
