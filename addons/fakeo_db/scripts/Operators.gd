@@ -177,9 +177,7 @@ class Contains:
 # ------------------------------------------------------------ 
 # FUNCREF
 """
-	Validate an item using a funcref.
-		said function is expected to have an argument for the target item and return bool
-
+Call a function on an object
 	usage:
 		func validate(item):
 			...
@@ -196,30 +194,18 @@ class FuncOp:
 	func eval(item):
 		return func_ref.call_func(item)
 		
-"""
-	Validate an item using a funcref
-		said function is expected to have an argument for the target item and return bool
-		takes up to 3 arguments as an array and the target function 
-
-	usage:
-		func validate(item, arg0, arg1):
-			...
-			return true
-
-		FuncOpArgs.new(self, "validate", [arg0, arg1])
-"""		
-class FuncOpArgs:
+class FuncOpArgsBase:
 	extends OperatorBase
 	const MAX_ARGS = 3
 	
-	var func_ref
-	var args
+	var args:Array
 	var n_args:int
+	var func_ref:FuncRef
 	
-	func _init(obj:Object, func_name:String, args:Array):
+	func _init(func_ref:FuncRef, args:Array):
 		n_args = args.size()
 		assert(n_args <= MAX_ARGS)		
-		self.func_ref = funcref(obj, func_name)
+		self.func_ref=func_ref
 		self.args = args
 		
 	func eval(item):
@@ -232,3 +218,25 @@ class FuncOpArgs:
 				return func_ref.call_func(item, args[0], args[1])
 			3:
 				return func_ref.call_func(item, args[0], args[1], args[2])
+
+"""
+	Call a function on an object
+		size of args array is expected to match additional arguments in referenced function.
+	usage:
+		func validate(item, arg0, arg1):
+			...
+			return true
+
+		FuncOpArgs.new(self, "validate", [arg0, arg1])
+"""		
+class FuncOpArgs:
+	extends FuncOpArgsBase
+	
+	func _init(obj:Object, func_name:String, args:Array).(funcref(obj, func_name), args):		
+		pass
+
+class FuncOpObjArgs:
+	extends FuncOpArgsBase
+		
+	func _init(func_ref:FuncRef, args:Array).(func_ref, args):
+		pass

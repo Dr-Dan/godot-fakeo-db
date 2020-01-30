@@ -88,8 +88,8 @@ class Enumerable:
 	func take(amt):
 		return Take.new(self, amt)
 		
-	func select(obj:Object, func_name:String, arg=null):
-		return Select.new(self, funcref(obj, func_name), arg)
+	func select(obj:Object, func_name:String, args:Array=[]):
+		return Select.new(self, funcref(obj, func_name), args)
 		
 	func skip(count):
 		return Skip.new(self, count)
@@ -312,19 +312,13 @@ class Select:
 	extends Enumerable
 	
 	var select_ref
-	var func_arg = null
 	
-	# expects a func_ref 
-	func _init(source, select_ref, arg=null).(source):
-		self.select_ref = select_ref
-		self.func_arg = arg
+	func _init(source, select_ref, args:Array=[]).(source):
+		self.select_ref = Operators.FuncOpObjArgs.new(select_ref, args)
 
 	func get_result(item):
-		if func_arg == null:
-			return select_ref.call_func(item)
-		else:
-			return select_ref.call_func(item, func_arg)
-
+		return select_ref.eval(item)
+		
 	func _iter_next(arg):
 		if state == RUNNING:
 			if source._iter_next(arg):

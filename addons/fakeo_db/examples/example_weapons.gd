@@ -47,7 +47,7 @@ var take = fdb.Enumerables.Take.new(project, 3)
 func get_name_and_dmg_mult(item, mult):
 	return [item.name, item.dmg * mult]
 
-var select = fdb.Enumerables.Select.new(where, funcref(self, "get_name_and_dmg_mult"), 20)
+var select = fdb.Enumerables.Select.new(where, funcref(self, "get_name_and_dmg_mult"), [20])
 
 # enumerable + chaining
 var query = fdb.list(data)\
