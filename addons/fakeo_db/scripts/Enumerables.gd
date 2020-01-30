@@ -90,7 +90,10 @@ class Enumerable:
 		
 	func select(obj:Object, func_name:String, args:Array=[]):
 		return Select.new(self, funcref(obj, func_name), args)
-		
+	
+	func as_args(obj:Object, func_name:String):
+		return AsArgs.new(self, funcref(obj, func_name))
+
 	func skip(count):
 		return Skip.new(self, count)
 		
@@ -301,7 +304,7 @@ class Skip:
 			current = item
 			return true
 
-		return _iter_next(arg)	
+		return _iter_next(arg)
 			
 	func reset():
 		.reset()
@@ -333,7 +336,40 @@ class Select:
 		if not source._iter_init(arg): return false
 		current = get_result(source.current)
 		return true
+
+class AsArgs:
+	extends Enumerable
+
+	var select_ref
+
+	func _init(source, select_ref).(source):
+		self.select_ref = Operators.FuncOpObjArgs.new(select_ref)
+
+	func get_result(item):
+		assert(item is Array)
+		item = [] + item
+		var i = item.pop_front()
+		select_ref.args = item
+		return select_ref.eval(i)
+	
+	func _iter_next(arg):
+		if state == RUNNING:
+			if source._iter_next(arg):
+				current = get_result(source.current)
+				return true
+
+			reset()
+		return false
+	
+	func _iter_init(arg):
+		._iter_init(arg)
+		if not source._iter_init(arg): return false
+		current = get_result(source.current)
+		return true
 		
+	func run():
+		to_array()
+				
 class Collection:
 	extends List
 	signal on_item_added(item)
@@ -356,7 +392,7 @@ class Collection:
 		assert(index>=0)
 		if index < source.size():
 			var item = source[index]
-			erase(item)	
+			erase(item)
 			
 	func empty():
 		return source.empty()
@@ -366,4 +402,4 @@ class Collection:
 		source.clear()
 		
 	func size():
-		return source.size()	
+		return source.size()

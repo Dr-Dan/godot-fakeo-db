@@ -69,8 +69,9 @@ var query3 = fdb.qb()\
 	.where(funcref(self, "_damage_or_sword"))\
 	.project(["name", "subtype", "dmg",])
 # ==============================================================
-		
+
 func _run():
+	
 	print_break()
 	print_break_mini()
 	for i in take:

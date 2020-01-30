@@ -72,21 +72,23 @@ func _run():
 
 # ==============================================================
 
-
+func _print_add(a0, a1):
+	print(a0+a1)
+	
 func collection_append_remove(name_table):
 	var removed = fdb.cltn()
 	var added = fdb.cltn()
 	
-	var connections = [
+	var connections = fdb.list([
 		# call function or append to another collection when modified
 		["on_item_added", self, "_on_item_added"],
 		["on_item_erased", self, "_on_item_erased"],
 
 		["on_item_added", added, "append"],
-		["on_item_erased", removed, "append"]]
-		
-	for c in connections:
-		name_table.connect(c[0], c[1], c[2])
+		["on_item_erased", removed, "append"]])
+	
+	# you can use list elements as arguments to a function
+	connections.as_args(name_table, "connect").run()
 		
 	name_table.append({name="aslan", age=199, addr_id=1})
 	var item = {name="fakeo", age=1, addr_id=1}
@@ -100,8 +102,7 @@ func collection_append_remove(name_table):
 	print("Items Added:")
 	print(added.to_array())
 	
-	for c in connections:
-		name_table.disconnect(c[0], c[1], c[2])
+	connections.as_args(name_table, "disconnect").run()
 		
 func _on_item_added(item):
 	print("added " + str(item))

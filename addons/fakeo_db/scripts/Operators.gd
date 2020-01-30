@@ -198,7 +198,7 @@ class FuncOpArgsBase:
 	extends OperatorBase
 	const MAX_ARGS = 3
 	
-	var args:Array
+	var args:Array setget _set_args
 	var n_args:int
 	var func_ref:FuncRef
 	
@@ -207,6 +207,11 @@ class FuncOpArgsBase:
 		assert(n_args <= MAX_ARGS)		
 		self.func_ref=func_ref
 		self.args = args
+		
+	func _set_args(args_):
+		args = args_
+		n_args = args.size()
+		assert(n_args <= MAX_ARGS)	
 		
 	func eval(item):
 		match n_args:
@@ -232,11 +237,11 @@ class FuncOpArgsBase:
 class FuncOpArgs:
 	extends FuncOpArgsBase
 	
-	func _init(obj:Object, func_name:String, args:Array).(funcref(obj, func_name), args):		
+	func _init(obj:Object, func_name:String, args:Array=[]).(funcref(obj, func_name), args):		
 		pass
 
 class FuncOpObjArgs:
 	extends FuncOpArgsBase
 		
-	func _init(func_ref:FuncRef, args:Array).(func_ref, args):
+	func _init(func_ref:FuncRef, args:Array=[]).(func_ref, args):
 		pass
