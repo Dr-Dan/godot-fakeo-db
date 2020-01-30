@@ -28,8 +28,10 @@ func select(select_func: FuncRef, arg=null):
 	_set_next(Enumerables.Select.new(next, select_func, arg))
 	return self
 	
+# expects Array or child of Enumerable
 func eval(data):
 	if data is Array:
 		data = Enumerables.List.new(data)
+	# assert(data is Enumerables.Enumerable)
 	start.source = data
 	return next

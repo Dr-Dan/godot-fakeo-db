@@ -12,7 +12,7 @@ static func item_valid(item, comps: Dictionary):
 	
 class OperatorBase:
 	func eval(item):
-		return true
+		return false
 	
 """
 	returns true if field in item. 
@@ -177,15 +177,17 @@ class Contains:
 # ------------------------------------------------------------ 
 # FUNCREF
 """
-	Validate an item using a custom function
+	Validate an item using a funcref.
+		said function is expected to return bool
 
 	usage:
 		func validate(item):
 			...
 			return true
-		CmpFunctionWithArgs.new(funcref(self, "check_args"))	
+
+		FuncOp.new(funcref(self, "validate"))	
 """
-class CmpFunction:
+class FuncOp:
 	extends OperatorBase
 	var func_ref
 	func _init(func_ref: FuncRef):
@@ -195,23 +197,35 @@ class CmpFunction:
 		return func_ref.call_func(item)
 		
 """
-	Validate an item using a custom function. Also passes an argument to said function.
+	Validate an item using a funcref
+		said function is expected to recieve 'arg' and return bool
 
 	usage:
 		func validate(item, arg):
 			...
 			return true
-		CmpFunctionWithArgs.new(funcref(self, "check_args"), arg)
+
+		FuncOpArgs.new(funcref(self, "validate"), arg)
 """		
-class CmpFunctionWithArgs:
+class FuncOpArgs:
 	extends OperatorBase
+	const MAX_ARGS = 3
+	
 	var func_ref
 	var args
-	func _init(func_ref: FuncRef, args):
+	
+	func _init(func_ref: FuncRef, args:Array):
 		self.func_ref = func_ref
+		assert(args.size() <= MAX_ARGS)
 		self.args = args
 		
 	func eval(item):
-		return func_ref.call_func(item, args)
-		
-		
+		match args.size():
+			0:
+				return func_ref.call_func(item)
+			1:
+				return func_ref.call_func(item, args[0])
+			2:
+				return func_ref.call_func(item, args[0], args[1])
+			3:
+				return func_ref.call_func(item, args[0], args[1], args[2])

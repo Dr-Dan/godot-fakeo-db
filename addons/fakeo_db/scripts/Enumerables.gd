@@ -1,7 +1,7 @@
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
-#const OpBase = Operators.OperatorBase
 
 class Enumerable:
+	extends Resource
 	const START = 0
 	const RUNNING = 1
 
@@ -88,8 +88,8 @@ class Enumerable:
 	func take(amt):
 		return Take.new(self, amt)
 		
-	func select(select_func: FuncRef, arg=null):
-		return Select.new(self, select_func, arg)
+	func select(obj:Object, func_name:String, arg=null):
+		return Select.new(self, funcref(obj, func_name), arg)
 		
 				
 # Pretty much does the same as the native array but is compatible with other enumerators
@@ -164,7 +164,8 @@ class WhereBase:
 
 		return _iter_next(arg)
 				
-# expects comps in the form of {field0=ops.eq(value), field1=ops.gt(value)}
+# expects comps in the form of {field0=value, field1=ops.eq(value), field2=ops.gt(value)}
+# if no operator is provided, the value will be wrapped with Operators.Eq
 # Note: this will only work with Lists of Objects or Dictionaries
 class WhereDict:
 	extends WhereBase
@@ -190,8 +191,9 @@ class WhereFunc:
 # expects a class with a function 'eval(item)' that returns a bool
 class WhereOp:
 	extends WhereBase
+	const OpBase = preload("res://addons/fakeo_db/scripts/Operators.gd").OperatorBase
 	
-	func _init(source, preds).(source, preds):
+	func _init(source, preds:OpBase).(source, preds):
 		pass
 		
 	func get_result(item):

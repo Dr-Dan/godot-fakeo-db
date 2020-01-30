@@ -45,20 +45,20 @@ func _run():
 
 ```gdscript
 # this
-var query = fdb.list.new(data).where(comparers).project(fields)
+var result = fdb.list(data).where(comparers).project(fields)
 ```
 
 ```gdscript
 # is the same as
-var qb = fdb.QueryBuilder.new().where(comparers).project(fields)
-query = qb.eval(data)
+var query = fdb.QueryBuilder.new().where(comparers).project(fields)
+var result = query.eval(data)
 ```
 
 ```gdscript
 # which is the same as
-var list = fdb.list.new(data)
+var list = fdb.list(data)
 var where = fdb.Enumerables.Where.new(list, comparers)
-var project = fdb.Enumerables.Project.new(where, fields)
+var result = fdb.Enumerables.Project.new(where, fields)
 ```
 
 ### Also...
@@ -97,17 +97,18 @@ All inherit from base Enumerable class
 #### About Where
 
 When using where, any or first; the supplied predicate must match the data.
-funcref and object variations work with all data formats. The dictionary of operators approach only applies to lists of objects or dictionaries.
+funcref and object variations accept all data formats. 
 
 ```gdscript
 
 var numbers = fdb.list([1,2,3,4,5])
 var employees = fdb.list([{name="Al", age=44, salary=20000}, Item.new("Jackie", 23, 40000)])\
 
+# ---------------------------------------------
 # VALID
 
 # fine, single operator expects single argument
-numbers.where(ops.and_([ops.gt(1), ops.lt(4)]))
+numbers.where(ops.and_([ops.gt(1), ops.lt(4)])) # = 1 < n < 4
 
 # valid if funcref takes one argument
 func _is_between_1_4(item):
@@ -117,9 +118,12 @@ numbers.where(funcref(self, "_is_between_1_4"))
 # valid if 'IsBetween' class has eval(item) function or extends OperatorBase
 numbers.where(IsBetween.new(1,4))
 
-employees.where({age=ops.gt(30))
+employees.where({age=ops.gt(30)})
 
+# if no operator is provided, the value will be wrapped with Operators.Eq (=)
+employees.where({name="Al", age=ops.gt(30)})
 
+# ---------------------------------------------
 # NOT VALID
 
 # will look for 'value' field in an int
@@ -135,24 +139,25 @@ employees.where(ops.gt(30))
 Operators take a single value (in 'eval(item)') and return a boolean
 
 * HasField
+  * {name="xxx"} has field "name"
+  * works with objects also
 
 * And
 * Or
 
 * Not
 
-* Any
-* None
+* LT (<),  LTE (<=)
+* GT (>), GTE (>=)
+* Eq (=)
 
-* LT
-* GT
-* Eq
+* In 
+  * {name=ops.in_(names_list)}
+* Contains (target must be iterator)
+  * {names=ops.contains(name_to_find)}
 
-* In
-* Contains
-
-* CmpFunction
-* CmpFunctionWithArgs
+* FuncOp
+* FuncOpArgs
 
 
 ## Installation

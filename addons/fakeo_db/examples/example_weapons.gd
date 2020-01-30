@@ -64,7 +64,8 @@ var query2 = fdb.QueryBuilder.new()\
 func _damage_or_sword(item):
 	return item.dmg > 20 or item.name=="Wooden Sword"
 	
-var query3 = fdb.QueryBuilder.new()\
+# qb() is short for QueryBuilder
+var query3 = fdb.qb()\
 	.where(funcref(self, "_damage_or_sword"))\
 	.project(["name", "subtype", "dmg",])
 # ==============================================================
@@ -74,7 +75,6 @@ func _run():
 	print_break_mini()
 	for i in take:
 		print(i)
-		
 	print_break_mini()
 	for i in select:
 		print(i)		

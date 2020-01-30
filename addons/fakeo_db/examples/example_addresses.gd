@@ -34,7 +34,8 @@ class Address:
 # ==============================================================
 			
 func _run():
-	var name_table = fdb.list([
+	# collections are like Enumerators.List with some append and erase functions
+	var name_table = fdb.cltn([
 	{name="mike", age=22, addr_id=0},
 	{name="mindy", age=16, addr_id=1},
 	{name="trish", age=49, addr_id=2},
@@ -44,13 +45,15 @@ func _run():
 	Human.new("ariel", 65, 3),
 	])
 
-	var addr_table = fdb.list([
+	var addr_table = fdb.cltn([
 	{addr_id=0, street="vale road", value=20000},
 	{addr_id=1, street="the lane", value=10000},
-	{addr_id=2, street="london road", value=35250},
+	{addr_id=2, street="london road", value=35250},	
 	Address.new(3, "diamond mews", 100000)
 	])
-	
+
+	print_break()
+	collection_append_remove(name_table)
 	
 	print_break()
 	print_lists(name_table, addr_table)
@@ -67,14 +70,46 @@ func _run():
 	print_break()
 	take_test(name_table)
 
-	
 # ==============================================================
-func print_break():
-	print("\n###############################")
 
-func print_break_mini():
-	print("\n--------------")
 
+func collection_append_remove(name_table):
+	var removed = fdb.cltn()
+	var added = fdb.cltn()
+	
+	var connections = [
+		# call function or append to another collection when modified
+		["on_item_added", self, "_on_item_added"],
+		["on_item_erased", self, "_on_item_erased"],
+
+		["on_item_added", added, "append"],
+		["on_item_erased", removed, "append"]]
+		
+	for c in connections:
+		name_table.connect(c[0], c[1], c[2])
+		
+	name_table.append({name="aslan", age=199, addr_id=1})
+	var item = {name="fakeo", age=1, addr_id=1}
+	name_table.append(item)
+	name_table.erase(item)
+	
+	print_break_mini()
+	
+	print("Items Removed:")
+	print(removed.to_array())
+	print("Items Added:")
+	print(added.to_array())
+	
+	for c in connections:
+		name_table.disconnect(c[0], c[1], c[2])
+		
+func _on_item_added(item):
+	print("added " + str(item))
+	
+func _on_item_erased(item):
+	print("removed " + str(item))
+
+# ==============================================================
 
 func print_lists(name_table, addr_table):
 	var query_names = name_table\
@@ -107,7 +142,7 @@ var where_not_age = fdb.QueryBuilder.new()\
 
 func age_comp_builder_test(name_table):
 	""" 
-	 even at this point no actual iteration has taken place
+	no actual iteration has taken place yet
 		 eval() sets the root array of the query and could also be
 		 called outside the function.
 	"""
@@ -115,7 +150,7 @@ func age_comp_builder_test(name_table):
 	var result_not = where_not_age.eval(name_table)
 
 	# to_array() has the added benefit of returning dictionaries which print nicely
-	# however changes to the result won't affect the original
+	# changes to the result (of result.to_array()) will not affect the original container
 	print("age > 20 and age < 70")
 	print(result.to_array())
 	print_break_mini()
@@ -133,7 +168,7 @@ func house_search_test(name_table, addr_table):
 		.project(["addr_id", "street", "value"])
 
 	var addr_ids = valued_houses\
-		.select(funcref(self, "get_addr"))
+		.select(self, "get_addr")
 
 	var homeowners = name_table\
 		.where({addr_id=ops.in_(addr_ids)})\
@@ -151,8 +186,9 @@ func i_is_in_name(name:String):
 	return "i" in name
 
 func count_names_test(name_table):
-	var cmp_has_i = ops.cmp_func(funcref(self, "i_is_in_name"))
-	var cmp_is_dan = {name=ops.eq("dan")}
+	var cmp_has_i = ops.func_op(self, "i_is_in_name")
+	# it is fine to simply state the value if equality is desired
+	var cmp_is_dan = {name="dan"}
 	
 	var result_name = name_table\
 	.where({name=cmp_has_i})\
@@ -171,7 +207,7 @@ func name_starts_with_letter(name:String, letter:String):
 	return not name.empty() and name[0].to_lower() == letter
 
 func take_test(name_table, amt_take=2):
-	var cmp = ops.cmp_func_args(funcref(self, "name_starts_with_letter"), "a")
+	var cmp = ops.func_op_args(self, "name_starts_with_letter", ["a"])
 
 	var result = name_table\
 	.where({name=cmp})\
@@ -180,3 +216,12 @@ func take_test(name_table, amt_take=2):
 
 	print("take %d entries where name starts with 'a':" % amt_take)
 	print(result.to_array())
+	
+# ==============================================================
+func print_break():
+	print("\n###############################")
+
+func print_break_mini():
+	print("\n--------------")
+
+# ==============================================================

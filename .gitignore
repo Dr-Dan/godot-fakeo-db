@@ -8,3 +8,4 @@ default_env.tres
 
 # Project specific
 addons/fakeo_db/examples/Shopkeeper
+project.godot
