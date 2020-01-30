@@ -91,6 +91,9 @@ class Enumerable:
 	func select(obj:Object, func_name:String, arg=null):
 		return Select.new(self, funcref(obj, func_name), arg)
 		
+	func skip(count):
+		return Skip.new(self, count)
+		
 				
 # Pretty much does the same as the native array but is compatible with other enumerators
 class List:
@@ -263,6 +266,43 @@ class Take:
 		current = source.current
 		return true
 								
+	func reset():
+		.reset()
+		i = -1
+
+# Take first N items from source
+class Skip:
+	extends Enumerable
+	
+	var count: int
+	var i: int
+	
+	func _init(source, count:int).(source):
+		self.source = source
+		self.count = count
+		self.i=-1
+		
+	func _iter_next(arg):
+		if state == RUNNING:
+			while source._iter_next(arg):
+				i += 1
+				if i >= count - 1:
+					current = source.current
+					return true
+			reset()
+		return false
+		
+	func _iter_init(arg):
+		._iter_init(arg)
+		if not source._iter_init(arg): return false
+		
+		var item = source.current
+		if count == 0:
+			current = item
+			return true
+
+		return _iter_next(arg)	
+			
 	func reset():
 		.reset()
 		i = -1

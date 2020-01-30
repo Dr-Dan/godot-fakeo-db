@@ -30,10 +30,10 @@ static func in_(item):
 	return Operators.In.new(item)
 
 static func func_op(obj:Object, func_name:String):
-	return Operators.FuncOp.new(funcref(obj, func_name))
+	return Operators.FuncOp.new(obj, func_name)
 
-static func func_op_args(obj:Object, func_name:String, args):
-	return Operators.FuncOpArgs.new(funcref(obj, func_name), args)
+static func func_op_args(obj:Object, func_name:String, args:Array):
+	return Operators.FuncOpArgs.new(obj, func_name, args)
 
 static func op(item:String, arg):
 	match item:

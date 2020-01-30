@@ -88,6 +88,7 @@ All inherit from base Enumerable class
   * Works with lists of primitives and objects
 * Project - project chosen fields into dictionary
 * Take - take first N results
+* Skip - skip N items before returning a result
 * Select - apply a function to each item and return the result
 
 * count(), at(index), first(pred), any(pred) can be called from children of Enumerable class.

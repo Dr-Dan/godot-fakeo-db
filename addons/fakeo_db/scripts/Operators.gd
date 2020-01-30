@@ -178,7 +178,7 @@ class Contains:
 # FUNCREF
 """
 	Validate an item using a funcref.
-		said function is expected to return bool
+		said function is expected to have an argument for the target item and return bool
 
 	usage:
 		func validate(item):
@@ -190,22 +190,23 @@ class Contains:
 class FuncOp:
 	extends OperatorBase
 	var func_ref
-	func _init(func_ref: FuncRef):
-		self.func_ref = func_ref
+	func _init(obj:Object, func_name:String):
+		self.func_ref = funcref(obj, func_name)
 		
 	func eval(item):
 		return func_ref.call_func(item)
 		
 """
 	Validate an item using a funcref
-		said function is expected to recieve 'arg' and return bool
+		said function is expected to have an argument for the target item and return bool
+		takes up to 3 arguments as an array and the target function 
 
 	usage:
-		func validate(item, arg):
+		func validate(item, arg0, arg1):
 			...
 			return true
 
-		FuncOpArgs.new(funcref(self, "validate"), arg)
+		FuncOpArgs.new(self, "validate", [arg0, arg1])
 """		
 class FuncOpArgs:
 	extends OperatorBase
@@ -213,14 +214,16 @@ class FuncOpArgs:
 	
 	var func_ref
 	var args
+	var n_args:int
 	
-	func _init(func_ref: FuncRef, args:Array):
-		self.func_ref = func_ref
-		assert(args.size() <= MAX_ARGS)
+	func _init(obj:Object, func_name:String, args:Array):
+		n_args = args.size()
+		assert(n_args <= MAX_ARGS)		
+		self.func_ref = funcref(obj, func_name)
 		self.args = args
 		
 	func eval(item):
-		match args.size():
+		match n_args:
 			0:
 				return func_ref.call_func(item)
 			1:
