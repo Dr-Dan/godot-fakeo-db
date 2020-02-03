@@ -176,6 +176,25 @@ class Contains:
 
 # ------------------------------------------------------------ 
 # FUNCREF
+
+class FuncOpUtil:
+	extends Resource
+	
+	static func get_func_op(func_ref:FuncRef, args:Array=[]):
+		var func_op
+		var n_args = args.size()
+		assert(n_args <= FuncOpArgsBase.MAX_ARGS)	
+		match n_args:
+			0:
+				return FuncOp.new(func_ref)
+			1:
+				return FuncOpArgs1.new(func_ref, args)
+			2:
+				return FuncOpArgs2.new(func_ref, args)
+			3:
+				return FuncOpArgs3.new(func_ref, args)
+		return null
+	
 """
 Call a function on an object
 	usage:
@@ -187,13 +206,15 @@ Call a function on an object
 """
 class FuncOp:
 	extends OperatorBase
-	var func_ref
-	func _init(obj:Object, func_name:String):
-		self.func_ref = funcref(obj, func_name)
-		
+	
+	var func_ref:FuncRef
+
+	func _init(func_ref:FuncRef):
+		self.func_ref = func_ref
+
 	func eval(item):
 		return func_ref.call_func(item)
-		
+			
 class FuncOpArgsBase:
 	extends OperatorBase
 	const MAX_ARGS = 3
@@ -214,34 +235,31 @@ class FuncOpArgsBase:
 		assert(n_args <= MAX_ARGS)	
 		
 	func eval(item):
-		match n_args:
-			0:
-				return func_ref.call_func(item)
-			1:
-				return func_ref.call_func(item, args[0])
-			2:
-				return func_ref.call_func(item, args[0], args[1])
-			3:
-				return func_ref.call_func(item, args[0], args[1], args[2])
-
-"""
-	Call a function on an object
-		size of args array is expected to match additional arguments in referenced function.
-	usage:
-		func validate(item, arg0, arg1):
-			...
-			return true
-
-		FuncOpArgs.new(self, "validate", [arg0, arg1])
-"""		
-class FuncOpArgs:
-	extends FuncOpArgsBase
-	
-	func _init(obj:Object, func_name:String, args:Array=[]).(funcref(obj, func_name), args):		
 		pass
 
-class FuncOpObjArgs:
+class FuncOpArgs1:
 	extends FuncOpArgsBase
-		
-	func _init(func_ref:FuncRef, args:Array=[]).(func_ref, args):
+
+	func _init(func_ref:FuncRef, args:Array=[]).(func_ref, args):		
 		pass
+
+	func eval(item):
+		return func_ref.call_func(item, args[0])			
+
+class FuncOpArgs2:
+	extends FuncOpArgsBase
+
+	func _init(func_ref:FuncRef, args:Array=[]).(func_ref, args):		
+		pass
+
+	func eval(item):
+		return func_ref.call_func(item, args[0], args[1])
+
+class FuncOpArgs3:
+	extends FuncOpArgsBase
+
+	func _init(func_ref:FuncRef, args:Array=[]).(func_ref, args):		
+		pass
+
+	func eval(item):
+		return func_ref.call_func(item, args[0], args[1], args[2])	

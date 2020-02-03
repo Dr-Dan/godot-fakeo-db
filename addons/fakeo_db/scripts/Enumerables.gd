@@ -29,8 +29,7 @@ class Enumerable:
 		
 	func _iter_get(arg):
 		return current
-		
-		
+				
 	func to_array():
 		var arg = null
 		var r = []
@@ -57,17 +56,63 @@ class Enumerable:
 	# get first in enumerable that satisfies conditions
 	func first(cmps):
 		return where(cmps).at(0)
+
+	func last(cmps):
+		var result = where(cmps).to_array()
+		if result.empty():
+			 return null
+		return result[result.size()-1]
 		
 	# returns true if any match conditions
-	func any(cmps):
+	func exists(cmps):
 		var d = first(cmps)
 		return d != null
 
 	func count():
-		return to_array().size()
-			
+		return to_array().size()	
+				
+	# apply function to each item
+	func for_each(obj:Object, func_name:String, args:Array=[]):
+		return for_each_ref(funcref(obj, func_name), args)
+		
+	func for_each_ref(fn:FuncRef, args:Array=[]):
+		select_ref(fn, args).to_array()		
 	# ===============================================================================
-	# Deferred evaluation
+
+	# Deferred evaluation	
+	func where(cmps):
+		var cls = WhereUtil.get_where_type(cmps)
+		assert(cls != null) # no Where type for input
+		return cls.new(self, cmps)
+		
+	func where_ref(fn:FuncRef, args:Array=[]):
+		return WhereFunc.new(self, fn, args)		
+			
+	func project(fields: Array):
+		return Project.new(self, fields)
+		
+	func take(amt):
+		return Take.new(self, amt)
+		
+	func select(obj:Object, func_name:String, args:Array=[]):
+		return select_ref(funcref(obj, func_name), args)
+	
+	func select_ref(fn:FuncRef, args:Array=[]):
+		return Select.new(self, fn, args)
+		
+	func as_args(obj:Object, func_name:String):
+		return as_args_ref(funcref(obj, func_name))
+
+	func as_args_ref(fn:FuncRef):
+		return AsArgs.new(self, fn)
+		
+	func skip(count):
+		return Skip.new(self, count)
+		
+		
+		
+class WhereUtil:
+	extends Resource
 	
 	static func get_where_type(cmps):
 		if cmps is FuncRef:
@@ -78,26 +123,7 @@ class Enumerable:
 		assert(cmps is Dictionary)
 		return WhereDict
 
-	func where(cmps):
-		var cls = get_where_type(cmps)
-		return cls.new(self, cmps)
-			
-	func project(fields: Array):
-		return Project.new(self, fields)
-		
-	func take(amt):
-		return Take.new(self, amt)
-		
-	func select(obj:Object, func_name:String, args:Array=[]):
-		return Select.new(self, funcref(obj, func_name), args)
-	
-	func as_args(obj:Object, func_name:String):
-		return AsArgs.new(self, funcref(obj, func_name))
 
-	func skip(count):
-		return Skip.new(self, count)
-		
-				
 # Pretty much does the same as the native array but is compatible with other enumerators
 class List:
 	extends Enumerable
@@ -135,16 +161,49 @@ class List:
 		.reset()
 		index = -1
 
+class Collection:
+	extends List
+	signal on_item_added(item)
+	signal on_item_erased(item)
+	signal on_cleared
+	
+	func _init(source:Array=[]).(source):
+		pass
+		
+	func append(item):
+		source.append(item)
+		emit_signal("on_item_added", item)
+				
+	func erase(item):
+		if item in source:
+			source.erase(item)
+			emit_signal("on_item_erased", item)
+			
+	func erase_at(index):
+		assert(index>=0)
+		if index < source.size():
+			var item = source[index]
+			erase(item)
+			
+	func empty():
+		return source.empty()
+	
+	func clear():
+		emit_signal("on_cleared")
+		source.clear()
+		
+	func size():
+		return source.size()			
+
+					
 # Get all where preds evaluate to true
 # This is a base class and should be extended, not used directly
 class WhereBase:
 	extends Enumerable
 
-	var preds
 
-	func _init(source, preds).(source):
-		self.preds = preds
-
+	func _init(source).(source):
+		pass
 	func get_result(item):
 		printerr("Using base where class!")
 		return false
@@ -169,14 +228,17 @@ class WhereBase:
 			return true
 
 		return _iter_next(arg)
-				
+		
+
 # expects comps in the form of {field0=value, field1=ops.eq(value), field2=ops.gt(value)}
 # if no operator is provided, the value will be wrapped with Operators.Eq
-# Note: this will only work with Lists of Objects or Dictionaries
+# Note: this will only work over Lists containing Objects and/or Dictionaries
 class WhereDict:
 	extends WhereBase
+	var preds
 
-	func _init(source, preds:Dictionary).(source, preds):
+	func _init(source, preds:Dictionary).(source):
+		self.preds = preds
 		for p in preds:
 			if not preds[p] is Operators.OperatorBase:
 				preds[p] = Operators.Eq.new(preds[p])
@@ -184,29 +246,29 @@ class WhereDict:
 	func get_result(item):
 		return Operators.item_valid(item, preds)
 				
-# expects only a FuncRef. The function taking a single argument and returning a bool
+# expects only a FuncRef. Will return appropriate class for number of args (max 3)
 class WhereFunc:
 	extends WhereBase
-	
-	func _init(source, preds:FuncRef).(source, preds):
-		pass
-		
+	var pred_func
+	func _init(source, preds:FuncRef, args:Array=[]).(source):
+		self.pred_func = Operators.FuncOpUtil.get_func_op(preds, args)
+				
 	func get_result(item):
-		return preds.call_func(item)
+		return pred_func.eval(item)
 
 # expects a class with a function 'eval(item)' that returns a bool
 class WhereOp:
 	extends WhereBase
+	var pred_op
 	const OpBase = preload("res://addons/fakeo_db/scripts/Operators.gd").OperatorBase
 	
-	func _init(source, preds:OpBase).(source, preds):
-		pass
+	func _init(source, pred_op:OpBase).(source):
+		self.pred_op = pred_op
 		
 	func get_result(item):
-		return preds.eval(item)
+		return pred_op.eval(item)
 
-								
-				
+
 # Returns only the fields matching names in the 'fields' array
 # ["name", "id"] => {name="the_name", id=0}
 class Project:
@@ -317,7 +379,7 @@ class Select:
 	var select_ref
 	
 	func _init(source, select_ref, args:Array=[]).(source):
-		self.select_ref = Operators.FuncOpObjArgs.new(select_ref, args)
+		self.select_ref = Operators.FuncOpUtil.get_func_op(select_ref, args)
 
 	func get_result(item):
 		return select_ref.eval(item)
@@ -337,20 +399,21 @@ class Select:
 		current = get_result(source.current)
 		return true
 
+# Expects each 'item' to be an array of arguments (up to 3) to a function
 class AsArgs:
 	extends Enumerable
 
 	var select_ref
 
 	func _init(source, select_ref).(source):
-		self.select_ref = Operators.FuncOpObjArgs.new(select_ref)
+		self.select_ref = select_ref
 
 	func get_result(item):
 		assert(item is Array)
 		item = [] + item
 		var i = item.pop_front()
-		select_ref.args = item
-		return select_ref.eval(i)
+		var func_op = Operators.FuncOpUtil.get_func_op(select_ref, item)
+		return func_op.eval(i)
 	
 	func _iter_next(arg):
 		if state == RUNNING:
@@ -369,37 +432,4 @@ class AsArgs:
 		
 	func run():
 		to_array()
-				
-class Collection:
-	extends List
-	signal on_item_added(item)
-	signal on_item_erased(item)
-	signal on_cleared
-	
-	func _init(source:Array=[]).(source):
-		pass
 		
-	func append(item):
-		source.append(item)
-		emit_signal("on_item_added", item)
-				
-	func erase(item):
-		if item in source:
-			source.erase(item)
-			emit_signal("on_item_erased", item)
-			
-	func erase_at(index):
-		assert(index>=0)
-		if index < source.size():
-			var item = source[index]
-			erase(item)
-			
-	func empty():
-		return source.empty()
-	
-	func clear():
-		emit_signal("on_cleared")
-		source.clear()
-		
-	func size():
-		return source.size()

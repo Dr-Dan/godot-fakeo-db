@@ -48,7 +48,7 @@ func _run():
 	var addr_table = fdb.cltn([
 	{addr_id=0, street="vale road", value=20000},
 	{addr_id=1, street="the lane", value=10000},
-	{addr_id=2, street="london road", value=35250},	
+	{addr_id=2, street="london road", value=35250},
 	Address.new(3, "diamond mews", 100000)
 	])
 
@@ -72,28 +72,30 @@ func _run():
 
 # ==============================================================
 
-func _print_add(a0, a1):
-	print(a0+a1)
-	
 func collection_append_remove(name_table):
 	var removed = fdb.cltn()
 	var added = fdb.cltn()
 	
 	var connections = fdb.list([
-		# call function or append to another collection when modified
 		["on_item_added", self, "_on_item_added"],
 		["on_item_erased", self, "_on_item_erased"],
 
 		["on_item_added", added, "append"],
 		["on_item_erased", removed, "append"]])
 	
-	# you can use list elements as arguments to a function
+	# each item is passed through a function in sequence
+	# you can use an array of up to 3 elements
 	connections.as_args(name_table, "connect").run()
 		
-	name_table.append({name="aslan", age=199, addr_id=1})
-	var item = {name="fakeo", age=1, addr_id=1}
-	name_table.append(item)
-	name_table.erase(item)
+	var items = fdb.cltn([
+		{name="fakeo", age=1, addr_id=1},
+		{name="who", age=199, addr_id=1}
+		])
+
+	# for each applies a function to each item
+	# case calling append will in turn trigger the _on_item_added signal
+	items.for_each(name_table, "append")
+	items.for_each(name_table, "erase")
 	
 	print_break_mini()
 	
@@ -142,10 +144,10 @@ var where_not_age = fdb.QueryBuilder.new()\
 	.project(fields)
 
 func age_comp_builder_test(name_table):
-	""" 
+	"""
 	no actual iteration has taken place yet
-		 eval() sets the root array of the query and could also be
-		 called outside the function.
+		eval() sets the root array of the query and could also be
+		called outside the function.
 	"""
 	var result = where_age.eval(name_table)
 	var result_not = where_not_age.eval(name_table)
@@ -187,35 +189,40 @@ func i_is_in_name(name:String):
 	return "i" in name
 
 func count_names_test(name_table):
+	# func_op works like funcref. In this case the function will need to return a bool.
 	var cmp_has_i = ops.func_op(self, "i_is_in_name")
-	# it is fine to simply state the value if equality is desired
+	# stating only the value will check for equality
 	var cmp_is_dan = {name="dan"}
 	
-	var result_name = name_table\
+	var count_name = name_table\
 	.where({name=cmp_has_i})\
 	.count()
 
 	var result_age = name_table\
-	.where(cmp_is_dan)\
-	.at(0)
+	.first(cmp_is_dan)
 
-	print("%d/%d name entries contain 'i'" % [result_name, name_table.count()])
+	print("%d/%d name entries contain 'i'" % [count_name, name_table.count()])
 	print("dan's age is %d" % result_age.age)
 
 # ==============================================================
 
-func name_starts_with_letter(name:String, letter:String):
-	return not name.empty() and name[0].to_lower() == letter
+func name_starts_with_letters(name:String, letter0:String, letter1:String):
+	return not name.empty() and (name[0].to_lower() == letter0 or name[0].to_lower() == letter1)
 
-func take_test(name_table, amt_take=2):
-	var cmp = ops.func_op_args(self, "name_starts_with_letter", ["a"])
+func name_starts_with_letters2(item, letter0:String, letter1:String):
+	var name = item.name
+	return not name.empty() and (name[0].to_lower() == letter0 or name[0].to_lower() == letter1)
+
+func take_test(name_table, amt_take=4):
+	# this takes up to 3 arguments as an array
+	var cmp = ops.func_op_args(self, "name_starts_with_letters", ["a", "m"])
 
 	var result = name_table\
 	.where({name=cmp})\
 	.take(amt_take)\
 	.project(["name"])
 
-	print("take %d entries where name starts with 'a':" % amt_take)
+	print("take %d entries where name starts with 'a' or 'm': " % amt_take)
 	print(result.to_array())
 	
 # ==============================================================

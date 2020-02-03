@@ -35,11 +35,13 @@ var data = [
 	{name="Ancient Bow", type="ranged", subtype="bow", dmg=10, atk_range=30.0, firing_rate=1.0},
 ]
 
-# ==============================================================
+# ==============================================================;
 # Three ways
 
 # nested
 var list = fdb.list(data)
+# There are 3 types of Where Enumerable. 
+# You may want to check the Enumerables file if you plan on using this method.
 var where = fdb.Enumerables.WhereDict.new(list, {dmg=ops.gteq(10)})
 var project = fdb.Enumerables.Project.new(where, ["name", "dmg"])
 var take = fdb.Enumerables.Take.new(project, 3)
@@ -49,9 +51,12 @@ func get_name_and_dmg_mult(item, mult):
 
 var select = fdb.Enumerables.Select.new(where, funcref(self, "get_name_and_dmg_mult"), [20])
 
+# -------------------------------------------------
+# the where function in the chaining method determines the type of Where function required
+# from the argument type: Dictionary->WhereDict, FuncRef->WhereFunc, OperatorBase->WhereOp
 # enumerable + chaining
 var query = fdb.list(data)\
-	.where({subtype=ops.eq("bow"), dmg=ops.gteq(7)})\
+	.where({subtype="bow", dmg=ops.gteq(7)})\
 	.project(["name", "dmg", "atk_range"])
 
 # query builder + chaining (eval() later...)
@@ -60,42 +65,41 @@ var query2 = fdb.QueryBuilder.new()\
 	.project(["name", "subtype", "dmg", "atk_range"])
 		
 # using a funcref
-# this can also be used in the first and any functions of Enumerator class
+# this can also be used in the 'first' and 'exists' functions of Enumerator class
 func _damage_or_sword(item):
 	return item.dmg > 20 or item.name=="Wooden Sword"
 	
-# qb() is short for QueryBuilder
+# can use qb() in place of QueryBuilder.new()
 var query3 = fdb.qb()\
 	.where(funcref(self, "_damage_or_sword"))\
 	.project(["name", "subtype", "dmg",])
 # ==============================================================
 
+
 func _run():
+	var queries = [
+		take,
+		select,
+		query,
+		# must call eval on query builder
+		query2.eval(data),
+		query3.eval(data),
+	]
 	
-	print_break()
-	print_break_mini()
-	for i in take:
-		print(i)
-	print_break_mini()
-	for i in select:
-		print(i)		
+	for q in queries:
+		print_break_mini()
+		q.for_each(self, "_print")
+#		print(q.to_array()) 
 
 	print_break_mini()
 	print(take.at(1).name)
 
-	print_break_mini()
-	for i in query:
-		print(i)
-	
-	print_break_mini()
-	for i in query2.eval(data):
-		print(i)
-		
-	print_break_mini()
-	for i in query3.eval(data):
-		print(i)
 		
 # ==============================================================
+
+func _print(msg):
+	print(msg)
+	
 func print_break():
 	print("\n###############################")
 
