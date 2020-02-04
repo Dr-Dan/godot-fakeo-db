@@ -22,4 +22,4 @@ Tested in Godot 3.1.
 
 ## License
 
-Provided under the [MIT license](../LICENSE)
+Provided under the [MIT license](../master/LICENSE)
