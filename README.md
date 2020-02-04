@@ -12,7 +12,7 @@ Tested in Godot 3.1.
 * Deferred query execution
 
 ## About
-### [Wiki](wiki)
+### [Wiki](../../wiki)
 
 ## Installation
 
