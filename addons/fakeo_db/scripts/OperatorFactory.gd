@@ -29,11 +29,11 @@ static func not_(item):
 static func in_(item):
 	return Operators.In.new(item)
 
-static func func_op(obj:Object, func_name:String):
-	return Operators.FuncOp.new(funcref(obj, func_name))
-
-static func func_op_args(obj:Object, func_name:String, args:Array):
-	return Operators.FuncOpUtil.get_func_op(funcref(obj, func_name), args)
+static func func_(obj:Object, func_name:String, args=[]):
+	var fn = funcref(obj, func_name)
+	if args.empty():
+		return Operators.FuncOp.new(fn)
+	return Operators.FuncOpArgs.new(fn, args)
 
 static func op(item:String, arg):
 	match item:

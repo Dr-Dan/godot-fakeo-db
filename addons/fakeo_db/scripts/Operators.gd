@@ -181,19 +181,9 @@ class FuncOpUtil:
 	extends Resource
 	
 	static func get_func_op(func_ref:FuncRef, args:Array=[]):
-		var func_op
-		var n_args = args.size()
-		assert(n_args <= FuncOpArgsBase.MAX_ARGS)	
-		match n_args:
-			0:
-				return FuncOp.new(func_ref)
-			1:
-				return FuncOpArgs1.new(func_ref, args)
-			2:
-				return FuncOpArgs2.new(func_ref, args)
-			3:
-				return FuncOpArgs3.new(func_ref, args)
-		return null
+		if args.empty():
+			return FuncOp.new(func_ref)		
+		return FuncOpArgs.new(func_ref, args)
 	
 """
 Call a function on an object
@@ -214,52 +204,16 @@ class FuncOp:
 
 	func eval(item):
 		return func_ref.call_func(item)
-			
-class FuncOpArgsBase:
+		
+class FuncOpArgs:
 	extends OperatorBase
-	const MAX_ARGS = 3
 	
-	var args:Array setget _set_args
-	var n_args:int
+	var args:Array
 	var func_ref:FuncRef
-	
+
 	func _init(func_ref:FuncRef, args:Array):
-		n_args = args.size()
-		assert(n_args <= MAX_ARGS)		
-		self.func_ref=func_ref
+		self.func_ref = func_ref
 		self.args = args
-		
-	func _set_args(args_):
-		args = args_
-		n_args = args.size()
-		assert(n_args <= MAX_ARGS)	
-		
-	func eval(item):
-		pass
-
-class FuncOpArgs1:
-	extends FuncOpArgsBase
-
-	func _init(func_ref:FuncRef, args:Array=[]).(func_ref, args):		
-		pass
 
 	func eval(item):
-		return func_ref.call_func(item, args[0])			
-
-class FuncOpArgs2:
-	extends FuncOpArgsBase
-
-	func _init(func_ref:FuncRef, args:Array=[]).(func_ref, args):		
-		pass
-
-	func eval(item):
-		return func_ref.call_func(item, args[0], args[1])
-
-class FuncOpArgs3:
-	extends FuncOpArgsBase
-
-	func _init(func_ref:FuncRef, args:Array=[]).(func_ref, args):		
-		pass
-
-	func eval(item):
-		return func_ref.call_func(item, args[0], args[1], args[2])	
+		return func_ref.call_funcv([item] + args)

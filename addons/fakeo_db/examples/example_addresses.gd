@@ -190,7 +190,7 @@ func i_is_in_name(name:String):
 
 func count_names_test(name_table):
 	# func_op works like funcref. In this case the function will need to return a bool.
-	var cmp_has_i = ops.func_op(self, "i_is_in_name")
+	var cmp_has_i = ops.func_(self, "i_is_in_name")
 	# stating only the value will check for equality
 	var cmp_is_dan = {name="dan"}
 	
@@ -209,18 +209,20 @@ func count_names_test(name_table):
 func name_starts_with_letters(name:String, letter0:String, letter1:String):
 	return not name.empty() and (name[0].to_lower() == letter0 or name[0].to_lower() == letter1)
 
-func name_starts_with_letters2(item, letter0:String, letter1:String):
-	var name = item.name
-	return not name.empty() and (name[0].to_lower() == letter0 or name[0].to_lower() == letter1)
+#func name_starts_with_letters2(item, letter0:String, letter1:String):
+#	var name = item.name
+#	return name_starts_with_letters(name, letter0, letter1)
 
 func take_test(name_table, amt_take=4):
-	# this takes up to 3 arguments as an array
-	var cmp = ops.func_op_args(self, "name_starts_with_letters", ["a", "m"])
-
 	var result = name_table\
-	.where({name=cmp})\
+	.where({name=ops.func_(self, "name_starts_with_letters", ["a", "m"])})\
 	.take(amt_take)\
 	.project(["name"])
+	
+#	var result = name_table\
+#	.where(ops.func_op(self, "name_starts_with_letters2", ["a", "m"]))\
+#	.take(amt_take)\
+#	.project(["name"])
 
 	print("take %d entries where name starts with 'a' or 'm': " % amt_take)
 	print(result.to_array())
