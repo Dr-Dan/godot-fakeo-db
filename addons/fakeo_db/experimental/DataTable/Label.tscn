@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="StyleBoxFlat" id=1]
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0, 0, 0, 1 )
+
+[node name="Label" type="Label"]
+margin_left = 390.45
+margin_top = 79.4188
+margin_right = 430.45
+margin_bottom = 95.4188
+custom_styles/normal = SubResource( 1 )
+text = "tjyftf"
