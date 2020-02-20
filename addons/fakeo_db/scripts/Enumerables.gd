@@ -251,7 +251,7 @@ class WhereFunc:
 	extends WhereBase
 	var pred_func
 	func _init(source, preds:FuncRef, args:Array=[]).(source):
-		self.pred_func = Operators.FuncOpUtil.get_func_op(preds, args)
+		self.pred_func = Operators.FuncOpArgs.new(preds, args)
 				
 	func get_result(item):
 		return pred_func.eval(item)
@@ -259,8 +259,9 @@ class WhereFunc:
 # expects a class with a function 'eval(item)' that returns a bool
 class WhereOp:
 	extends WhereBase
-	var pred_op
 	const OpBase = preload("res://addons/fakeo_db/scripts/Operators.gd").OperatorBase
+
+	var pred_op
 	
 	func _init(source, pred_op:OpBase).(source):
 		self.pred_op = pred_op
@@ -379,7 +380,7 @@ class Select:
 	var select_ref
 	
 	func _init(source, select_ref, args:Array=[]).(source):
-		self.select_ref = Operators.FuncOpUtil.get_func_op(select_ref, args)
+		self.select_ref = Operators.FuncOpArgs.new(select_ref, args)
 
 	func get_result(item):
 		return select_ref.eval(item)
@@ -412,7 +413,7 @@ class AsArgs:
 		assert(item is Array)
 		item = [] + item
 		var i = item.pop_front()
-		var func_op = Operators.FuncOpUtil.get_func_op(select_ref, item)
+		var func_op = Operators.FuncOpArgs.new(select_ref, item)
 		return func_op.eval(i)
 	
 	func _iter_next(arg):

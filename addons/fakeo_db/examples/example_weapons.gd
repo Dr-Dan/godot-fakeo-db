@@ -24,7 +24,7 @@ class Weapon:
 		self.atk_range = atk_range
 	
 	
-var data = [
+var data = fdb.list([
 	Weapon.new("Wooden Sword", "melee", "sword", 2, 1.2),
 	Weapon.new("Katana", "melee", "sword", 16, 1.6),
 	Weapon.new("Nice Spear", "melee", "spear", 13, 2.0),
@@ -33,16 +33,13 @@ var data = [
 	{name="Wooden Bow", type="ranged", subtype="bow", dmg=4, atk_range=20.0, firing_rate=1.4},
 	{name="Glass Bow", type="ranged", subtype="bow", dmg=7, atk_range=20.0, firing_rate=1.7},
 	{name="Ancient Bow", type="ranged", subtype="bow", dmg=10, atk_range=30.0, firing_rate=1.0},
-]
+])
 
 # ==============================================================;
-# Three ways
 
-# nested
-var list = fdb.list(data)
 # There are 3 types of Where Enumerable. 
-# You may want to check the Enumerables file if you plan on using this method.
-var where = fdb.Enumerables.WhereDict.new(list, {dmg=ops.gteq(10)})
+# You may want to check out the Enumerables file if you plan on using this method.
+var where = fdb.Enumerables.WhereDict.new(data, {dmg=ops.gteq(10)})
 var project = fdb.Enumerables.Project.new(where, ["name", "dmg"])
 var take = fdb.Enumerables.Take.new(project, 3)
 
@@ -54,12 +51,11 @@ var select = fdb.Enumerables.Select.new(where, funcref(self, "get_name_and_dmg_m
 # -------------------------------------------------
 # the where function in the chaining method determines the type of Where function required
 # from the argument type: Dictionary->WhereDict, FuncRef->WhereFunc, OperatorBase->WhereOp
-# enumerable + chaining
-var query = fdb.list(data)\
+var query = data\
 	.where({subtype="bow", dmg=ops.gteq(7)})\
 	.project(["name", "dmg", "atk_range"])
 
-# query builder + chaining (eval() later...)
+# query builder + chaining (eval(data) later...)
 var query2 = fdb.QueryBuilder.new()\
 	.where({subtype=ops.in_(["sword", "spear", "thrown"])})\
 	.project(["name", "subtype", "dmg", "atk_range"])
@@ -73,6 +69,11 @@ func _damage_or_sword(item):
 var query3 = fdb.qb()\
 	.where(funcref(self, "_damage_or_sword"))\
 	.project(["name", "subtype", "dmg",])
+	
+# same result
+#var query3 = fdb.qb()\
+#	.where(ops.func_(self, "_damage_or_sword"))\
+#	.project(["name", "subtype", "dmg",])	
 # ==============================================================
 
 
