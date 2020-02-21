@@ -10,7 +10,6 @@ onready var root = get_node(gui_root)
 var input_row_last = -1
 var input_col_last = -1
 
-var edited = false
 var selected = false
 
 var ignore_rows = 0
@@ -26,20 +25,16 @@ func _ready() -> void:
 
 # must inflate/show separate to label edit as label needs time to update size
 func _process(delta: float) -> void:
-	if edited:
-		detect()
-		inflate()		
-		edited = false
-		
 	if selected:
 		var cell = get_hovered_cell()
-		edit_field.rect_global_position = cell.rect_global_position
-		edit_field.rect_size = cell.rect_size
-		edit_field.text = cell.text
-		selected = false
+		if cell != null:
+			edit_field.rect_global_position = cell.rect_global_position
+			edit_field.rect_size = cell.rect_size
+			edit_field.text = cell.value
+			selected = false
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == 1 and not event.pressed:
+	if event is InputEventMouseButton and event.button_index == 1 and event.pressed:
 		if not -1 in [input_row, input_col] and input_row > ignore_rows-1:	
 			input_col_last = input_col
 			input_row_last = input_row	
@@ -50,27 +45,21 @@ func _gui_input(event: InputEvent) -> void:
 			clear_edited()
 				
 func _input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		if not get_parent().get_rect().has_point(event.position):
+	if event is InputEventMouseButton and event.button_index in [1, 2]:
+		if not get_parent().get_global_rect().has_point(event.position):
 			clear_edited()
 
 	if event is InputEventKey and event.pressed:
 		if event.scancode == KEY_ESCAPE:
 			clear_edited()
-
+	
 func clear_edited():
 	edit_field.deselect()
 	edit_field.release_focus()
 	edit_field.hide()
 
 func _text_entered(text):
-	if not validate_cell(text, input_col_last, input_row_last): return
 	var cell = get_cell(input_col_last, input_row_last)
 	if cell != null:
-		cell.text = text
-		edited = true
 		emit_signal("on_cell_edited", input_row_last, input_col_last, text)
 	clear_edited()
-
-func validate_cell(text, row, col):
-	return true

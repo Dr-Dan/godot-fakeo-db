@@ -1,16 +1,25 @@
-extends Container
+extends VBoxContainer
 
 const TableRow = preload("TableRow.gd")
-const Lbl = preload("res://addons/fakeo_db/experimental/DataTable/Label.tscn")
+const Lbl = preload("res://addons/fakeo_db/experimental/DataTable/Table/Cells/LabelNew.tscn")
 
 export var h_sep = 4 setget set_h_separation
 export var v_sep = 4 setget set_v_separation
 
 var n_rows = 0
 var n_cols = 0
-var widths = []
-var cell_height = 20
 
+var widths = []
+var min_cell_height = 20
+var min_cell_width = 80
+var edited = false
+
+func _process(delta):
+	if edited:
+		detect()
+		inflate()		
+		edited = false
+		
 func set_v_separation(sep):
 	set("custom_constants/separation", sep)
 	v_sep = sep
@@ -43,13 +52,24 @@ func clear():
 		get_child(i).free()
 	
 func set_dimensions(cols=0, rows=0):
-	n_rows = n_rows
+	var dr = rows-n_rows
+	if dr > 0:
+		for i in dr:
+			add_row()
+	var dc = cols-n_cols
+	if dc > 0:
+		for i in dc:
+			widths.append(min_cell_width)
+	n_rows = rows
 	n_cols = cols
+	detect()
+	inflate()
 
 # TODO: set_cell_expand? or expand argument
 func set_cell(x:int, y:int, value):
 	if index_exists(x,y):
-		get_child(y).get_child(x).text = str(value)
+		get_child(y).get_child(x).value = str(value)
+		edited = true
 		return true
 	return false
 
@@ -88,15 +108,21 @@ func add_row_data(data, auto_fill=true) -> TableRow:
 		for d in range(diff):
 			var l = create_label()
 			row.add_cell(l)
+			
 	row.h_sep = h_sep
 	detect_row(row)
 	return row
+	
+func detect():
+	for r in n_rows:
+		detect_row(get_row(r))
 
 func detect_row(row):
 	var N = row.get_child_count()
 	var d = N - widths.size()
-	for i in d:
-		widths.append(0)
+	if d > 0:
+		for i in d:
+			widths.append(min_cell_width)
 	for x in N:
 		var itm = row.get_children()[x]
 		if itm.rect_size.x > widths[x]:
@@ -104,30 +130,27 @@ func detect_row(row):
 	return N
 	
 func inflate():
-	for y in range(n_rows):
-		var row = get_child(y)
-		for x in range(n_cols):
-			if x < row.get_child_count():
-				var cell = row.get_child(x)
-			else:
-				var l = create_label()
-				row.add_cell(l)
-				
 	for y in n_rows:
-		var row = get_child(y)
+		var row = get_row(y)
 		inflate_row(row)
 				
 		
 func inflate_row(row):
 	for x in n_cols:
+		if x >= row.get_child_count():
+			var l = create_label()
+			row.add_cell(l)
 		var itm = row.get_children()[x]
 		itm.rect_min_size.x = widths[x]
+		itm.rect_size.x = widths[x]
 			
 func create_label(value="", align=Label.ALIGN_CENTER):
 	var l = Lbl.instance()
-	l.mouse_filter = Control.MOUSE_FILTER_PASS
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	l.size_flags_horizontal = SIZE_EXPAND_FILL
-	l.rect_min_size.y=cell_height
-	l.align = align
-	l.text = str(value)
+	l.rect_min_size=Vector2(min_cell_width, min_cell_height)
+	l.rect_size=Vector2(min_cell_width, min_cell_height)
+	l._ready()
+	l.label.align = align
+	l.value = str(value)
 	return l
