@@ -43,7 +43,7 @@ func create_label(value="", align=Label.ALIGN_CENTER):
 	var l = Lbl.instance()
 	l.mouse_filter = Control.MOUSE_FILTER_PASS
 	l.size_flags_horizontal = SIZE_EXPAND_FILL
-	l.rect_min_size.y=cell_height
+	l.rect_min_size.y=min_cell_height
 	l.align = align
 	l.text = str(value)
 	return l

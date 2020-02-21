@@ -38,6 +38,9 @@ class Enumerable:
 			while _iter_next(arg):
 				r.append(current)
 		return r
+		
+	func to_collection():
+		return Collection.new(to_array())
 	# ===============================================================================
 	# Instant evaluation
 
@@ -91,6 +94,12 @@ class Enumerable:
 	func project(fields: Array):
 		return Project.new(self, fields)
 		
+	func project_default(fields: Array, default):
+		return ProjectDefault.new(self, fields, default)	
+
+	func project_values(fields: Array, default):
+		return ProjectValues.new(self, fields, default)	
+	
 	func take(amt):
 		return Take.new(self, amt)
 		
@@ -302,6 +311,43 @@ class Project:
 		current = get_result(source.current)
 		return true
 		
+class ProjectDefault:
+	extends Project
+
+	var default
+
+	func _init(source, fields:Array, default).(source, fields):
+		self.default = default
+	
+	func get_result(item):
+		var n = {}
+		for f in fields:
+			if f in item:
+				n[f] = item[f]
+			else:
+				n[f] = default
+		return n
+		
+class ProjectValues:
+	extends Project
+
+	var default
+	var n_fields:int
+
+	func _init(source, fields:Array, default).(source, fields):
+		self.default = default
+		n_fields = fields.size()
+
+	func get_result(item):
+		var n = []
+		n.resize(n_fields)
+		for i in n_fields:
+			if fields[i] in item:
+				n[i] = item[fields[i]]
+			else:
+				n[i] = default
+		return n
+				
 # Take first N items from source
 class Take:
 	extends Enumerable
@@ -382,6 +428,7 @@ class Select:
 	func _init(source, select_ref, args:Array=[]).(source):
 		self.select_ref = Operators.FuncOpArgs.new(select_ref, args)
 
+	# NOTE: added duplicate here. not sure if necessary really
 	func get_result(item):
 		return select_ref.eval(item)
 		

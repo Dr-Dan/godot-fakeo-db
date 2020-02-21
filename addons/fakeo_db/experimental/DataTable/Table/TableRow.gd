@@ -32,3 +32,4 @@ func set_cell_extend(index, value):
 			
 func add_cell(c):
 	add_child(c)
+

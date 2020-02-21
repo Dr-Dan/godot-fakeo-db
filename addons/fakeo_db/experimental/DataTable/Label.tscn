@@ -12,3 +12,6 @@ margin_right = 430.45
 margin_bottom = 95.4188
 custom_styles/normal = SubResource( 1 )
 text = "tjyftf"
+__meta__ = {
+"_edit_use_anchors_": false
+}

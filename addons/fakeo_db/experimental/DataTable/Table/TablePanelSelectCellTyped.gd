@@ -14,6 +14,7 @@ var edited = false
 var selected = false
 
 var ignore_rows = 0
+var headings:Array
 
 func _ready() -> void:
 	edit_field = LineEdit.new()
@@ -51,7 +52,7 @@ func _gui_input(event: InputEvent) -> void:
 				
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
-		if not get_parent().get_rect().has_point(event.position):
+		if not get_parent().get_global_rect().has_point(event.position):
 			clear_edited()
 
 	if event is InputEventKey and event.pressed:
@@ -64,13 +65,28 @@ func clear_edited():
 	edit_field.hide()
 
 func _text_entered(text):
-	if not validate_cell(text, input_col_last, input_row_last): return
-	var cell = get_cell(input_col_last, input_row_last)
-	if cell != null:
-		cell.text = text
-		edited = true
-		emit_signal("on_cell_edited", input_row_last, input_col_last, text)
+	var val = validate_cell(text, input_row_last, input_col_last)
+	if val[0]:
+		var cell = get_cell(input_col_last, input_row_last)
+		if cell != null:
+			cell.text = text
+			edited = true
+			emit_signal("on_cell_edited", input_row_last, input_col_last, val[1])
 	clear_edited()
 
 func validate_cell(text, row, col):
-	return true
+	var type = headings[col].type
+	var val = text
+	var valid = false
+	match type:
+		TYPE_STRING:
+			valid = true
+		TYPE_INT:
+			if val.is_valid_integer():
+				val = val.to_int()
+				valid = true
+		TYPE_REAL:
+			if val.is_valid_float():
+				val = val.to_float()			
+				valid = true
+	return [valid, val]

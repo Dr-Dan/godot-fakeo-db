@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://addons/fakeo_db/experimental/DataTable/Table/TablePanelSelectCell.gd" type="Script" id=1]
+[ext_resource path="res://addons/fakeo_db/experimental/DataTable/Table/TablePanelSelectCellTyped.gd" type="Script" id=1]
 [ext_resource path="res://addons/fakeo_db/experimental/DataTable/TableTestRunner.gd" type="Script" id=2]
 [ext_resource path="res://addons/fakeo_db/experimental/DataTable/Label.tscn" type="PackedScene" id=3]
+[ext_resource path="res://icon.png" type="Texture" id=4]
+[ext_resource path="res://addons/fakeo_db/experimental/DataTable/GodotPerson.gd" type="Script" id=5]
+[ext_resource path="res://addons/fakeo_db/experimental/DataTable/Table/TableControllerCollection.gd" type="Script" id=6]
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
@@ -26,12 +29,18 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Table" type="VBoxContainer" parent="MarginContainer/Panel"]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/Panel"]
 margin_left = 7.0
 margin_top = 7.0
 margin_right = 398.0
 margin_bottom = 292.0
-mouse_filter = 0
+mouse_filter = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/Panel/ScrollContainer"]
+script = ExtResource( 6 )
+table_path = NodePath("Table")
+
+[node name="Table" type="VBoxContainer" parent="MarginContainer/Panel/ScrollContainer/MarginContainer"]
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_constants/separation = 4
@@ -39,7 +48,49 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
-gui_root = NodePath("../../..")
+gui_root = NodePath("..")
+
+[node name="MarginContainer2" type="MarginContainer" parent="."]
+margin_left = 614.539
+margin_top = 0.735077
+margin_right = 1019.54
+margin_bottom = 299.735
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Panel" type="PanelContainer" parent="MarginContainer2"]
+margin_right = 405.0
+margin_bottom = 299.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer2/Panel"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 398.0
+margin_bottom = 292.0
+mouse_filter = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer2/Panel/ScrollContainer"]
+script = ExtResource( 6 )
+table_path = NodePath("Table")
+
+[node name="Table" type="VBoxContainer" parent="MarginContainer2/Panel/ScrollContainer/MarginContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/separation = 4
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+gui_root = NodePath("..")
 
 [node name="Label" parent="." instance=ExtResource( 3 )]
 visible = false
+
+[node name="GodotPerson" type="Sprite" parent="."]
+position = Vector2( 496.924, 144.814 )
+texture = ExtResource( 4 )
+script = ExtResource( 5 )
