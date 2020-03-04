@@ -39,6 +39,15 @@ func _exit_current_row(row, y):
 	input_col = -1
 	input_row = -1
 
+#func create_label(value="", align=Label.ALIGN_CENTER):
+#	var l = Lbl.instance()
+#	l.mouse_filter = Control.MOUSE_FILTER_PASS
+#	l.size_flags_horizontal = SIZE_EXPAND_FILL
+#	l.rect_min_size.y=min_cell_height
+#	l.align = align
+#	l.text = str(value)
+#	return l
+
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		if input_row == -1: return

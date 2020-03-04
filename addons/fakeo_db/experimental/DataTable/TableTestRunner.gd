@@ -45,6 +45,7 @@ func _ready() -> void:
 	table_cntrl.connect("changed", table_cntrl2, "_update_table")
 	table_cntrl2.connect("changed", table_cntrl, "_update_table")
 	
+
 #	var expression = Expression.new()
 #	expression.parse("dmg*atk_rate", ["val", "dmg", "atk_rate"])
 #	print(expression.execute([1, 1, 22]))

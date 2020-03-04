@@ -112,7 +112,7 @@ theme = SubResource( 1 )
 [node name="People" type="Node2D" parent="."]
 
 [node name="GodotPerson" type="Sprite" parent="People"]
-position = Vector2( 496.924, 144.814 )
+position = Vector2( 494.924, 144.814 )
 texture = ExtResource( 4 )
 script = ExtResource( 5 )
 
@@ -120,7 +120,3 @@ script = ExtResource( 5 )
 position = Vector2( 516.036, 299.184 )
 texture = ExtResource( 4 )
 script = ExtResource( 5 )
-wpn_name = "Godot Friend"
-dmg = 111
-atk_rate = 6.0
-atk_range = 20.0

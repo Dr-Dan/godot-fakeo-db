@@ -14,6 +14,7 @@ var cltn:fdb.Enumerables.Collection
 
 func setup(headings, data:fdb.Enumerables.Collection):
 	self.headings = headings
+	table.headings = headings
 	cltn = data
 	
 	table.v_sep = 0
@@ -68,6 +69,21 @@ func validate_cell(text, col):
 				val = val.to_float()			
 				valid = true
 		TYPE_VECTOR2:
-			val = str2var("Vector2"+val)
-			valid = true
+			if val.match("(*,*)"):
+#				val = str2var("Vector2"+val)
+#				if not val is String:
+#					valid = true
+				var v = str2vec(val)
+				if v != null:
+					val = v
+					valid = true
 	return [valid, val]
+
+func str2vec(s:String):
+	var r = s.substr(1, s.length()-2).split(",")
+	if r.size() == 2:
+		for n in r:
+			if not n.is_valid_float():
+				return null
+		return Vector2(r[0], r[1])
+	return null
