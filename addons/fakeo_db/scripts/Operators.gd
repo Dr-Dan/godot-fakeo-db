@@ -30,6 +30,44 @@ class HasField:
 			return false
 		return true
 
+"""
+returns true if all operations evaluate to true
+
+usage:
+	DictCompareOp.new(
+		{field0=value, field1=ops.eq(value), field2=ops.gt(value)}
+	)
+
+"""
+class DictCompareOp:
+	extends OperatorBase
+	var fields
+	var any:bool
+	var fail_missing:bool
+
+	func _init(fields: Dictionary, _any=false, _fail_missing=true):
+		self.fields = fields
+		for p in fields:
+			if not fields[p] is OperatorBase:
+				fields[p] = Eq.new(fields[p])
+		any = _any
+		fail_missing = _fail_missing
+
+	func eval(item):
+		return item_valid(item, fields)
+
+	func item_valid(item, comps: Dictionary):
+		for key in comps:
+			if key in item:
+				if comps[key].eval(item[key]):
+					if any:
+						return true
+				else:
+					return false
+			elif fail_missing:
+				return false
+		return true		
+		
 # ------------------------------------------------------------ 
 # LOGICAL OPERATORS
 """
@@ -177,14 +215,6 @@ class Contains:
 # ------------------------------------------------------------ 
 # FUNCREF
 
-class FuncOpUtil:
-	extends Resource
-	
-	static func get_func_op(func_ref:FuncRef, args:Array=[]):
-		if args.empty():
-			return FuncOp.new(func_ref)		
-		return FuncOpArgs.new(func_ref, args)
-	
 """
 Call a function on an object
 	usage:
@@ -192,28 +222,109 @@ Call a function on an object
 			...
 			return true
 
-		FuncOp.new(funcref(self, "validate"))	
+		FuncOp.new(funcref(self, "validate"), [arg1, ..., argN])	
 """
+
 class FuncOp:
-	extends OperatorBase
-	
-	var func_ref:FuncRef
-
-	func _init(func_ref:FuncRef):
-		self.func_ref = func_ref
-
-	func eval(item):
-		return func_ref.call_func(item)
-		
-class FuncOpArgs:
 	extends OperatorBase
 	
 	var args:Array
 	var func_ref:FuncRef
 
-	func _init(func_ref:FuncRef, args:Array):
+	func _init(func_ref:FuncRef, args:Array=[]):
 		self.func_ref = func_ref
 		self.args = args
 
 	func eval(item):
 		return func_ref.call_funcv([item] + args)
+
+	
+class ExprOp:
+	extends OperatorBase
+	
+	var expr:Expression = Expression.new()
+
+	func _init(expr_str:String).():
+		expr.parse(expr_str, ["_item"])
+
+	func eval(item):
+		return expr.execute([item])
+		
+class ExprOpArgs:
+	extends OperatorBase
+	
+	var expr:Expression = Expression.new()
+	var fields = []
+	
+	func _init(expr_str:String, fields:Array).():
+		for f in fields:
+			self.fields.append(OpenOp.new(f))
+		expr.parse(expr_str, fields)
+		
+	func eval(item):
+		var args = []
+		for f in fields:
+			args.append(f.eval(item))
+		return expr.execute(args)
+		
+class ExprOpArgsDeep:
+	extends OperatorBase
+	
+	var expr:Expression = Expression.new()
+	var fields = []
+	
+	func _init(expr_str:String, fields:Array).():
+		var r = []
+		for f in fields:
+			var f_split = f.split("/")
+			r.append(f_split[f_split.size()-1])
+			self.fields.append(OpenOpDeep.new(f))
+		expr.parse(expr_str, r)
+		
+	func eval(item):
+		var args = []
+		for f in fields:
+			args.append(f.eval(item))
+		return expr.execute(args)
+	
+			
+class OpenOp:
+	extends OperatorBase
+	
+	var field:String
+	
+	func _init(field:String).():
+		self.field = field
+
+	func eval(item):
+		var result = null
+		assert(field in item)
+		if field in item:
+			result = item[field]
+			item = result
+		return result
+						
+class OpenOpDeep:
+	extends OperatorBase
+	
+	var fields:Array = []
+	
+	func _init(field:String).():
+		var f_split = field.split("/")
+		for s in f_split:
+			fields.append(s)
+
+	func eval(item):
+		var result = null
+		for f in fields:
+			if f == "*":
+				result = item
+				continue
+			assert(f in item)
+			if f in item:
+				result = item[f]
+				item = result
+				
+			else: return null
+		return result
+	

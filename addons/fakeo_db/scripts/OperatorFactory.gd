@@ -33,7 +33,7 @@ static func func_(obj:Object, func_name:String, args=[]):
 	var fn = funcref(obj, func_name)
 	if args.empty():
 		return Operators.FuncOp.new(fn)
-	return Operators.FuncOpArgs.new(fn, args)
+	return Operators.FuncOp.new(fn, args)
 
 static func op(item:String, arg):
 	match item:

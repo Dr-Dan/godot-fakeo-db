@@ -38,6 +38,11 @@ class Enumerable:
 			while _iter_next(arg):
 				r.append(current)
 		return r
+		
+	func for_each(op):
+		var items = to_array()
+		for i in items:
+			op.eval(i)
 	# ===============================================================================
 	# Instant evaluation
 
@@ -53,62 +58,40 @@ class Enumerable:
 					return current
 		return null
 		
-	# get first in enumerable that satisfies conditions
-	func first(cmps):
-		return where(cmps).at(0)
-
-	func last(cmps):
-		var result = where(cmps).to_array()
-		if result.empty():
-			 return null
-		return result[result.size()-1]
-		
-	# returns true if any match conditions
-	func exists(cmps):
-		var d = first(cmps)
-		return d != null
-
-	func count():
-		return to_array().size()	
+	func size():
+		return to_array().size()
 				
-	# apply function to each item
-	func for_each(obj:Object, func_name:String, args:Array=[]):
-		return for_each_ref(funcref(obj, func_name), args)
-		
-	func for_each_ref(fn:FuncRef, args:Array=[]):
-		select_ref(fn, args).to_array()		
-	# ===============================================================================
+# ===============================================================================
 
-	# Deferred evaluation	
-	func where(cmps):
-		var cls = WhereUtil.get_where_type(cmps)
-		assert(cls != null) # no Where type for input
-		return cls.new(self, cmps)
-		
-	func where_ref(fn:FuncRef, args:Array=[]):
-		return WhereFunc.new(self, fn, args)		
-			
-	func project(fields: Array):
-		return Project.new(self, fields)
-		
-	func take(amt):
-		return Take.new(self, amt)
-		
-	func select(obj:Object, func_name:String, args:Array=[]):
-		return select_ref(funcref(obj, func_name), args)
+class StepEnumerable:
+	extends Enumerable
 	
-	func select_ref(fn:FuncRef, args:Array=[]):
-		return Select.new(self, fn, args)
-		
-	func as_args(obj:Object, func_name:String):
-		return as_args_ref(funcref(obj, func_name))
+	var index
+	
+	func _init(source).(source):
+		index = -1
 
-	func as_args_ref(fn:FuncRef):
-		return AsArgs.new(self, fn)
+	func _iter_next(arg):
+		if state == RUNNING:
+			if source._iter_next(arg):
+				current = source.current
+				index+=1
+				return true
+
+			reset()
+		return false
 		
-	func skip(count):
-		return Skip.new(self, count)
-		
+	func _iter_init(arg):
+		._iter_init(arg)
+		if not source._iter_init(arg): return false
+
+		index = 0
+		current = source.current
+		return true
+				
+	func reset():
+		.reset()
+		index = -1
 
 
 # Pretty much does the same as the native array but is compatible with other enumerators
@@ -116,7 +99,7 @@ class List:
 	extends Enumerable
 	var index
 	
-	func _init(source: Array).(source):
+	func _init(source: Array=[]).(source):
 		index = -1
 
 	func _iter_next(arg):
@@ -138,6 +121,9 @@ class List:
 		
 	func to_array():
 		return [] + source
+		
+	func size():
+		return source.size()
 		
 	func at(index):
 		if index >= 0 and index < len(source):
@@ -180,10 +166,9 @@ class Collection:
 		source.clear()
 		
 	func size():
-		return source.size()			
+		return source.size()
 
 				
-		
 class WhereUtil:
 	extends Resource
 	
@@ -195,12 +180,11 @@ class WhereUtil:
 		# if cmps is not a Dictionary; at this point it is not a valid type
 		assert(cmps is Dictionary)
 		return WhereDict
-			
+					
 # Get all where preds evaluate to true
 # This is a base class and should be extended, not used directly
 class WhereBase:
 	extends Enumerable
-
 
 	func _init(source).(source):
 		pass
@@ -301,7 +285,6 @@ class Project:
 		if not source._iter_init(arg): return false
 		current = get_result(source.current)
 		return true
-
 		
 class ProjectDeep:
 	extends Enumerable
@@ -351,7 +334,7 @@ class ProjectDeep:
 		if not source._iter_init(arg): return false
 		current = get_result(source.current)
 		return true
-			
+				
 # Take first N items from source
 class Take:
 	extends Enumerable
@@ -422,6 +405,7 @@ class Skip:
 	func reset():
 		.reset()
 		i = -1
+		
 
 # Select from source using a given function reference
 class Select:
@@ -474,7 +458,7 @@ class SelectOp:
 		if not source._iter_init(arg): return false
 		current = get_result(source.current)
 		return true
-		
+
 # Expects each 'item' to be an array of arguments (up to 3) to a function
 class AsArgs:
 	extends Enumerable
