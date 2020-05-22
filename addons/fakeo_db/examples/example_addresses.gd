@@ -53,7 +53,7 @@ func _run():
 	])
 
 	print_break()
-	collection_append_remove(name_table)
+	collection_append_remove()
 	
 	print_break()
 	print_lists(name_table, addr_table)
@@ -72,7 +72,8 @@ func _run():
 
 # ==============================================================
 
-func collection_append_remove(name_table):
+func collection_append_remove():
+	var people = fdb.cltn()
 	var removed = fdb.cltn()
 	var added = fdb.cltn()
 	
@@ -83,29 +84,42 @@ func collection_append_remove(name_table):
 		["on_item_added", added, "append"],
 		["on_item_erased", removed, "append"]])
 	
-	# each item is passed through a function in sequence
-	# you can use an array of up to 3 elements
-	connections.as_args(name_table, "connect").run()
-		
+	# each item is used an argument for the referenced function (connect)
+	# func_as_args only works when supplied with arrays
+	
+	# these all return the same
+	var r = connections.as_args(funcref(people, "connect")).to_array() # as_args does not execute immediately without to_array()
+#	var r = connections.for_each_op(ops.func_as_args(people, "connect"))
+#	var r = connections.for_each_expr('p.connect(_item[0], _item[1], _item[2])', {p=people})
+
+	# r will contain return values for each item
+	print("connect results: %s" % str(r))
+	
 	var items = fdb.cltn([
 		{name="fakeo", age=1, addr_id=1},
-		{name="who", age=199, addr_id=1}
+		{name="who", age=199, addr_id=1},
 		])
 
 	# for each applies a function to each item
-	# case calling append will in turn trigger the _on_item_added signal
-	items.for_each(name_table, "append")
-	items.for_each(name_table, "erase")
+	# calling append will in turn trigger the _on_item_added signal
+	items.for_each(funcref(people, "append"))
+	items.for_each(funcref(people, "erase"))
+	
+	# var t = {name="whyy", age=34, addr_id=2}
+	# people.append(t)
+	
+	# people.erase(t)
 	
 	print_break_mini()
 	
-	print("Items Removed:")
-	print(removed.to_array())
 	print("Items Added:")
 	print(added.to_array())
+	print("Items Removed:")
+	print(removed.to_array())
+
+	connections.as_args(funcref(people, "disconnect")).to_array()
+	people.append({name="unknown", age=21, addr_id=1})
 	
-	connections.as_args(name_table, "disconnect").run()
-		
 func _on_item_added(item):
 	print("added " + str(item))
 	
@@ -137,11 +151,13 @@ var fields = ["name", "age"]
 
 var where_age = fdb.QueryBuilder.new()\
 	.where({age=age_comp})\
-	.project(fields)
+	.select_op(ops.open(fields))
+#	.project(fields)
 
 var where_not_age = fdb.QueryBuilder.new()\
 	.where({age=age_comp_not})\
-	.project(fields)
+	.select_op(ops.open(fields))
+#	.project(fields)
 
 func age_comp_builder_test(name_table):
 	"""
@@ -166,21 +182,22 @@ func get_addr(item):
 	return item.addr_id
 	
 func house_search_test(name_table, addr_table):
+	var value = 30000
 	var valued_houses = addr_table\
-		.where({value=ops.gteq(20000)})\
+		.where({value=ops.gteq(value)})\
 		.project(["addr_id", "street", "value"])
 
 	var addr_ids = valued_houses\
-		.select(self, "get_addr")
+		.select(funcref(self, "get_addr"))
 
 	var homeowners = name_table\
 		.where({addr_id=ops.in_(addr_ids)})\
 		.project(["name", "addr_id", "value"])
 
-	print("house value > 20000")
+	print("house value > %d" % value)
 	print(valued_houses.to_array())
 	print_break_mini()
-	print("homeowners where house value > 20000 (addr_id in 'addr_ids')")
+	print("homeowners where house value > %d (addr_id in 'addr_ids')" % value)
 	print(homeowners.to_array())
 	
 # ==============================================================
@@ -195,11 +212,11 @@ func count_names_test(name_table):
 	var cmp_is_dan = {name="dan"}
 	
 	var count_name = name_table\
-	.where({name=cmp_has_i})\
-	.count()
+		.where({name=cmp_has_i})\
+		.count()
 
 	var result_age = name_table\
-	.first(cmp_is_dan)
+		.first(cmp_is_dan)
 
 	print("%d/%d name entries contain 'i'" % [count_name, name_table.count()])
 	print("dan's age is %d" % result_age.age)
@@ -211,9 +228,9 @@ func name_starts_with_letters(name:String, letter0:String, letter1:String):
 
 func take_test(name_table, amt_take=4):
 	var result = name_table\
-	.where({name=ops.func_(self, "name_starts_with_letters", ["a", "m"])})\
-	.take(amt_take)\
-	.project(["name"])
+		.where({name=ops.func_(self, "name_starts_with_letters", ["a", "m"])})\
+		.take(amt_take)\
+		.project(["name"])
 	
 	print("take %d entries where name starts with 'a' or 'm': " % amt_take)
 	print(result.to_array())

@@ -60,7 +60,7 @@ class Enumerable:
 	func last(cmps):
 		var result = where(cmps).to_array()
 		if result.empty():
-			 return null
+			return null
 		return result[result.size()-1]
 		
 	# returns true if any match conditions
@@ -69,47 +69,90 @@ class Enumerable:
 		return d != null
 
 	func count():
-		return to_array().size()	
+		return to_array().size()
 				
-	# apply function to each item
-	func for_each(obj:Object, func_name:String, args:Array=[]):
-		return for_each_ref(funcref(obj, func_name), args)
-		
-	func for_each_ref(fn:FuncRef, args:Array=[]):
-		select_ref(fn, args).to_array()		
-	# ===============================================================================
+	# -------------------------------------------------------------------------------- 
 
-	# Deferred evaluation	
-	func where(cmps):
-		var cls = WhereUtil.get_where_type(cmps)
-		assert(cls != null) # no Where type for input
-		return cls.new(self, cmps)
-		
-	func where_ref(fn:FuncRef, args:Array=[]):
-		return WhereFunc.new(self, fn, args)		
+	# apply function to each item
+	func for_each(fn:FuncRef, args:Array=[]):
+		select(fn, args).to_array()
+
+	func for_each_op(op):
+		return select_op(op).to_array()
+	
+	func for_each_expr(op, arg=null, target=null):
+		if arg is Dictionary:
+			return for_each_op(Operators.ExprArgsDict.new(op, arg, target))
+		elif arg is Array:
+			return for_each_op(Operators.ExprArgsDeep.new(op, arg, target))
 			
-	func project(fields: Array):
-		return Project.new(self, fields)
+		return for_each_op(Operators.Expr.new(op, target))
+
+	# ===============================================================================
+	# Deferred evaluation	
+
+	func as_args(fn:FuncRef):
+		return select_op(Operators.FuncAsArgs.new(fn))		
 		
+	static func get_where_type(source, preds):
+		if preds is Operators.OperatorBase:
+			return WhereOp.new(source, preds)
+		elif preds is FuncRef:
+			return WhereOp.new(source, Operators.Func.new(preds))
+		elif preds is String:
+			return WhereOp.new(source, Operators.Expr.new(preds))
+		elif preds is Dictionary:
+			return  WhereOp.new(source, Operators.DictCompare.new(preds))
+		return null
+			
+	# FILTER
+	func where(preds):
+		var cls = get_where_type(self, preds)
+		assert(cls != null) # no Where type for input
+		return cls
+		
+	func where_op(op):
+		return WhereOp.new(self, op)
+
+	func where_fn(fn:FuncRef, args:Array=[]):
+		return where_op(Operators.Func.new(fn, args))
+		
+	func where_expr(expr: String, expr_vars=[]):
+		return where_op(Operators.ExprArgs.new(expr, expr_vars))
+			
 	func take(amt):
 		return Take.new(self, amt)
 		
-	func select(obj:Object, func_name:String, args:Array=[]):
-		return select_ref(funcref(obj, func_name), args)
-	
-	func select_ref(fn:FuncRef, args:Array=[]):
-		return Select.new(self, fn, args)
-		
-	func as_args(obj:Object, func_name:String):
-		return as_args_ref(funcref(obj, func_name))
-
-	func as_args_ref(fn:FuncRef):
-		return AsArgs.new(self, fn)
-		
 	func skip(count):
 		return Skip.new(self, count)
-		
 
+	# MAP
+	func select(op, args=[]):
+		if op is Operators.OperatorBase:
+			return select_op(op)
+		elif op is String:
+			return select_expr(op, args)
+		elif op is FuncRef:
+			return select_fn(op, args)
+		return null
+	
+	func select_op(op):
+		return SelectOp.new(self, op)
+
+	func select_expr(expr, expr_vars=[]):
+		return select_op(Operators.ExprArgs.new(expr, expr_vars))
+
+	func select_fn(fn:FuncRef, args:Array=[]):
+		return select_op(Operators.Func.new(fn, args))
+	
+			
+	func project(fields: Array):
+		return Project.new(self, fields)
+
+	func project_deep(fields:Array):
+		return ProjectDeep.new(self, fields)
+
+# ===============================================================================
 
 # Pretty much does the same as the native array but is compatible with other enumerators
 class List:
@@ -180,30 +223,20 @@ class Collection:
 		source.clear()
 		
 	func size():
-		return source.size()			
-
-				
-		
-class WhereUtil:
-	extends Resource
+		return source.size()
 	
-	static func get_where_type(cmps):
-		if cmps is FuncRef:
-			return WhereFunc
-		elif cmps is Operators.OperatorBase:
-			return WhereOp
-		# if cmps is not a Dictionary; at this point it is not a valid type
-		assert(cmps is Dictionary)
-		return WhereDict
-			
+
+# ===============================================================================
+# FILTERS
+
 # Get all where preds evaluate to true
 # This is a base class and should be extended, not used directly
 class WhereBase:
 	extends Enumerable
 
-
 	func _init(source).(source):
 		pass
+
 	func get_result(item):
 		printerr("Using base where class!")
 		return false
@@ -229,33 +262,6 @@ class WhereBase:
 
 		return _iter_next(arg)
 		
-
-# expects comps in the form of {field0=value, field1=ops.eq(value), field2=ops.gt(value)}
-# if no operator is provided, the value will be wrapped with Operators.Eq
-# Note: this will only work over Lists containing Objects and/or Dictionaries
-class WhereDict:
-	extends WhereBase
-	var preds
-
-	func _init(source, preds:Dictionary).(source):
-		self.preds = preds
-		for p in preds:
-			if not preds[p] is Operators.OperatorBase:
-				preds[p] = Operators.Eq.new(preds[p])
-
-	func get_result(item):
-		return Operators.item_valid(item, preds)
-				
-# expects only a FuncRef. Will return appropriate class for number of args (max 3)
-class WhereFunc:
-	extends WhereBase
-	var pred_func
-	func _init(source, preds:FuncRef, args:Array=[]).(source):
-		self.pred_func = Operators.FuncOp.new(preds, args)
-				
-	func get_result(item):
-		return pred_func.eval(item)
-
 # expects a class with a function 'eval(item)' that returns a bool
 class WhereOp:
 	extends WhereBase
@@ -269,89 +275,23 @@ class WhereOp:
 	func get_result(item):
 		return pred_op.eval(item)
 
+# expects comps in the form of {field0=value, field1=ops.eq(value), field2=ops.gt(value)}
+# if no operator is provided, the value will be wrapped with Operators.Eq
+class WhereDict:
+	extends WhereOp
+	# var preds
 
-# Returns only the fields matching names in the 'fields' array
-# ["name", "id"] => {name="the_name", id=0}
-class Project:
-	extends Enumerable
-	
-	var fields
-	
-	func _init(source, fields:Array).(source):
-		self.fields = fields
-	
-	func get_result(item):
-		var n = {}
-		for f in fields:
-			if f in item:
-				n[f] = item[f]
-		return n
-		
-	func _iter_next(arg):
-		if state == RUNNING:
-			if source._iter_next(arg):
-				current = get_result(source.current)
-				return true
+	func _init(source, preds:Dictionary).\
+		(source, Operators.DictCompare.new(preds)):
+			pass
 
-			reset()
-		return false
-		
-	func _iter_init(arg):
-		._iter_init(arg)
-		if not source._iter_init(arg): return false
-		current = get_result(source.current)
-		return true
+# expects a FuncRef and anyarguments as an array.
+class WhereFunc:
+	extends WhereOp
+	func _init(source, preds:FuncRef, args:Array=[]).\
+		(source, Operators.Func.new(preds, args)):
+		pass
 
-		
-class ProjectDeep:
-	extends Enumerable
-	
-	var fields:Array = []
-	
-	func _init(source, fields:Array).(source):
-		for i in fields.size():
-			var f_split = fields[i].split("/")
-			self.fields.append([])
-			for s in f_split:
-				self.fields[i].append(s)
-		self.source = source
-		
-	func get_result(item):
-		var n = {}
-		for f in fields:
-			n[f.back()] = descend(f, item)
-		return n
-		
-	func descend(keys:Array, item):
-		var result = null
-		keys = keys.duplicate()
-		while keys.size() > 0:
-			var next = keys.pop_front()
-			if next == "*":
-				result = item
-				continue
-				
-			if next in item:
-				result = item[next]
-				item = result
-			else: return null
-		return result
-		
-	func _iter_next(arg):
-		if state == RUNNING:
-			if source._iter_next(arg):
-				current = get_result(source.current)
-				return true
-
-			reset()
-		return false
-		
-	func _iter_init(arg):
-		._iter_init(arg)
-		if not source._iter_init(arg): return false
-		current = get_result(source.current)
-		return true
-			
 # Take first N items from source
 class Take:
 	extends Enumerable
@@ -423,39 +363,15 @@ class Skip:
 		.reset()
 		i = -1
 
-# Select from source using a given function reference
-class Select:
-	extends Enumerable
-	
-	var select_ref
-	
-	func _init(source, select_ref, args:Array=[]).(source):
-		self.select_ref = Operators.FuncOp.new(select_ref, args)
-
-	func get_result(item):
-		return select_ref.eval(item)
-		
-	func _iter_next(arg):
-		if state == RUNNING:
-			if source._iter_next(arg):
-				current = get_result(source.current)
-				return true
-
-			reset()
-		return false
-		
-	func _iter_init(arg):
-		._iter_init(arg)
-		if not source._iter_init(arg): return false
-		current = get_result(source.current)
-		return true
+# ===============================================================================
+# MAPPERS
 
 class SelectOp:
 	extends Enumerable
 	
 	var select_op
 	
-	func _init(source, select_op, args:Array=[]).(source):
+	func _init(source, select_op).(source):
 		self.select_op = select_op
 
 	func get_result(item):
@@ -475,37 +391,21 @@ class SelectOp:
 		current = get_result(source.current)
 		return true
 		
-# Expects each 'item' to be an array of arguments (up to 3) to a function
-class AsArgs:
-	extends Enumerable
-
-	var select_ref
-
-	func _init(source, select_ref).(source):
-		self.select_ref = select_ref
-
-	func get_result(item):
-		assert(item is Array)
-		item = [] + item
-		var i = item.pop_front()
-		var func_op = Operators.FuncOp.new(select_ref, item)
-		return func_op.eval(i)
+class Select:
+	extends SelectOp
 	
-	func _iter_next(arg):
-		if state == RUNNING:
-			if source._iter_next(arg):
-				current = get_result(source.current)
-				return true
+	func _init(source, select_fn, args:Array=[]).(source, Operators.Func.new(select_fn, args)):
+		pass
 
-			reset()
-		return false
-	
-	func _iter_init(arg):
-		._iter_init(arg)
-		if not source._iter_init(arg): return false
-		current = get_result(source.current)
-		return true
-		
-	func run():
-		to_array()
-		
+class Project:
+	extends SelectOp
+
+	func _init(source, fields:Array).\
+		(source, Operators.OpenMulti.new(fields)):
+		pass
+#
+class ProjectDeep:
+	extends SelectOp
+
+	func _init(source, fields:Array).(source, Operators.OpenMultiDeep.new(fields)):
+		pass

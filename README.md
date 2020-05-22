@@ -14,6 +14,10 @@ Tested in Godot 3.1.
 ## About
 ### [Wiki](../../wiki)
 
+## Usage
+
+This addon is not production tested and will not be faster than handwritten code. 'foreach' being a prime example of this.
+
 ## Installation
 
 1. Either download from the Godot Asset Store or just copy fakeo_db into the 'addons' folder in your project.
