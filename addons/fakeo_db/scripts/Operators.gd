@@ -1,14 +1,5 @@
 
-
-static func item_valid(item, comps: Dictionary):
-	for key in comps:
-		if key in item:
-			if not comps[key].eval(item[key]):
-				return false
-		else:
-			return false
-	return true
-
+# ==============================================================
 	
 class OperatorBase:
 	func eval(item):
@@ -30,16 +21,21 @@ class HasField:
 			return false
 		return true
 
+
+# ==============================================================
+# EVALUATIVE OPERATORS; 'eval' should return a bool
+
 """
-returns true if all operations evaluate to true
+Compare a dictionary of values with those in an object
+Any naked values (i.e. 'field0' below) will be wrapped with an Eq operator
 
 usage:
-	DictCompareOp.new(
+	DictCompare.new(
 		{field0=value, field1=ops.eq(value), field2=ops.gt(value)}
 	)
 
 """
-class DictCompareOp:
+class DictCompare:
 	extends OperatorBase
 	var fields
 	var any:bool
@@ -67,15 +63,15 @@ class DictCompareOp:
 			elif fail_missing:
 				return false
 		return true		
-		
+
 # ------------------------------------------------------------ 
-# LOGICAL OPERATORS
+# LOGICAL
 """
 	returns true if all operators in 'cmps' are true
 	Expects an array of operators
 
 	usage:
-		var comp = OpFac.And.new([OpFac.gt(20), OpFac.lt(70)]) # 20 < age < 70
+		var comp = And.new([GT.new(20), LT.new(70)]) # 20 < age < 70
 
 """
 class And:
@@ -95,7 +91,7 @@ class And:
 	Expects an array of operators
 
 	usage:
-		var comp = OpFac.Or.new([OpFac.gt(20), OpFac.lt(70)]) # 20 < age < 70
+		var comp = Or.new([Eq.new("Mike"), Eq.new("Anna")])
 
 	"""
 class Or:
@@ -111,11 +107,12 @@ class Or:
 		return false
 	
 """
-	returns false if 'cmp' is true and vice versa
+	returns false if 'cmp.eval(item)' returns true and vice versa
 """
 class Not:
 	extends OperatorBase
 	var cmp
+	
 	func _init(cmp):
 		self.cmp = cmp
 		
@@ -148,8 +145,7 @@ class None:
 	func eval(item):
 		return false
 # ------------------------------------------------------------ 
-# COMPARITIVE OPERATORS
-# handle dictionary value only
+# COMPARITIVE
 
 """
 	Less than
@@ -212,6 +208,8 @@ class Contains:
 		return false
 #		return self.item in item
 
+# ==============================================================
+# FUNCTION-Y; 'eval' can return anything
 # ------------------------------------------------------------ 
 # FUNCREF
 
@@ -222,10 +220,10 @@ Call a function on an object
 			...
 			return true
 
-		FuncOp.new(funcref(self, "validate"), [arg1, ..., argN])	
+		Func.new(funcref(self, "validate"), [arg1, ..., argN])	
 """
 
-class FuncOp:
+class Func:
 	extends OperatorBase
 	
 	var args:Array
@@ -238,57 +236,108 @@ class FuncOp:
 	func eval(item):
 		return func_ref.call_funcv([item] + args)
 
+"""
+ Use each element in 'item' as an argument to the target function.
+ in eval, 'item' must be an array
+"""
+class FuncAsArgs:
+	extends OperatorBase
 	
-class ExprOp:
+	var func_ref:FuncRef
+
+	func _init(func_ref:FuncRef):
+		self.func_ref = func_ref
+
+	func eval(item):
+		return func_ref.call_funcv(item)
+
+	
+class Expr:
 	extends OperatorBase
 	
 	var expr:Expression = Expression.new()
-
-	func _init(expr_str:String).():
+	var target
+	
+	func _init(expr_str:String, _target=null).():
 		expr.parse(expr_str, ["_item"])
-
-	func eval(item):
-		return expr.execute([item])
+		target = _target
 		
-class ExprOpArgs:
+	func eval(item):
+		return expr.execute([item], target)
+		
+class ExprArgs:
 	extends OperatorBase
 	
 	var expr:Expression = Expression.new()
 	var fields = []
+	var target
 	
-	func _init(expr_str:String, fields:Array).():
+	func _init(expr_str:String, fields:Array=[], _target=null).():
 		for f in fields:
-			self.fields.append(OpenOp.new(f))
-		expr.parse(expr_str, fields)
+			self.fields.append(Open.new(f))
+		expr.parse(expr_str, ["_item"] + fields)
+		target = _target
 		
 	func eval(item):
 		var args = []
 		for f in fields:
 			args.append(f.eval(item))
-		return expr.execute(args)
+		return expr.execute([item] + args, target)
 		
-class ExprOpArgsDeep:
+class ExprArgsDeep:
 	extends OperatorBase
 	
 	var expr:Expression = Expression.new()
 	var fields = []
+	var target
 	
-	func _init(expr_str:String, fields:Array).():
+	func _init(expr_str:String, fields:Array, _target=null).():
 		var r = []
 		for f in fields:
 			var f_split = f.split("/")
 			r.append(f_split[f_split.size()-1])
-			self.fields.append(OpenOpDeep.new(f))
-		expr.parse(expr_str, r)
+			self.fields.append(OpenDeep.new(f))
+		expr.parse(expr_str,  ["_item"] + r)
+		target = _target
 		
 	func eval(item):
 		var args = []
 		for f in fields:
 			args.append(f.eval(item))
-		return expr.execute(args)
+		return expr.execute([item] + args, target)
 	
-			
-class OpenOp:
+
+class ExprArgsDict:
+	extends OperatorBase
+	
+	var expr:Expression = Expression.new()
+	var fields = {}
+	var target
+	
+	func _init(expr_str:String, _fields:Dictionary={}, _target=null).():
+		fields = _fields
+		expr.parse(expr_str, ["_item"] + fields.keys())
+		target = _target
+		
+	func eval(item=null):
+		return expr.execute([item] + fields.values(), target)
+		
+class OpenMulti:
+	extends OperatorBase
+
+	var fields:Array
+	
+	func _init(_fields:Array).():
+		fields = _fields
+
+	func eval(item):
+		var n = {}
+		for f in fields:
+			if f in item:
+				n[f] = item[f]
+		return n
+		
+class Open:
 	extends OperatorBase
 	
 	var field:String
@@ -301,10 +350,11 @@ class OpenOp:
 		assert(field in item)
 		if field in item:
 			result = item[field]
-			item = result
+			# item = result
 		return result
 						
-class OpenOpDeep:
+
+class OpenDeep:
 	extends OperatorBase
 	
 	var fields:Array = []
@@ -320,7 +370,7 @@ class OpenOpDeep:
 			if f == "*":
 				result = item
 				continue
-			assert(f in item)
+			# assert(f in item)
 			if f in item:
 				result = item[f]
 				item = result
@@ -328,3 +378,20 @@ class OpenOpDeep:
 			else: return null
 		return result
 	
+class OpenMultiDeep:
+	extends OperatorBase
+
+	var fields:Dictionary = {}
+	
+	func _init(_fields:Array).():
+		for f in _fields:
+			fields[f] = OpenDeep.new(f)
+
+	func eval(item):
+		var result = {}
+		for f in fields:
+			if not fields[f].fields.empty():
+				var name = fields[f].fields.back()
+				# if f in item:
+				result[name] = fields[f].eval(item)
+		return result

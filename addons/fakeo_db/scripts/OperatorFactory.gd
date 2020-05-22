@@ -31,9 +31,38 @@ static func in_(item):
 
 static func func_(obj:Object, func_name:String, args=[]):
 	var fn = funcref(obj, func_name)
-	if args.empty():
-		return Operators.FuncOp.new(fn)
-	return Operators.FuncOp.new(fn, args)
+	return Operators.Func.new(fn, args)
+
+static func func_as_args(obj:Object, func_name:String):
+	var fn = funcref(obj, func_name)
+	return Operators.FuncAsArgs.new(fn)
+
+
+static func expr(expr_str:String, fields=null, target=null):
+	if fields is Dictionary:
+		return Operators.ExprArgsDict.new(expr_str, fields, target)
+	elif fields is Array:
+		return Operators.ExprArgs.new(expr_str, fields, target)
+		
+#	if fields == null:
+	return Operators.Expr.new(expr_str, target)
+#	return Operators.ExprArgs.new(expr_str, fields, target)
+
+static func expr_dp(expr_str:String, fields:Array, target=null):
+	return Operators.ExprArgsDeep.new(expr_str, fields, target)
+	
+static func open(field):
+	if field is Array:
+		return Operators.OpenMulti.new(field)
+	return Operators.Open.new(field)
+	
+static func open_dp(field):
+	if field is Array:
+		return Operators.OpenMultiDeep.new(field)
+	return Operators.OpenDeep.new(field)
+
+static func dict(preds, _any=false, _fail_missing=true):
+	return Operators.DictCompare.new(preds, _any, _fail_missing)
 
 static func op(item:String, arg):
 	match item:
@@ -42,11 +71,11 @@ static func op(item:String, arg):
 		">":
 			return gt(arg)
 		"=", "==":
-			return eq(arg)			
+			return eq(arg)
 		"and", "&", "&&":
 			return and_(arg)
 		"or", "|", "||":
-			return or_(arg)			
+			return or_(arg)
 		"not", "!":
 			return not_(arg)
 		"in":
