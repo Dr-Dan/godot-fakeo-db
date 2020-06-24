@@ -38,6 +38,7 @@ class Enumerable:
 			while _iter_next(arg):
 				r.append(current)
 		return r
+		
 	# ===============================================================================
 	# Instant evaluation
 
@@ -55,7 +56,7 @@ class Enumerable:
 		
 	# get first in enumerable that satisfies conditions
 	func first(cmps):
-		return where(cmps).at(0)
+		return where(cmps).take(1).at(0)
 
 	func last(cmps):
 		var result = where(cmps).to_array()
@@ -127,14 +128,19 @@ class Enumerable:
 		return Skip.new(self, count)
 
 	# MAP
-	func select(op, args=[]):
+	static func get_select_type(source, op, args=[]):
 		if op is Operators.OperatorBase:
-			return select_op(op)
+			return SelectOp.new(source, op)
 		elif op is String:
-			return select_expr(op, args)
+			return SelectOp.new(source, Operators.ExprArgs.new(op, args))
 		elif op is FuncRef:
-			return select_fn(op, args)
-		return null
+			return SelectOp.new(source, Operators.Func.new(op, args))
+		return null	
+
+	func select(op, args=[]):
+		var cls = get_select_type(self, op, args)
+		assert(cls != null)
+		return cls		
 	
 	func select_op(op):
 		return SelectOp.new(self, op)
@@ -154,12 +160,42 @@ class Enumerable:
 
 # ===============================================================================
 
+class StepEnumerable:
+	extends Enumerable
+	
+	var index
+	
+	func _init(source).(source):
+		index = -1
+
+	func _iter_next(arg):
+		if state == RUNNING:
+			if source._iter_next(arg):
+				current = source.current
+				index+=1
+				return true
+
+			reset()
+		return false
+		
+	func _iter_init(arg):
+		._iter_init(arg)
+		if not source._iter_init(arg): return false
+
+		index = 0
+		current = source.current
+		return true
+				
+	func reset():
+		.reset()
+		index = -1
+		
 # Pretty much does the same as the native array but is compatible with other enumerators
 class List:
 	extends Enumerable
 	var index
 	
-	func _init(source: Array).(source):
+	func _init(source: Array=[]).(source):
 		index = -1
 
 	func _iter_next(arg):
@@ -388,6 +424,7 @@ class SelectOp:
 	func _iter_init(arg):
 		._iter_init(arg)
 		if not source._iter_init(arg): return false
+		
 		current = get_result(source.current)
 		return true
 		

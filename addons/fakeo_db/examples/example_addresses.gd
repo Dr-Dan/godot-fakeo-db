@@ -71,7 +71,7 @@ func _run():
 	take_test(name_table)
 
 # ==============================================================
-
+# TODO: move to func example
 func collection_append_remove():
 	var people = fdb.cltn()
 	var removed = fdb.cltn()
@@ -151,12 +151,12 @@ var fields = ["name", "age"]
 
 var where_age = fdb.QueryBuilder.new()\
 	.where({age=age_comp})\
-	.select_op(ops.open(fields))
+	.select(ops.open(fields))
 #	.project(fields)
 
 var where_not_age = fdb.QueryBuilder.new()\
 	.where({age=age_comp_not})\
-	.select_op(ops.open(fields))
+	.select(ops.open(fields))
 #	.project(fields)
 
 func age_comp_builder_test(name_table):

@@ -7,10 +7,10 @@ func add_collection(c:Collection, name):
 	collections[name] = c
 
 func has_collection(name):
-	pass
+	name in collections
 	
 func get_collection(name) -> Collection:
-	if name in collections:
+	if has_collection(name):
 		return collections[name]
 		
 	collections[name] = Collection.new()

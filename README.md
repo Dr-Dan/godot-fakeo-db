@@ -7,7 +7,7 @@ Tested in Godot 3.1.
 
 ## Features
 
-* Filter lists of objects and primitives
+* Works with lists of objects or primitives
 * Readable chained query syntax
 * Deferred query execution
 

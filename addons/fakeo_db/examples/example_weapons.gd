@@ -67,7 +67,7 @@ var chain_queries = [
 	},
 	{
 		description="where: dmg >= 10",
-		query=where
+		query=where #.project(["name", "dmg"]) # without project, results that are objects will not print fields
 	},
 	{
 		description="project: name and dmg fields",
@@ -93,24 +93,28 @@ var chain_queries = [
 func _damage_or_sword(item):
 	return item.dmg > 20 or item.name=="Wooden Sword"
 
-var build_queries= [
+var root = fdb.Enumerables.StepEnumerable.new([])
+#var root = fdb.Enumerables.StepEnumerable.new(data)
+
+var deferred_queries= [
 	{
 		description="subtype is in [sword, spear, thrown]",
-		query=fdb.QueryBuilder.new()\
+		query=root\
 			.where({subtype=ops.in_(["sword", "spear", "thrown"])})\
 			.project(["name", "subtype", "dmg", "atk_range"])
 	},
 	{
-		description="filter by dmg and type",
+		description="filter by dmg and type using func",
 		# can use qb() in place of QueryBuilder.new()
-		query=fdb.qb()\
+		query=root\
 			.where(funcref(self, "_damage_or_sword"))\
 			.project(["name", "subtype", "dmg",])
 	},
 	{
 		description="item damage >= 10 and 'o' in subtype",
 		# using a string in where() will execute it as code (using the Expression class)
-		query=fdb.qb()\
+		# probably quite slow
+		query=root\
 			.where('_item.dmg >= 10 and "o" in _item.subtype')\
 			.project(["name", "subtype", "dmg",])
 	}
@@ -122,21 +126,19 @@ func _run():
 	for q in chain_queries:
 		print_break_mini()
 		print(q.description)
-#		q.query.for_each(funcref(self, "_print"))
-		for item in q.query:
-			print(item)
+		for item in q.query: print(item)
 		
-	for q in build_queries:
+	for q in deferred_queries:
 		print_break_mini()
 		print(q.description)
-		var result = q.query.eval(data)
-		result.for_each(funcref(self, "_print"))
+		root.source = data
+		for item in q.query: print(item)
+#		var result = q.query.eval(data)
+#		for item in result: print(item)
+
 
 # ==============================================================
 
-func _print(msg):
-	print(msg)
-	
 func print_break():
 	print("\n###############################")
 
