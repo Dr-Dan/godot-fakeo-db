@@ -35,7 +35,7 @@ class Address:
 			
 func _run():
 	# collections are like Enumerators.List with some append and erase functions
-	var name_table = fdb.cltn([
+	var name_table = [
 	{name="mike", age=22, addr_id=0},
 	{name="mindy", age=16, addr_id=1},
 	{name="trish", age=49, addr_id=2},
@@ -43,96 +43,41 @@ func _run():
 	Human.new("dan", 30, 2),
 	Human.new("andy", 76, 2),
 	Human.new("ariel", 65, 3),
-	])
+	]
 
-	var addr_table = fdb.cltn([
+	var addr_table = [
 	{addr_id=0, street="vale road", value=20000},
 	{addr_id=1, street="the lane", value=10000},
 	{addr_id=2, street="london road", value=35250},
 	Address.new(3, "diamond mews", 100000)
-	])
+	]
 
-	print_break()
-	collection_append_remove()
-	
+
 	print_break()
 	print_lists(name_table, addr_table)
 	
 	print_break()
 	age_comp_builder_test(name_table)
-	
+#
 	print_break()
 	house_search_test(name_table, addr_table)
-	
+#
 	print_break()
 	count_names_test(name_table)
-	
+#
 	print_break()
 	take_test(name_table)
-
-# ==============================================================
-# TODO: move to func example
-func collection_append_remove():
-	var people = fdb.cltn()
-	var removed = fdb.cltn()
-	var added = fdb.cltn()
 	
-	var connections = fdb.list([
-		["on_item_added", self, "_on_item_added"],
-		["on_item_erased", self, "_on_item_erased"],
-
-		["on_item_added", added, "append"],
-		["on_item_erased", removed, "append"]])
-	
-	# each item is used an argument for the referenced function (connect)
-	# func_as_args only works when supplied with arrays
-	
-	# these all return the same
-	var r = connections.as_args(funcref(people, "connect")).to_array() # as_args does not execute immediately without to_array()
-#	var r = connections.for_each_op(ops.func_as_args(people, "connect"))
-#	var r = connections.for_each_expr('p.connect(_item[0], _item[1], _item[2])', {p=people})
-
-	# r will contain return values for each item
-	print("connect results: %s" % str(r))
-	
-	var items = fdb.cltn([
-		{name="fakeo", age=1, addr_id=1},
-		{name="who", age=199, addr_id=1},
-		])
-
-	# for each applies a function to each item
-	# calling append will in turn trigger the _on_item_added signal
-	items.for_each(funcref(people, "append"))
-	items.for_each(funcref(people, "erase"))
-	
-	# var t = {name="whyy", age=34, addr_id=2}
-	# people.append(t)
-	
-	# people.erase(t)
-	
-	print_break_mini()
-	
-	print("Items Added:")
-	print(added.to_array())
-	print("Items Removed:")
-	print(removed.to_array())
-
-	connections.as_args(funcref(people, "disconnect")).to_array()
-	people.append({name="unknown", age=21, addr_id=1})
-	
-func _on_item_added(item):
-	print("added " + str(item))
-	
-func _on_item_erased(item):
-	print("removed " + str(item))
-
+	print_break()
+	collection_append_remove()
+#
 # ==============================================================
 
 func print_lists(name_table, addr_table):
-	var query_names = name_table\
+	var query_names = fdb.qry(name_table)\
 	.project(["name", "age", "addr_id"])
 	
-	var query_addr = addr_table\
+	var query_addr = fdb.qry(addr_table)\
 	.project(["addr_id", "street", "value"])
 
 	print("PEOPLE:")
@@ -149,12 +94,13 @@ var age_comp = ops.and_([ops.gt(20), ops.lt(70)]) # 20 < age < 70
 var age_comp_not = ops.not_(age_comp)
 var fields = ["name", "age"]
 
-var where_age = fdb.QueryBuilder.new()\
+var whr_qry = fdb.QueryBuilder.new()
+var where_age = whr_qry.branch()\
 	.where({age=age_comp})\
 	.select(ops.open(fields))
 #	.project(fields)
 
-var where_not_age = fdb.QueryBuilder.new()\
+var where_not_age = whr_qry.branch()\
 	.where({age=age_comp_not})\
 	.select(ops.open(fields))
 #	.project(fields)
@@ -165,32 +111,31 @@ func age_comp_builder_test(name_table):
 		eval() sets the root array of the query and could also be
 		called outside the function.
 	"""
-	var result = where_age.eval(name_table)
-	var result_not = where_not_age.eval(name_table)
-
+	
+	whr_qry.set_root(name_table)
 	# to_array() has the added benefit of returning dictionaries which print nicely
 	# changes to the result (of result.to_array()) will not affect the original container
 	print("age > 20 and age < 70")
-	print(result.to_array())
+	print(where_age.to_array())
 	print_break_mini()
 	print("not (age > 20 and age < 70)")
-	print(result_not.to_array())
+	print(where_not_age.to_array())
 
-# ==============================================================
-
+## ==============================================================
+#
 func get_addr(item):
 	return item.addr_id
-	
+
 func house_search_test(name_table, addr_table):
 	var value = 30000
-	var valued_houses = addr_table\
+	var valued_houses = fdb.qry(addr_table)\
 		.where({value=ops.gteq(value)})\
 		.project(["addr_id", "street", "value"])
 
 	var addr_ids = valued_houses\
 		.select(funcref(self, "get_addr"))
-
-	var homeowners = name_table\
+#
+	var homeowners = fdb.qry(name_table)\
 		.where({addr_id=ops.in_(addr_ids)})\
 		.project(["name", "addr_id", "value"])
 
@@ -199,9 +144,9 @@ func house_search_test(name_table, addr_table):
 	print_break_mini()
 	print("homeowners where house value > %d (addr_id in 'addr_ids')" % value)
 	print(homeowners.to_array())
-	
-# ==============================================================
-
+#
+## ==============================================================
+#
 func i_is_in_name(name:String):
 	return "i" in name
 
@@ -210,28 +155,28 @@ func count_names_test(name_table):
 	var cmp_has_i = ops.func_(self, "i_is_in_name")
 	# stating only the value will check for equality
 	var cmp_is_dan = {name="dan"}
-	
-	var count_name = name_table\
+
+	var count_name = fdb.qry(name_table)\
 		.where({name=cmp_has_i})\
 		.count()
 
-	var result_age = name_table\
+	var result_age = fdb.qry(name_table)\
 		.first(cmp_is_dan)
 
-	print("%d/%d name entries contain 'i'" % [count_name, name_table.count()])
+	print("%d/%d name entries contain 'i'" % [count_name, name_table.size()])
 	print("dan's age is %d" % result_age.age)
 
-# ==============================================================
+## ==============================================================
 
 func name_starts_with_letters(name:String, letter0:String, letter1:String):
 	return not name.empty() and (name[0].to_lower() == letter0 or name[0].to_lower() == letter1)
 
 func take_test(name_table, amt_take=4):
-	var result = name_table\
+	var result = fdb.qry(name_table)\
 		.where({name=ops.func_(self, "name_starts_with_letters", ["a", "m"])})\
 		.take(amt_take)\
 		.project(["name"])
-	
+
 	print("take %d entries where name starts with 'a' or 'm': " % amt_take)
 	print(result.to_array())
 	
@@ -242,4 +187,54 @@ func print_break():
 func print_break_mini():
 	print("\n--------------")
 
+
 # ==============================================================
+# TODO: move to func example
+func collection_append_remove():
+	var people = fdb.cltn()
+	var removed = fdb.cltn()
+	var added = fdb.cltn()
+
+	var connections = fdb.qry([
+		["on_item_added", self, "_on_item_added"],
+		["on_item_erased", self, "_on_item_erased"],
+
+		["on_item_added", added, "append"],
+		["on_item_erased", removed, "append"]])
+
+	# func_as_args only works when supplied with arrays
+	# each item is used as an argument for the referenced function (connect)
+
+	# these all return the same
+	var r = connections.as_args(funcref(people, "connect")).to_array() # as_args does not execute immediately without to_array()
+#	var r = connections.for_each_op(ops.func_as_args(people, "connect"))
+#	var r = connections.for_each_expr('p.connect(_item[0], _item[1], _item[2])', {p=people})
+
+	# r will contain return values for each item
+	print("connect results: %s" % str(r))
+
+	var items = fdb.qry([
+		{name="fakeo", age=1, addr_id=1},
+		{name="who", age=199, addr_id=1},
+		])
+
+	# for each applies a function to each item
+	# calling append will in turn trigger the _on_item_added signal
+	items.for_each(funcref(people, "append"))
+	items.for_each(funcref(people, "erase"))
+
+	print_break_mini()
+
+	print("Items Added:")
+	print(added.to_array())
+	print("Items Removed:")
+	print(removed.to_array())
+
+	connections.as_args(funcref(people, "disconnect")).to_array()
+	people.append({name="unknown", age=21, addr_id=1})
+
+func _on_item_added(item):
+	print("added " + str(item))
+
+func _on_item_erased(item):
+	print("removed " + str(item))

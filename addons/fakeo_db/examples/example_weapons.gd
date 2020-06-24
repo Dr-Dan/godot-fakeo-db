@@ -62,12 +62,8 @@ var select = E.Select.new(where, funcref(self, "get_name_and_dmg_mult"), [20])
 var chain_queries = [
 	{
 		description="project fields from each object",
-		query=data\
-			.project(["name", "type", "subtype", "dmg"])
-	},
-	{
-		description="where: dmg >= 10",
-		query=where #.project(["name", "dmg"]) # without project, results that are objects will not print fields
+		query=fdb.qry(data)\
+			.project(["name", "type", "subtype", "dmg"]) # project will print object fields otherwise we get [Reference:XXXXXX]
 	},
 	{
 		description="project: name and dmg fields",
@@ -83,7 +79,7 @@ var chain_queries = [
 	},
 	{
 		description="bows with dmg >= 7",
-		query=data\
+		query=fdb.qry(data)\
 			.where({subtype="bow", dmg=ops.gteq(7)})\
 			.project(["name", "dmg", "atk_range"])
 	}
@@ -93,20 +89,18 @@ var chain_queries = [
 func _damage_or_sword(item):
 	return item.dmg > 20 or item.name=="Wooden Sword"
 
-var root = fdb.Enumerables.StepEnumerable.new([])
-#var root = fdb.Enumerables.StepEnumerable.new(data)
-
+var qry_root = fdb.qry()
 var deferred_queries= [
 	{
 		description="subtype is in [sword, spear, thrown]",
-		query=root\
+		query=qry_root.branch()\
 			.where({subtype=ops.in_(["sword", "spear", "thrown"])})\
 			.project(["name", "subtype", "dmg", "atk_range"])
 	},
 	{
 		description="filter by dmg and type using func",
-		# can use qb() in place of QueryBuilder.new()
-		query=root\
+		# can use qry() in place of QueryBuilder.new()
+		query=qry_root\
 			.where(funcref(self, "_damage_or_sword"))\
 			.project(["name", "subtype", "dmg",])
 	},
@@ -114,7 +108,7 @@ var deferred_queries= [
 		description="item damage >= 10 and 'o' in subtype",
 		# using a string in where() will execute it as code (using the Expression class)
 		# probably quite slow
-		query=root\
+		query=qry_root\
 			.where('_item.dmg >= 10 and "o" in _item.subtype')\
 			.project(["name", "subtype", "dmg",])
 	}
@@ -127,15 +121,12 @@ func _run():
 		print_break_mini()
 		print(q.description)
 		for item in q.query: print(item)
-		
+
+	qry_root.set_root(data)
 	for q in deferred_queries:
 		print_break_mini()
 		print(q.description)
-		root.source = data
 		for item in q.query: print(item)
-#		var result = q.query.eval(data)
-#		for item in result: print(item)
-
 
 # ==============================================================
 

@@ -12,5 +12,5 @@ static func list(array:Array=[]):
 static func cltn(array:Array=[]):
 	return Enumerables.Collection.new(array)
 	
-static func qb():
-	return QueryBuilder.new()
+static func qry(data=[]):
+	return QueryBuilder.new(data)

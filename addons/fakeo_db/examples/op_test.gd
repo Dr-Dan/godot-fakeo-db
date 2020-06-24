@@ -15,14 +15,14 @@ func _run():
 	print(l.to_array())
 
 
-	var l2 = Enumerables.List.new([
+	var l2 = fdb.qry([
 		{name="Dan", age=22, bag={food=5, matchbox={matches=20}}}, 
 		{name="Sally", age=42, bag={food=13}}])
 
-	var q3 = l2.project_deep(["name", "bag/matchbox/matches", "bag/food"])
+	var q3 = l2.project_dp(["name", "bag/matchbox/matches", "bag/food"])
 	print(q3.to_array())
 
-	var e = Enumerables.List.new([1,3,4])
+	var e = fdb.qry([1,3,4])
 	
 	var qe2 = e.select_op(ops.expr('_item * 10'))
 	print(qe2.to_array())
@@ -44,7 +44,7 @@ func _run():
 		
 	var ll = fdb.cltn()
 	l2.for_each_op(ops.expr('self.append(_item)', [], ll))
-	ll.for_each_op(ops.expr('print(_item)'))
+	fdb.qry(ll).for_each_op(ops.expr('print(_item)'))
 	
 	print(ops.expr_dp('matches*food', ["bag/matchbox/matches", "bag/food"]).eval(l2.at(0)))
 	print(ops.open_dp('bag/matchbox').eval(l2.at(0)))
