@@ -2,6 +2,9 @@ extends Resource
 
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
 
+static func op_iter(ops:Array):
+	return Operators.OperatorIterator.new(ops)
+
 static func gt(item):
 	return Operators.GT.new(item)
 	
@@ -29,6 +32,12 @@ static func not_(item):
 static func in_(item):
 	return Operators.In.new(item)
 
+static func contains(item):
+	return Operators.Contains.new(item)
+
+static func has(item):
+	return Operators.HasField.new(item)
+
 static func func_(obj:Object, func_name:String, args=[]):
 	var fn = funcref(obj, func_name)
 	return Operators.Func.new(fn, args)
@@ -50,7 +59,8 @@ static func expr(expr_str:String, fields=null, target=null):
 
 static func expr_dp(expr_str:String, fields:Array, target=null):
 	return Operators.ExprArgsDeep.new(expr_str, fields, target)
-	
+
+
 static func open(field):
 	if field is Array:
 		return Operators.OpenMulti.new(field)

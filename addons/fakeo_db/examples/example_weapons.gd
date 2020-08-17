@@ -32,101 +32,109 @@ class WeaponRanged:
 		firing_rate = _firing_rate
 	
 	
-var data = fdb.list([
+var data = [
 	{name="Wooden Sword", type="melee", subtype="sword", dmg=2, atk_range=1.2},
 	Weapon.new("Katana", "melee", "sword", 16, 1.6),
 	Weapon.new("Nice Spear", "melee", "spear", 13, 2.0),
 	Weapon.new("Jan's Hammer", "melee", "blunt", 30, 1.3),
 	{name="John's Rock", type="ranged", subtype="thrown", dmg=21, atk_range=10.0, firing_rate=0.5},
 	{name="Wooden Bow", type="ranged", subtype="bow", dmg=4, atk_range=20.0, firing_rate=1.4},
+	{name="Crossbow", type="ranged", subtype="bow", dmg=9, atk_range=10.0, firing_rate=0.8},
 	WeaponRanged.new("Glass Bow", "ranged", "bow", 7, 20.0, 1.7),
 	{name="Ancient Bow", type="ranged", subtype="bow", dmg=10, atk_range=30.0, firing_rate=1.0},
-])
+]
 
-# ==============================================================;
+# ==============================================================
 
-const E = fdb.Enumerables
-# You may want to check out the Enumerables.gd if you plan on using this method.
-var where = E.WhereOp.new(data, ops.dict({dmg=ops.gteq(10)}))
-var project = E.Project.new(where, ["name", "dmg"])
-var take = E.Take.new(project, 3)
+const Proc = preload("res://addons/fakeo_db/scripts/Processors.gd")
+# You may want to check out the Processors.gd if you plan on using this method.
+var filter = Proc.FilterOp.new(ops.dict({dmg=ops.gteq(10)}))
+var map = Proc.MapOp.new(ops.open(["name", "dmg"]))
+var take = Proc.Take.new(3)
 
-func get_name_and_dmg_mult(item, mult):
-	return [item.name, item.dmg * item.atk_range, mult]
+func dmg_mult_range(item, mult):
+	return {name=item.name, dmg_by_range=item.dmg * item.atk_range * mult}
 	
-var select = E.Select.new(where, funcref(self, "get_name_and_dmg_mult"), [20])
+# this doesnt make sense
+var select_qry = fdb.qry([filter])\
+	.proc(Proc.MapOpAuto.new(funcref(self, "dmg_mult_range"), [1.5]))
 
 # -------------------------------------------------
-# the where function in the chaining method determines the type of Where function required
-# from the argument type: Dictionary->WhereDict, FuncRef->WhereFunc, OperatorBase->WhereOp
 var chain_queries = [
 	{
-		description="project fields from each object",
-		query=fdb.qry(data)\
-			.project(["name", "type", "subtype", "dmg"]) # project will print object fields otherwise we get [Reference:XXXXXX]
+		description="map fields from each object into an array",
+		result=fdb.qry()\
+			.map(["name", "type", "subtype", "dmg"])\
+			.apply(data)
 	},
 	{
-		description="project: name and dmg fields",
-		query=project
+		description="apply effect to fields and map remaining",
+		result=fdb.mapi(data, {dmg='_item.dmg*5'}, ["name", "type", "subtype"])
+	},	
+	{
+		description="create a field and map others",
+		result=fdb.filtqi(data, 
+			{subtype="bow"})\
+			.map(
+				{dmg_range_ratio='_item.dmg/_item.atk_range'}, 
+				["name", "subtype", "dmg", "atk_range"])
+	},		
+	{
+		description="map: name and dmg fields",
+		result=fdb.iter(data, [filter, map])
 	},
 	{
 		description="take: 3 from projected result",
-		query=take
+		result=fdb.iter(data, [filter, map, take])
 	},
 	{
-		description="select: multiply damage",
-		query=select
+		description="map: multiply damage",
+		result=fdb.iter(data, select_qry)
 	},
 	{
 		description="bows with dmg >= 7",
-		query=fdb.qry(data)\
-			.where({subtype="bow", dmg=ops.gteq(7)})\
-			.project(["name", "dmg", "atk_range"])
+		result=fdb.qry_iter(data)\
+			.filter({subtype="bow", dmg=ops.gteq(7)})\
+			.proc(Proc.MapOp.new(ops.open(["name", "dmg", "atk_range"])))
 	}
 ]
-# using a funcref
-# this can also be used in the 'first' and 'exists' functions of Enumerator class
+
 func _damage_or_sword(item):
 	return item.dmg > 20 or item.name=="Wooden Sword"
-
-var qry_root = fdb.qry()
+	
 var deferred_queries= [
 	{
 		description="subtype is in [sword, spear, thrown]",
-		query=qry_root.branch()\
-			.where({subtype=ops.in_(["sword", "spear", "thrown"])})\
-			.project(["name", "subtype", "dmg", "atk_range"])
+		query=fdb.qry()\
+			.filter({subtype=ops.in_(["sword", "spear", "thrown"])})\
+			.map(["name", "subtype", "dmg", "atk_range"])
 	},
 	{
 		description="filter by dmg and type using func",
-		# can use qry() in place of QueryBuilder.new()
-		query=qry_root\
-			.where(funcref(self, "_damage_or_sword"))\
-			.project(["name", "subtype", "dmg",])
-	},
+		query=fdb.qry()\
+			.filter(funcref(self, "_damage_or_sword"))\
+			.map(["name", "subtype", "dmg",])
+	},	
 	{
 		description="item damage >= 10 and 'o' in subtype",
-		# using a string in where() will execute it as code (using the Expression class)
-		# probably quite slow
-		query=qry_root\
-			.where('_item.dmg >= 10 and "o" in _item.subtype')\
-			.project(["name", "subtype", "dmg",])
+		query=fdb.filtq('dmg >= 10 and "o" in subtype', ["dmg", "subtype"])\
+			.map(["name", "subtype", "dmg",])
 	}
 ]
 	
+
 # ==============================================================
 
 func _run():
 	for q in chain_queries:
 		print_break_mini()
 		print(q.description)
-		for item in q.query: print(item)
+		for item in q.result: print(item)
 
-	qry_root.set_root(data)
 	for q in deferred_queries:
 		print_break_mini()
 		print(q.description)
-		for item in q.query: print(item)
+		for item in fdb.iter(data, q.query): print(item)
 
 # ==============================================================
 

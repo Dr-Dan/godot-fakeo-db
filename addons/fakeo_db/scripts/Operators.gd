@@ -1,29 +1,57 @@
+# the name that will be used to refer to the current
+# 	object in an expression i.e. {dmg = 2} =>'_item.dmg * 4'
+const EXPR_NAME = '_item'
+
+## =======================================================
+## UTILS
+class Util:
+	static func get_map_op(input, args=[])\
+		-> OperatorBase:
+		if input is OperatorBase:
+			return input
+		elif input is String:
+			return ExprArgsDeep.new(input, args)
+		elif input is FuncRef:
+			return Func.new(input, args)
+		elif input is Array:
+			return OpenMultiDeep.new(input)
+		elif input is Dictionary:
+			return DictApplied.new(input, args)
+		return null
+	
+	static func get_filter_op(input, args=[])\
+		-> OperatorBase:
+		if input is OperatorBase:
+			return input
+		elif input is FuncRef:
+			return Func.new(input, args)
+		elif input is String:
+			return ExprArgsDeep.new(input, args)
+		elif input is Dictionary:
+			return DictCompare.new(input)
+		return null
+		
 
 # ==============================================================
 	
 class OperatorBase:
 	func eval(item):
 		return false
-	
-"""
-	returns true if field in item. 
-		i.e. 'item.field' exists
-"""
-class HasField:
-	extends OperatorBase
-	var field
 
-	func _init(field: String):
-		self.field = field
+class OperatorIterator:
+	var ops = []
+
+	func _init(ops_:Array):
+		ops = ops_
 
 	func eval(item):
-		if not field in item:
-			return false
-		return true
-
+		item = ops[0].eval(item)
+		for i in range(1, ops.size()):
+			item = ops[0].eval(item)
+		return item
 
 # ==============================================================
-# EVALUATIVE OPERATORS; 'eval' should return a bool
+# DICTIONARY OPERATORS;
 
 """
 Compare a dictionary of values with those in an object
@@ -52,7 +80,7 @@ class DictCompare:
 	func eval(item):
 		return item_valid(item, fields)
 
-	func item_valid(item, comps: Dictionary):
+	func item_valid(item, comps: Dictionary)->bool:
 		for key in comps:
 			if key in item:
 				if comps[key].eval(item[key]):
@@ -64,6 +92,44 @@ class DictCompare:
 				return false
 		return true		
 
+			
+# NOTE: will not actually stop user from mutating an object
+class DictApplied:
+	extends OperatorBase
+	var fields:Dictionary
+	var open:OpenMultiDeep
+
+	func _all_ops(fields_:Dictionary):
+		for v in fields_.values():
+			if not v is OperatorBase and not v is String:
+				return false
+		return true
+
+	func _init(_fields:Dictionary, _other:Array=[]).():
+		fields = _fields
+		for k in fields:
+			fields[k] = Util.get_map_op(fields[k])
+		assert(_all_ops(_fields))
+		open = OpenMultiDeep.new(_other)
+
+	func eval(item):
+		return result(item, fields)
+
+	func result(item, fields: Dictionary):
+		var r = {}
+		for key in fields:
+			# if key in item:
+			# 	r[key] = fields[key].eval(item[key])
+			# else:
+			r[key] = fields[key].eval(item)
+		var other = open.eval(item)
+		for k in other:
+			r[k] = other[k]
+		return r		
+
+# ==============================================================
+# EVALUATIVE OPERATORS; 'eval' should return a bool
+		
 # ------------------------------------------------------------ 
 # LOGICAL
 """
@@ -196,6 +262,23 @@ class In:
 			if item == i: return true
 		return false
 		
+"""
+	returns true if field in item. 
+		i.e. 'item.field' exists
+"""
+class HasField:
+	extends OperatorBase
+	var field
+
+	func _init(field: String):
+		self.field = field
+
+	func eval(item):
+		if not field in item:
+			return false
+		return true
+
+
 class Contains:
 	extends OperatorBase
 	var item
@@ -251,7 +334,7 @@ class FuncAsArgs:
 	func eval(item):
 		return func_ref.call_funcv(item)
 
-	
+
 class Expr:
 	extends OperatorBase
 	
@@ -259,7 +342,7 @@ class Expr:
 	var target
 	
 	func _init(expr_str:String, _target=null).():
-		expr.parse(expr_str, ["_item"])
+		expr.parse(expr_str, [EXPR_NAME])
 		target = _target
 		
 	func eval(item):
@@ -275,7 +358,7 @@ class ExprArgs:
 	func _init(expr_str:String, fields:Array=[], _target=null).():
 		for f in fields:
 			self.fields.append(Open.new(f))
-		expr.parse(expr_str, ["_item"] + fields)
+		expr.parse(expr_str, [EXPR_NAME] + fields)
 		target = _target
 		
 	func eval(item):
@@ -283,7 +366,8 @@ class ExprArgs:
 		for f in fields:
 			args.append(f.eval(item))
 		return expr.execute([item] + args, target)
-		
+
+
 class ExprArgsDeep:
 	extends OperatorBase
 	
@@ -297,7 +381,7 @@ class ExprArgsDeep:
 			var f_split = f.split("/")
 			r.append(f_split[f_split.size()-1])
 			self.fields.append(OpenDeep.new(f))
-		expr.parse(expr_str,  ["_item"] + r)
+		expr.parse(expr_str,  [EXPR_NAME] + r)
 		target = _target
 		
 	func eval(item):
@@ -316,12 +400,27 @@ class ExprArgsDict:
 	
 	func _init(expr_str:String, _fields:Dictionary={}, _target=null).():
 		fields = _fields
-		expr.parse(expr_str, ["_item"] + fields.keys())
+		expr.parse(expr_str, [EXPR_NAME] + fields.keys())
 		target = _target
 		
 	func eval(item=null):
 		return expr.execute([item] + fields.values(), target)
-		
+	
+	
+class Open:
+	extends OperatorBase
+	
+	var field:String
+	
+	func _init(field:String).():
+		self.field = field
+
+	func eval(item):
+		var result = null
+		if field in item:
+			result = item[field]
+		return result
+						
 class OpenMulti:
 	extends OperatorBase
 
@@ -336,24 +435,7 @@ class OpenMulti:
 			if f in item:
 				n[f] = item[f]
 		return n
-		
-class Open:
-	extends OperatorBase
 	
-	var field:String
-	
-	func _init(field:String).():
-		self.field = field
-
-	func eval(item):
-		var result = null
-		assert(field in item)
-		if field in item:
-			result = item[field]
-			# item = result
-		return result
-						
-
 class OpenDeep:
 	extends OperatorBase
 	
@@ -378,20 +460,46 @@ class OpenDeep:
 			else: return null
 		return result
 	
+# TODO: this should be up with dict functions? Or be renamed. (Project?)
+# ValuesMulti is more inline with other OpenXXX classes
 class OpenMultiDeep:
 	extends OperatorBase
 
-	var fields:Dictionary = {}
+	# filled with OpenDeep
+	var ops:Dictionary = {}
 	
 	func _init(_fields:Array).():
 		for f in _fields:
-			fields[f] = OpenDeep.new(f)
+			ops[f] = OpenDeep.new(f)
+			assert(not ops[f].fields.empty())
 
 	func eval(item):
 		var result = {}
-		for f in fields:
-			if not fields[f].fields.empty():
-				var name = fields[f].fields.back()
-				# if f in item:
-				result[name] = fields[f].eval(item)
+#		for f in ops:
+#			var name = f.fields.back()
+#			result[name] = f.eval(item)
+		for f in ops:
+			if not ops[f].fields.empty():
+				var name = ops[f].fields.back()
+				result[name] = ops[f].eval(item)
+		return result
+
+# returns in the order provided an array of the requested fields
+# ['name', 'age'] => ['mike', 43]
+class ValueMulti:
+	extends OperatorBase
+
+	# filled with OpenDeep
+	var ops:Array = []
+	
+	func _init(_fields:Array).():
+		for f in _fields:
+			ops.append(OpenDeep.new(f))
+			assert(not ops.back().fields.empty())
+
+	func eval(item):
+		var result = []
+		for f in ops:
+			if not f.fields.empty():
+				result.append(f.eval(item))
 		return result
