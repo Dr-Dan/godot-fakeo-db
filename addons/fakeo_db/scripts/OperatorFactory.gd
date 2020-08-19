@@ -2,9 +2,18 @@ extends Resource
 
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
 
-static func op_iter(ops:Array):
-	return Operators.OperatorIterator.new(ops)
+static func op_iter(ops:Array, exit_op=null, is_predicate=false):
+	return Operators.OperatorIterator.new(ops, exit_op, is_predicate)
 
+static func comp(ops:Array, exit_op=null, is_predicate=false):
+	return op_iter(ops, exit_op, is_predicate)
+
+static func value(val):
+	return Operators.Value.new(val)
+
+static func even():
+	return Operators.Even.new()
+	
 static func gt(item):
 	return Operators.GT.new(item)
 	
@@ -13,6 +22,9 @@ static func lt(item):
 
 static func eq(item):
 	return Operators.Eq.new(item)
+
+static func neq(item):
+	return not_(Operators.Eq.new(item))
 
 static func gteq(item):
 	return or_([gt(item), eq(item)])
@@ -32,6 +44,12 @@ static func not_(item):
 static func in_(item):
 	return Operators.In.new(item)
 
+static func is_(type):
+	return Operators.Is.new(type)
+	
+static func is_var(type:int):
+	return Operators.IsVariant.new(type)
+
 static func contains(item):
 	return Operators.Contains.new(item)
 
@@ -46,33 +64,45 @@ static func func_as_args(obj:Object, func_name:String):
 	var fn = funcref(obj, func_name)
 	return Operators.FuncAsArgs.new(fn)
 
+# this is just and?!
+#static func if_then(if_op, then_op):
+#	var o = [if_op]
+#	if then_op is Array:
+#		for to in then_op:
+#			o.append(to)
+#	else: o.append(then_op)
+#	return and_(o)
+
+# should do while something in item is true
+#static func do_while(ops:Array, exit_op=null):
+#	return op_iter(ops, exit_op)
 
 static func expr(expr_str:String, fields=null, target=null):
 	if fields is Dictionary:
 		return Operators.ExprArgsDict.new(expr_str, fields, target)
 	elif fields is Array:
-		return Operators.ExprArgs.new(expr_str, fields, target)
-		
-#	if fields == null:
+		return Operators.ExprArgsDeep.new(expr_str, fields, target)
 	return Operators.Expr.new(expr_str, target)
-#	return Operators.ExprArgs.new(expr_str, fields, target)
 
-static func expr_dp(expr_str:String, fields:Array, target=null):
-	return Operators.ExprArgsDeep.new(expr_str, fields, target)
+# static func expr_dp(expr_str:String, fields:Array, target=null):
+# 	return Operators.ExprArgsDeep.new(expr_str, fields, target)
 
 
 static func open(field):
 	if field is Array:
-		return Operators.OpenMulti.new(field)
-	return Operators.Open.new(field)
-	
-static func open_dp(field):
-	if field is Array:
 		return Operators.OpenMultiDeep.new(field)
 	return Operators.OpenDeep.new(field)
+	
+# static func open_dp(field):
+# 	if field is Array:
+# 		return Operators.OpenMultiDeep.new(field)
+# 	return Operators.OpenDeep.new(field)
 
 static func dict(preds, _any=false, _fail_missing=true):
 	return Operators.DictCompare.new(preds, _any, _fail_missing)
+	
+static func dict_apply(input, args=[]):
+	return Operators.DictApplied.new(input, args)	
 
 static func op(item:String, arg):
 	match item:
@@ -80,8 +110,14 @@ static func op(item:String, arg):
 			return lt(arg)
 		">":
 			return gt(arg)
+		"<=":
+			return lteq(arg)
+		">=":
+			return gteq(arg)
 		"=", "==":
 			return eq(arg)
+		"!=":
+			return neq(arg)			
 		"and", "&", "&&":
 			return and_(arg)
 		"or", "|", "||":

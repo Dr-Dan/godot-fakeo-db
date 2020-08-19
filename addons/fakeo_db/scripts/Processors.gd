@@ -1,15 +1,50 @@
-const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
-const OpUtil = Operators.Util
+const OpUtil = preload("res://addons/fakeo_db/scripts/Operators.gd").Util
 const Exit = [null, false]
 	
 class Processor:
 	extends Resource
 	
-	func next(item, data={}):
+	func next(item, data):
 		return [item, true, false]
-		
+
+	func apply(coll, data):
+		var result = []
+		for n in coll:
+			var r = next(n, data)
+			if r[1]:
+				result.append(r[0])
+			if r[2]: break
+		return result	
+
 	func make_data():
 		return {}
+
+	func terminal(coll, idx, data):
+		return idx >= coll.size()
+
+class ProcIterator:
+	extends Processor
+
+	var procs:Array = []
+	func _init(procs_:Array):
+		procs = procs_
+	
+	func make_data():
+		var proc_data = []
+		for p in procs:
+			proc_data.append(p.make_data())		
+		return {proc_data=proc_data}
+			
+	func next(item, data):	
+		var r = [item, true, false]
+		var t = false
+		for i in procs.size():
+			var q = procs[i]
+			r = q.next(r[0], data.proc_data[i])
+			if r[2]: t = true
+			if not r[1]: break # or r[2]?
+		if t: r[2] = true
+		return r
 
 class Map:
 	extends Processor
@@ -20,7 +55,7 @@ class Map:
 	func get_result(item, data):
 		return item
 
-	func next(item, data={}):	
+	func next(item, data):	
 		return [get_result(item, data), true, false]
 	
 class MapOp:
@@ -35,6 +70,32 @@ class MapOp:
 	func get_result(item, data):
 		return pred_op.eval(item)
 
+
+class IterateOp:
+	extends Processor
+	const Ops = preload("res://addons/fakeo_db/scripts/Operators.gd")
+	const OpBase = Ops.OperatorBase
+	const OpFunc = Ops.Func
+	
+	var mut_op
+
+	func make_data():
+		return {started=false, value=null}
+
+	func _init(mut_op_:OpBase):
+		mut_op = mut_op_
+
+	func get_result(item, data):
+		if not data.started:
+			data.started = true
+			data.value = item
+		else:
+			data.value = mut_op.eval2(item, data.value)
+		return data.value
+
+	func next(item, data):	
+		return [get_result(item, data), true, false]	
+		
 class Filter:
 	extends Processor
 
@@ -44,7 +105,7 @@ class Filter:
 	func get_result(item, data):
 		return true
 
-	func next(item, data={}):
+	func next(item, data):
 		return [item, get_result(item, data), false]
 
 class FilterIndexed:
@@ -53,7 +114,7 @@ class FilterIndexed:
 	func make_data():
 		return {i=0}
 		
-	func next(item, data={}):
+	func next(item, data):
 		var r = .next(item, data)
 		data.i += 1
 		return r
@@ -95,8 +156,8 @@ class TakeWhile:
 		data.t = not r
 		return r
 		
-	func next(item, data={}):
-		var r = .next(item)
+	func next(item, data):
+		var r = .next(item, data)
 		r[2] = data.t
 		return r 
 		
@@ -107,7 +168,7 @@ class Take:
 	func _init(count:int):
 		self.count = count
 
-	func next(item, data={}):
+	func next(item, data):
 		var r = .next(item, data)
 		r[2] = data.i >= count
 		return r 

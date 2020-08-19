@@ -12,16 +12,6 @@ var items = []
 func _init(items_:Array=[]) -> void:
 	items = [] + items_
 
-func to_iter(coll=[]) -> Iterable:
-	return Iterable.new(items, coll)
-
-# func from_iter(iter: Iterable)\
-# 	-> Query:
-# 	return get_script().new(iter.query)
-	
-func apply(coll: Array):
-	return to_iter(coll).run()
-
 # =======================================================
 	
 func proc(item)\
@@ -53,13 +43,11 @@ func skip(amt: int)\
 func map(input, args:Array=[])\
 	-> Query:
 	return proc(Proc.MapOpAuto.new(input, args))
+	
+func reduce(op)\
+	-> Query:
+	return proc(Proc.IterateOp.new(op))
 
 func as_args(fn:FuncRef)\
 	-> Query:
 	return map(Operators.FuncAsArgs.new(fn))
-
-# =======================================================
-## TODO: call when query changed
-##func _on_item_added(e):
-##	pass
-#

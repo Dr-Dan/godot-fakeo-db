@@ -1,24 +1,36 @@
 extends Resource
-# TODO: wtf is query_data? This needs to be obvious somewhere
+
+const Proc = preload("res://addons/fakeo_db/scripts/Processors.gd")
+
 var source = []
 var index = -1
-var query:Array = []
-var query_data:Array = []
+var proc:Proc.ProcIterator
 var current
 var terminal = false
-				
+var query_data = {}	
+
 func _init(query_, source_=[]):
 	index = -1
 	source = [] + source_ # TODO: copy src?; [] + source
-	query = query_
+	proc = Proc.ProcIterator.new(query_)
 	
-func run():
-	return run_qry_coll(query, get_qry_data(query), source)
-		
+func run() -> Array:
+	var result = []
+	var data = proc.make_data()
+	if proc.procs.size() == 1:
+		return proc.apply(source, data)
+
+	for n in source:
+		var r = proc.next(n, data)
+		if r[1]:
+			result.append(r[0])
+		if r[2]: break
+	return result	
+
 func _iter_init(arg):
 	if source.empty(): return false
 	reset()
-	query_data = get_qry_data(query)
+	query_data = proc.make_data()
 	index = 0
 	return _iter_next(arg)
 			
@@ -27,7 +39,7 @@ func _iter_next(arg):
 	var idx = index
 	var r = []
 	for i in range(idx, source.size()):
-		r = run_qry_item(query, source[i], query_data)
+		r = proc.next(source[i], query_data)
 		index += 1
 		terminal = r[2]
 		if r[1]:
@@ -43,11 +55,10 @@ func reset():
 	index = -1
 	current = null
 	terminal = false
-
-# TODO: test
+	query_data = {}
+	
 # get item at index in enumerable
 func at(index):
-	# slice source -> run_qry_coll and return last result
 	var next = _iter_init(null)
 	while next and index > 0:
 		index -= 1
@@ -58,10 +69,14 @@ func at(index):
 		return r
 	return null
 	
-
-# get first in enumerable that satisfies conditions
+func contains(i) -> bool:
+	return i in run()
+	
 func front():
 	return at(0)
+
+func ffront():
+	return at(1)
 
 func back():
 	var result = run()
@@ -69,29 +84,15 @@ func back():
 		return null
 	return result.back()
 	
-func size():
+func bback():
+	var result = run()
+	var N = result.size()
+	if N < 2:
+		return null
+	return result[N-2]
+			
+func size() -> int:
 	return run().size()
-				
-static func run_qry_coll(qry, data, coll):
-	var result = []
-	for n in coll:
-		var r = run_qry_item(qry, n, data)
-		if r[1]:
-			result.append(r[0])
-		if r[2]: break
-	return result
-	
-static func run_qry_item(qry, item, data):
-	var r = [item, true, false]
-	for i in qry.size():
-		var q = qry[i]
-		r = q.next(r[0], data[i])
-		if not r[1] or r[2]: break
-	return r
 
-static func get_qry_data(qry):
-	var r = []
-	for q in qry:
-		r.append(q.make_data())
-	return r
-				
+func empty() -> bool:
+	return size() == 0

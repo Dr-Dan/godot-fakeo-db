@@ -47,38 +47,35 @@ var data = [
 # ==============================================================
 
 const Proc = preload("res://addons/fakeo_db/scripts/Processors.gd")
-# You may want to check out the Processors.gd if you plan on using this method.
+
 var filter = Proc.FilterOp.new(ops.dict({dmg=ops.gteq(10)}))
 var map = Proc.MapOp.new(ops.open(["name", "dmg"]))
 var take = Proc.Take.new(3)
-
-func dmg_mult_range(item, mult):
-	return {name=item.name, dmg_by_range=item.dmg * item.atk_range * mult}
-	
-# this doesnt make sense
-var select_qry = fdb.qry([filter])\
-	.proc(Proc.MapOpAuto.new(funcref(self, "dmg_mult_range"), [1.5]))
-
+		
 # -------------------------------------------------
+# TODO: only use deferred in this example
 var chain_queries = [
 	{
 		description="map fields from each object into an array",
-		result=fdb.qry()\
-			.map(["name", "type", "subtype", "dmg"])\
-			.apply(data)
+		result=fdb.mapply(data, ["name", "type", "subtype", "dmg"])			
 	},
 	{
-		description="apply effect to fields and map remaining",
-		result=fdb.mapi(data, {dmg='_item.dmg*5'}, ["name", "type", "subtype"])
-	},	
+		description="apply effect (*5) to each and select others into an iterator",
+		result=fdb.mapi(data, {dmg='_x.dmg*5'}, ["name", "type", "subtype"])
+	},
 	{
 		description="create a field and map others",
-		result=fdb.filtqi(data, 
-			{subtype="bow"})\
-			.map(
-				{dmg_range_ratio='_item.dmg/_item.atk_range'}, 
-				["name", "subtype", "dmg", "atk_range"])
-	},		
+		result=fdb.apply(data, fdb.qry()\
+			.filter({subtype="bow"})\
+			.map({dmg_range_ratio='_x.dmg/_x.atk_range'}, 
+				["name", "subtype", "dmg", "atk_range"]))
+	},
+	{
+		description="bows with dmg >= 7",
+		result=fdb.iter(data, fdb.qry()\
+			.filter({subtype="bow", dmg=ops.gteq(7)})\
+			.proc(Proc.MapOp.new(ops.open(["name", "dmg", "atk_range"]))))
+	},	
 	{
 		description="map: name and dmg fields",
 		result=fdb.iter(data, [filter, map])
@@ -87,16 +84,7 @@ var chain_queries = [
 		description="take: 3 from projected result",
 		result=fdb.iter(data, [filter, map, take])
 	},
-	{
-		description="map: multiply damage",
-		result=fdb.iter(data, select_qry)
-	},
-	{
-		description="bows with dmg >= 7",
-		result=fdb.qry_iter(data)\
-			.filter({subtype="bow", dmg=ops.gteq(7)})\
-			.proc(Proc.MapOp.new(ops.open(["name", "dmg", "atk_range"])))
-	}
+
 ]
 
 func _damage_or_sword(item):
@@ -104,7 +92,7 @@ func _damage_or_sword(item):
 	
 var deferred_queries= [
 	{
-		description="subtype is in [sword, spear, thrown]",
+		description="subtype is in [sword, spear, thrown] using an op",
 		query=fdb.qry()\
 			.filter({subtype=ops.in_(["sword", "spear", "thrown"])})\
 			.map(["name", "subtype", "dmg", "atk_range"])
@@ -119,13 +107,38 @@ var deferred_queries= [
 		description="item damage >= 10 and 'o' in subtype",
 		query=fdb.filtq('dmg >= 10 and "o" in subtype', ["dmg", "subtype"])\
 			.map(["name", "subtype", "dmg",])
-	}
+	},
+	{
+		description="type is Weapon",
+		query=fdb.filtq(ops.is_(Weapon)).map(['name'])
+	},	
+	{
+		description="type is Dictionary; can't use Dictionary so must use Variant type",
+		query=fdb.filtq(ops.is_var(TYPE_DICTIONARY)).map(['name'])
+	}	
 ]
 	
 
 # ==============================================================
 
+func _add(x, y):
+	return {dmg=x.dmg + y.dmg}
+	
 func _run():
+	
+	print(2 in fdb.mapply(data, ops.open('dmg')))
+	print(fdb.in_(2, fdb.mapi(data, ops.open('dmg'))))
+	print(fdb.mapi(data, ops.open('dmg')).contains(2))
+	
+	# pass the item through operators in sequence
+	printt('dmgs + 1', fdb.mapply(data, ops.op_iter([
+		ops.open('dmg'), ops.expr('_x + 1')])))
+	# reduce only works with expressions and funcrefs
+	printt('reduce from iter:', fdb.reduce(
+		fdb.mapi(data, ops.open('dmg')), '_x+_y'))
+	printt('reduce total damage:', fdb.reduce(
+		data, funcref(self, '_add'))) # can also use ops.func_(self, '_add')
+	
 	for q in chain_queries:
 		print_break_mini()
 		print(q.description)

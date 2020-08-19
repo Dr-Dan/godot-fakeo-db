@@ -24,7 +24,7 @@ func _run():
 
 	var e = fdb.qry([1,3,4])
 	
-	var qe2 = e.select_op(ops.expr('_item * 10'))
+	var qe2 = e.select_op(ops.expr('_x * 10'))
 	print(qe2.to_array())
 	
 	var do_x = fdb.Operators.ExprArgsDict.new('x + y' , {x=2, y=4}).eval(null)
@@ -35,7 +35,7 @@ func _run():
 	)
 	print("y: %s" % str(do_y))
 	
-	var get_food = ops.expr('{"name":_item.name, "food":_item.bag.food}')
+	var get_food = ops.expr('{"name":_x.name, "food":_x.bag.food}')
 	print(get_food.eval(
 		{name="Sally", age=42, bag={food=22}}))
 	print(l2.select_op(get_food).to_array())
@@ -43,8 +43,8 @@ func _run():
 		{name="Holy Spear", age=42, dmg=2, atk_rate=1.75}))
 		
 	var ll = fdb.cltn()
-	l2.for_each_op(ops.expr('self.append(_item)', [], ll))
-	fdb.qry(ll).for_each_op(ops.expr('print(_item)'))
+	l2.for_each_op(ops.expr('self.append(_x)', [], ll))
+	fdb.qry(ll).for_each_op(ops.expr('print(_x)'))
 	
 	print(ops.expr_dp('matches*food', ["bag/matchbox/matches", "bag/food"]).eval(l2.at(0)))
 	print(ops.open_dp('bag/matchbox').eval(l2.at(0)))

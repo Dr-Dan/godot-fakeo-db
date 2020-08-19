@@ -31,9 +31,9 @@ class Address:
 		self.street = street
 		self.value = value
 		
-var qry_root = fdb.qry().where("_item.age > 50").project(["name", "age"])
+var qry_root = fdb.qry().where("_x.age > 50").project(["name", "age"])
 #var qry = 
-#var qd = qry_root.where("_item.age > 50").project(["name", "age"])
+#var qd = qry_root.where("_x.age > 50").project(["name", "age"])
 
 func _run():
 	var name_table = [

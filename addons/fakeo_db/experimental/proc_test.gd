@@ -31,7 +31,7 @@ func _run() -> void:
 	var qr = QR.new([po], name_table)
 #	print(qr.run())
 #	for i in qr: print(i)
-#	print(fdb.qry_proc([Proc.TakeWhile.new(ops.expr('_item.age < 40'))]).apply(name_table))
+#	print(fdb.qry_proc([Proc.TakeWhile.new(ops.expr('_x.age < 40'))]).apply(name_table))
 	print(fdb.qry()\
 		.where("hat", ["bag/hat"])\
 		.project(["bag/hat", "name"])\
@@ -51,9 +51,9 @@ func _run() -> void:
 
 
 	# TODO map as opposed to reduce. i.e. project with mutations
-#	var ps2 = Proc.ProjectOp.new(ops.dict({age=ops.expr('_item * 10')}))
+#	var ps2 = Proc.ProjectOp.new(ops.dict({age=ops.expr('_x * 10')}))
 #	var ps2 = Proc.SelectOp.new(ops.expr('{"age":age * 4, "name":name}', ["age", "name"]))
-#	var ps2 = Proc.SelectOp.new(ops.expr('{"name":_item.name, "age":_item.age * 10}'))
+#	var ps2 = Proc.SelectOp.new(ops.expr('{"name":_x.name, "age":_x.age * 10}'))
 
 	var qry = [p]
 	var runner = fdb.qry(qry).proc(Proc.Take.new(2)).skip(1).to_iter(name_table)
