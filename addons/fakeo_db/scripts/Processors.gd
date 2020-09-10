@@ -7,20 +7,19 @@ class Processor:
 	func next(item, data):
 		return [item, true, false]
 
-	func apply(coll, data):
-		var result = []
-		for n in coll:
-			var r = next(n, data)
-			if r[1]:
-				result.append(r[0])
-			if r[2]: break
-		return result	
-
 	func make_data():
 		return {}
 
-	func terminal(coll, idx, data):
-		return idx >= coll.size()
+	# allows for faster impls over lists
+	# func apply(coll):
+	# 	var data = make_data()
+	# 	var result = []
+	# 	for n in coll:
+	# 		var r = next(n, data)
+	# 		if r[1]:
+	# 			result.append(r[0])
+	# 		if r[2]: break
+	# 	return result	
 
 class ProcIterator:
 	extends Processor
@@ -46,20 +45,9 @@ class ProcIterator:
 		if t: r[2] = true
 		return r
 
-class Map:
-	extends Processor
 
-	func _init().():
-		pass
-
-	func get_result(item, data):
-		return item
-
-	func next(item, data):	
-		return [get_result(item, data), true, false]
-	
 class MapOp:
-	extends Map
+	extends Processor
 	const OpBase = preload("res://addons/fakeo_db/scripts/Operators.gd").OperatorBase
 	
 	var pred_op
@@ -70,6 +58,9 @@ class MapOp:
 	func get_result(item, data):
 		return pred_op.eval(item)
 
+	func next(item, data):	
+		return [get_result(item, data), true, false]
+	
 
 class IterateOp:
 	extends Processor
@@ -159,6 +150,21 @@ class TakeWhile:
 	func next(item, data):
 		var r = .next(item, data)
 		r[2] = data.t
+		return r 
+
+class Slice:
+	extends FilterIndexed
+	var st_idx: int
+	var end_idx: int
+	
+	func _init(st_idx_:int, end_idx_:int):
+		st_idx = st_idx_
+		end_idx = end_idx_
+
+	func next(item, data):
+		var r = .next(item, data)
+		r[1] = data.i >= st_idx
+		r[2] = data.i >= end_idx
 		return r 
 		
 class Take:

@@ -19,7 +19,7 @@ func _run():
 	
 	ex_util.print_break()
 	print("using a collection of objects (Dictionary)\n")
-	openings()
+	open_operators()
 	
 # ==============================================================	
 
@@ -52,7 +52,7 @@ func primitive_intro():
 	# mapply and fapply return arrays
 	# f(ilter)apply
 	# filter returns all in data where the op returns true
-	printt('x is even (x%2==0)',
+	printt('x is even',
 		fdb.fapply(data, ops.even()))
 					
 	# some ops contain others					
@@ -86,7 +86,7 @@ func primitive_intro():
 	printt('pow(x, y)',
 		fdb.mapply(data, 'pow(_x, y)', {y=10}))
 
-	# comp passes each entry through a series of operators
+	# comp(ose) passes each entry through a series of operators
 	printt('x + 3 + y > 8',
 		fdb.mapply(data,
 			ops.comp([
@@ -94,8 +94,7 @@ func primitive_intro():
 				ops.func_(self, 'plus_y', [2]),
 				ops.gt(8)
 				])))
-				
-				
+
 	# reduce works with expressions, funcrefs, Operators.Expr, Operators.Func
 	printt('add all items:',
 		fdb.reduce(data, '_x + _y'))
@@ -113,38 +112,36 @@ var name_table = [
 	{name="Mike", age=22, addr_id=0, inv={money={coin=25}, weapon={gun=1, knife=2}, food={nut=2}}},
 	{name="Anne", age=16, addr_id=1, inv={money={coin=2}, weapon={knife=2}, food={}}},
 	{name="xXx", age=16, addr_id=1, inv={money={coin=2000}, weapon={knife=10}, food={}, drink={relentless=1}}},
-	{name="Trish", age=49, addr_id=2, inv={food={berry=20}}}]
+	{name="Carla", age=49, addr_id=2, inv={food={berry=20}}}]
 
 var addr_table = [
 	{addr_id=0, street="vale road", value=20000},
 	{addr_id=1, street="the lane", value=10000},
 	{addr_id=2, street="london road", value=35250}]
 
-# ==============================================================	
+# ==============================================================
 # TODO: a breezy filter example + logic i.e. not, or, and, is etc
-# ==============================================================	
+# ==============================================================
 
 var id = 0
-func openings():
+func open_operators():
 	# get the value of a field in each item
 	# this is only if open is called with a single String (not an Array or Dictionary)
 	printt('names',
 		fdb.mapply(name_table, ops.open('name')))
 		
 	# open multiple fields; use slashes to go deeper
+	# result is a dictionary for each
 	printt('view weapons, name and age',
 		fdb.mapply(name_table, ['inv/weapon', 'name', 'age']))
 		
-	# TODO: does not work for some reason
-#	var food_qry = fdb.mapq({has_food='not _x.inv.food.empty()'}, ['name', 'inv/food'])
-#	print(fdb.mapply(name_table, fdb.mapq(['name'])))
 
 	# use a dictionary allows mapping to fields that do not yet exist
 	# 	fields in the array will be opened as before
+#	var food_qry = ops.dict_apply({has_food='not _x.inv.food.empty()'}, ['name', 'inv/food'])
 	printt('who has food?',
 		fdb.mapply(name_table,
 			{has_food='not _x.inv.food.empty()'}, ['name', 'inv/food']))
-		
 	# TODO: break into 2 args, move into filter example	
 	# simple version in numbers?
 	"""
@@ -157,7 +154,7 @@ func openings():
 		ops.neq(null), true)
 			
 	printt('who has coin >= 10?',
-		fdb.apply(name_table, fdb.qry()\
+		fdb.qapply(name_table, fdb.qry()\
 			.filter(op)\
 			.map(['name', 'inv/money'])))
 			

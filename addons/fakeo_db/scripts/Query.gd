@@ -3,24 +3,27 @@ class_name Query
 
 const Proc = preload("res://addons/fakeo_db/scripts/Processors.gd")
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
-const Iterable = preload("res://addons/fakeo_db/scripts/Iterable.gd")
-
 const OpBase = Operators.OperatorBase
 
-var items = []
+# var items = []
+var proc
 
 func _init(items_:Array=[]) -> void:
-	items = [] + items_
+	# items = [] + items_
+	proc = Proc.ProcIterator.new(items_)
+
+func items():
+	return proc.procs
 
 # =======================================================
-	
+
 func proc(item)\
 	-> Query:
-	return get_script().new(items + [item])
-	
+	return get_script().new(proc.procs + [item])
+
 func proc_array(item:Array)\
 	-> Query:
-	return get_script().new(items + item)
+	return get_script().new(proc.procs + item)
 
 # -------------------------------------------------------
 
@@ -43,7 +46,7 @@ func skip(amt: int)\
 func map(input, args:Array=[])\
 	-> Query:
 	return proc(Proc.MapOpAuto.new(input, args))
-	
+
 func reduce(op)\
 	-> Query:
 	return proc(Proc.IterateOp.new(op))

@@ -48,7 +48,7 @@ static func is_(type):
 	return Operators.Is.new(type)
 	
 static func is_var(type:int):
-	return Operators.IsVariant.new(type)
+	return Operators.IsVariantType.new(type)
 
 static func contains(item):
 	return Operators.Contains.new(item)

@@ -100,10 +100,10 @@ var where_not_age = fdb.qry()\
 
 func age_comp_builder_test(name_table):
 	print("age > 20 and age < 70")
-	print(fdb.apply(name_table, where_age))
+	print(fdb.qapply(name_table, where_age))
 	print_break_mini()
 	print("not (age > 20 and age < 70) == age < 20 and age > 70")
-	print(fdb.apply(name_table, where_not_age))
+	print(fdb.qapply(name_table, where_not_age))
 
 ## ==============================================================
 
@@ -120,7 +120,7 @@ func house_search_test(name_table, addr_table, value=30000):
 		.map(["name", "addr_id"]))
 
 	print("house value > %d" % value)
-	print(fdb.apply(addr_table, value_qry))
+	print(fdb.qapply(addr_table, value_qry))
 	print_break_mini()
 	print("homeowners filter house value > %d (addr_id in 'addr_ids')" % value)
 	print(homeowners.run())
@@ -188,7 +188,7 @@ func collection_append_remove():
 
 	# func_as_args only works when supplied with arrays
 	# each item is used as an argument for the referenced function (connect)
-	var r = fdb.apply(connections, fdb.qry()\
+	var r = fdb.qapply(connections, fdb.qry()\
 		.as_args(funcref(people, "connect")))
 #	var r = fdb.mapply(connections, 
 # 		ops.expr('p.connect(_x[0], _x[1], _x[2])', {p=people}))
@@ -215,7 +215,7 @@ func collection_append_remove():
 	print("Items Removed:")
 	print(removed.to_array())
 
-	fdb.apply(connections, 
+	fdb.qapply(connections, 
 	fdb.qry().as_args(funcref(people, "disconnect")))
 	# no signals anymore; this will not cause printage
 	people.append({name="unknown", age=21, addr_id=1})

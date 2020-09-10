@@ -4,42 +4,52 @@ const Proc = preload("res://addons/fakeo_db/scripts/Processors.gd")
 
 var source = []
 var index = -1
-var proc:Proc.ProcIterator
 var current
 var terminal = false
-var query_data = {}	
+var query_data = {}
+var proc:Proc.Processor
 
-func _init(query_, source_=[]):
+func _init(proc_, source_=[]):
 	index = -1
 	source = [] + source_ # TODO: copy src?; [] + source
-	proc = Proc.ProcIterator.new(query_)
-	
-func run() -> Array:
-	var result = []
-	var data = proc.make_data()
-	if proc.procs.size() == 1:
-		return proc.apply(source, data)
+	proc = proc_
 
-	for n in source:
+# exit by default
+func next(item, data):
+	return proc.next(item, data)
+
+func make_data():
+	return proc.make_data()
+
+func apply(coll):
+	var data = make_data()
+	var result = []
+	for n in coll:
 		var r = proc.next(n, data)
 		if r[1]:
 			result.append(r[0])
 		if r[2]: break
-	return result	
+	return result
+
+func run() -> Array:
+	return apply(source)
+
+func _terminal(coll, idx):
+	return terminal or idx > coll.size()-1
 
 func _iter_init(arg):
 	if source.empty(): return false
 	reset()
-	query_data = proc.make_data()
+	query_data = make_data()
 	index = 0
 	return _iter_next(arg)
 			
 func _iter_next(arg):
 	if terminal: return false
-	var idx = index
 	var r = []
-	for i in range(idx, source.size()):
-		r = proc.next(source[i], query_data)
+#	for i in range(idx, source.size()):
+	while not terminal:
+		r = next(source[index], query_data)
 		index += 1
 		terminal = r[2]
 		if r[1]:

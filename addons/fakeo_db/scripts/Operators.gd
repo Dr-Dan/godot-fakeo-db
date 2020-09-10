@@ -158,6 +158,7 @@ class DictApplied:
 # LOGICAL
 """
 	returns true if all operators in 'cmps' are true
+	will exit early if a result is false
 	Expects an array of operators
 
 	usage:
@@ -176,6 +177,28 @@ class And:
 				return false
 		return true
 
+"""
+	returns true if all operators in 'cmps' are true
+	doesn't exit early if a result is false
+	Expects an array of operators
+
+	usage:
+		var comp = All.new([GT.new(20), LT.new(70)]) # 20 < age < 70
+
+"""
+class All:
+	extends OperatorBase
+	var cmps
+	func _init(cmps:Array):
+		self.cmps = cmps
+		
+	func eval(item):
+		var r = true
+		for c in cmps:
+			if not c.eval(item):
+				r = false
+		return r
+	
 """
 	returns true if any operators in 'cmps' are true
 	Expects an array of operators
@@ -212,30 +235,6 @@ class Not:
 		return true
 
 """
-	returns true for any item
-"""
-class Any:
-	extends OperatorBase
-
-	func _init():
-		pass
-		
-	func eval(item):
-		return true
-	
-"""
-	returns false for any item
-"""
-class None:
-	extends OperatorBase
-
-	func _init():
-		pass
-		
-	func eval(item):
-		return false
-
-"""
 	returns false for any item
 """
 class Is:
@@ -247,7 +246,7 @@ class Is:
 	func eval(item):
 		return item is type		
 		
-class IsVariant:
+class IsVariantType:
 	extends OperatorBase
 	var type:int
 	func _init(type_:int):

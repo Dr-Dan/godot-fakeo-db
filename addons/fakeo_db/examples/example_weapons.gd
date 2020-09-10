@@ -65,7 +65,7 @@ var chain_queries = [
 	},
 	{
 		description="create a field and map others",
-		result=fdb.apply(data, fdb.qry()\
+		result=fdb.qapply(data, fdb.qry()\
 			.filter({subtype="bow"})\
 			.map({dmg_range_ratio='_x.dmg/_x.atk_range'}, 
 				["name", "subtype", "dmg", "atk_range"]))
