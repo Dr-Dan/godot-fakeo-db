@@ -76,7 +76,8 @@ func print_lists(name_table, addr_table):
 	var query_names = fdb.iter(name_table, 
 		fdb.mapq(ops.open(["name", "age", "addr_id"])))
 
-	var query_addr = fdb.mapi(addr_table, ["addr_id", "street", "value"])
+	var query_addr = fdb.mapi(addr_table, 
+		ops.open(["addr_id", "street", "value"]))
 
 	print("PEOPLE:")
 	for i in query_names: print(i)

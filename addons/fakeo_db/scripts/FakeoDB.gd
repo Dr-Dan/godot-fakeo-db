@@ -16,9 +16,6 @@ static func qry(query=[]) -> Query:
 	return Query.new(_qry_to_arr(query))
 
 static func iter(coll, query=[]) -> Iterable:
-	# TODO: should remove this
-	# if coll is Iterable:
-	# 	coll = coll.run()
 	return Iterable.new(_input_to_proc(query), coll)
 
 static func in_(v, it) -> bool:
@@ -34,12 +31,11 @@ static func reduce(coll, op, args=[]):
 	# return iter(coll, qry().reduce(op)).back()
 	return iter(coll, Processors.IterateOp.new(op)).back()
 
-
 static func mapq(op, args=[]) -> Query:
-	return qry([Query.Proc.MapOpAuto.new(op, args)])
+	return qry([Processors.MapOpAuto.new(op, args)])
 
 static func filtq(op, args=[]) -> Query:
-	return qry([Query.Proc.FilterOpAuto.new(op, args)])
+	return qry([Processors.FilterOpAuto.new(op, args)])
 
 
 static func qapply(coll, qry) -> Array:

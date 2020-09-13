@@ -11,10 +11,7 @@ var proc:Proc.Processor
 
 func _init(proc_, source_=[]):
 	index = -1
-	if source_ is Array:
-		source = [] + source_ # TODO: copy src?; [] + source
-	else:
-		source = source_
+	source = source_
 	proc = proc_
 
 # exit by default
@@ -50,7 +47,8 @@ func _iter_init(arg):
 func _iter_next(arg):
 	if terminal: return false
 	var r = []
-	for i in range(index, source.size()):
+	var st = index
+	for i in range(st, source.size()):
 	# while not terminal:
 		r = next(source[index], query_data)
 		index += 1
