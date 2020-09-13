@@ -203,10 +203,8 @@ func collection_append_remove():
 
 	# calling append, erase will in turn trigger the signals from earlier
 	fdb.mapply(items, funcref(people, "append"))
-	fdb.mapply(items, funcref(people, "erase"))
-	# NOTE: it is often quicker to use a for loop
-#	for i in items: people.append(i)
-#	for i in items: people.erase(i)
+	# it is often quicker to use a for loop
+	for i in items: people.erase(i)
 	
 	print_break_mini()
 

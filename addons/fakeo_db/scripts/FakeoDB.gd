@@ -17,8 +17,8 @@ static func qry(query=[]) -> Query:
 
 static func iter(coll, query=[]) -> Iterable:
 	# TODO: should remove this
-	if coll is Iterable:
-		coll = coll.run()
+	# if coll is Iterable:
+	# 	coll = coll.run()
 	return Iterable.new(_input_to_proc(query), coll)
 
 static func in_(v, it) -> bool:
@@ -34,6 +34,14 @@ static func reduce(coll, op, args=[]):
 	# return iter(coll, qry().reduce(op)).back()
 	return iter(coll, Processors.IterateOp.new(op)).back()
 
+
+static func mapq(op, args=[]) -> Query:
+	return qry([Query.Proc.MapOpAuto.new(op, args)])
+
+static func filtq(op, args=[]) -> Query:
+	return qry([Query.Proc.FilterOpAuto.new(op, args)])
+
+
 static func qapply(coll, qry) -> Array:
 	return iter(coll, qry).run()
 	
@@ -42,13 +50,6 @@ static func mapply(coll, input, args=[]) -> Array:
 	
 static func fapply(coll, input, args=[]) -> Array:
 	return filti(coll, input, args).run()
-	
-
-static func mapq(op, args=[]) -> Query:
-	return qry([Query.Proc.MapOpAuto.new(op, args)])
-
-static func filtq(op, args=[]) -> Query:
-	return qry([Query.Proc.FilterOpAuto.new(op, args)])
 	
 
 static func mapi(coll, op, args=[]) -> Iterable:
@@ -60,18 +61,17 @@ static func filti(coll, op, args=[]) -> Iterable:
 
 static func _input_to_proc(query) -> Processors.Processor:
 	if query is Iterable or query is Query:
-		return query.proc
+		return Processors.ProcIterator.new(query.items)
 	elif query is Array:
 		return Processors.ProcIterator.new(query)
 	assert(query is Processors.Processor)
 	return query
 		
-
 static func _qry_to_arr(query) -> Array:
 	if query is Iterable:
 		return query.proc.procs
 	elif query is Query:
-		return [] + query.proc.procs
+		return [] + query.items
 	elif query is Processors.Processor:
 		return [query]
 	assert(query is Array)

@@ -42,6 +42,9 @@ class OperatorBase:
 	func eval(item):
 		return false
 
+	func eval2(x_next, x_total):
+		return x_next
+	
 class Value:
 	extends OperatorBase
 	var value
@@ -177,6 +180,11 @@ class And:
 				return false
 		return true
 
+	func eval2(x_next, x_total):
+		for c in cmps:
+			if not c.eval(x_total) or not c.eval(x_next):
+				return false
+		return true			
 """
 	returns true if all operators in 'cmps' are true
 	doesn't exit early if a result is false
@@ -218,7 +226,12 @@ class Or:
 			if c.eval(item):
 				return true
 		return false
-				
+
+	func eval2(x_next, x_total):
+		for c in cmps:
+			if c.eval(x_total) and c.eval(x_next):
+				return true
+		return false				
 """
 	returns false if 'cmp.eval(item)' returns true and vice versa
 """
@@ -278,7 +291,31 @@ class LT:
 		
 	func eval(item):
 		return item < val
+
+#class OpCaller1:
+#	extends OperatorBase
+#	var op
+#	var arg
+#
+#	func _init(op_, arg_):
+#		self.op = op_
+#		self.arg = arg_
+#
+#	func eval(item0, item1=null):
+#		return op.eval(item0, arg)
+#
+#class OpCaller2:
+#	extends OperatorBase
+#	var op
+#
+#	func _init(op_):
+#		self.op = op_
+#
+#	func eval(item0, item1=null):
+#		return op.eval(item0, item1)
 	
+
+
 """
 	Greater than
 """
@@ -290,7 +327,10 @@ class GT:
 		
 	func eval(item):
 		return item > val
-			
+
+	func eval2(item0, item1):
+		return item0 > item1	
+				
 """
 	Equal to
 """
@@ -301,7 +341,7 @@ class Eq:
 		self.val = val
 		
 	func eval(item):
-		return item == val
+		return eval2(item, val)
 		
 	func eval2(item0, item1):
 		return item0 == item1	
@@ -315,13 +355,17 @@ class In:
 		self.container = container
 		
 	func eval(item):
-		for i in container:
-			if item == i: return true
-		return false
+		# for i in container:
+		# 	if item == i: return true
+		# return false
+		return eval2(item, container)
 		
 	func eval2(item0, item1):
-		return item0 in item1	
-			
+		# return item0 in item1	
+		for i in item1:
+			if item0 == i: return true
+		return false
+		
 """
 	returns true if field in item. 
 		i.e. 'item.field' exists

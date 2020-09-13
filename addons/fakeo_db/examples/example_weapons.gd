@@ -113,7 +113,8 @@ var deferred_queries= [
 		query=fdb.filtq(ops.is_(Weapon)).map(['name'])
 	},	
 	{
-		description="type is Dictionary; can't use Dictionary so must use Variant type",
+		description=\
+		"type is Dictionary; can't use built-in type as an arg so use Variant value instead",
 		query=fdb.filtq(ops.is_var(TYPE_DICTIONARY)).map(['name'])
 	}	
 ]
@@ -125,14 +126,15 @@ func _add(x, y):
 	return {dmg=x.dmg + y.dmg}
 	
 func _run():
-	
-	print(2 in fdb.mapply(data, ops.open('dmg')))
-	print(fdb.in_(2, fdb.mapi(data, ops.open('dmg'))))
-	print(fdb.mapi(data, ops.open('dmg')).contains(2))
+#
+#	print(2 in fdb.mapply(data, ops.open('dmg')))
+#	print(fdb.in_(2, fdb.mapi(data, ops.open('dmg'))))
+#	print(fdb.mapi(data, ops.open('dmg')).contains(2))
 	
 	# pass the item through operators in sequence
-	printt('dmgs + 1', fdb.mapply(data, ops.op_iter([
-		ops.open('dmg'), ops.expr('_x + 1')])))
+	printt('dmgs + 1', fdb.mapply(data, 
+		ops.comp([
+			ops.open('dmg'), ops.expr('_x + 1')])))
 	# reduce only works with expressions and funcrefs
 	printt('reduce from iter:', fdb.reduce(
 		fdb.mapi(data, ops.open('dmg')), '_x+_y'))

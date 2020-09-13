@@ -69,12 +69,13 @@ class IterateOp:
 	const OpFunc = Ops.Func
 	
 	var mut_op
-
+	var def_val
 	func make_data():
-		return {started=false, value=null}
+		return {started=false, value=def_val}
 
-	func _init(mut_op_:OpBase):
+	func _init(mut_op_:OpBase, def_val_=null):
 		mut_op = mut_op_
+		def_val = def_val_
 
 	func get_result(item, data):
 		if not data.started:

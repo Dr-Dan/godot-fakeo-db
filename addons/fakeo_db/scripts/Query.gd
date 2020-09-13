@@ -5,25 +5,20 @@ const Proc = preload("res://addons/fakeo_db/scripts/Processors.gd")
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
 const OpBase = Operators.OperatorBase
 
-# var items = []
-var proc
+var items = []
 
 func _init(items_:Array=[]) -> void:
-	# items = [] + items_
-	proc = Proc.ProcIterator.new(items_)
-
-func items():
-	return proc.procs
+	items = [] + items_
 
 # =======================================================
 
 func proc(item)\
 	-> Query:
-	return get_script().new(proc.procs + [item])
+	return get_script().new(items + [item])
 
 func proc_array(item:Array)\
 	-> Query:
-	return get_script().new(proc.procs + item)
+	return get_script().new(items + item)
 
 # -------------------------------------------------------
 
@@ -47,9 +42,9 @@ func map(input, args:Array=[])\
 	-> Query:
 	return proc(Proc.MapOpAuto.new(input, args))
 
-func reduce(op)\
-	-> Query:
-	return proc(Proc.IterateOp.new(op))
+# func reduce(op)\
+# 	-> Query:
+# 	return proc(Proc.IterateOp.new(op))
 
 func as_args(fn:FuncRef)\
 	-> Query:

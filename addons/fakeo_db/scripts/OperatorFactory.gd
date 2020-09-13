@@ -2,17 +2,20 @@ extends Resource
 
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
 
-static func op_iter(ops:Array, exit_op=null, is_predicate=false):
-	return Operators.OperatorIterator.new(ops, exit_op, is_predicate)
-
 static func comp(ops:Array, exit_op=null, is_predicate=false):
-	return op_iter(ops, exit_op, is_predicate)
+	return Operators.OperatorIterator.new(ops, exit_op, is_predicate)
 
 static func value(val):
 	return Operators.Value.new(val)
 
 static func even():
 	return Operators.Even.new()
+	
+# static func gt(item0, item1=null):
+# 	if item1:
+# 		return Operators.OpCaller2(Operators.GT, item0, item1)
+# 	else:
+# 		return Operators.OpCaller1(Operators.GT, item0)
 	
 static func gt(item):
 	return Operators.GT.new(item)
