@@ -73,7 +73,7 @@ func _run():
 # ==============================================================
 
 func print_lists(name_table, addr_table):
-	var query_names = fdb.iter(name_table, 
+	var query_names = fdb.itbl(name_table, 
 		fdb.mapq(ops.open(["name", "age", "addr_id"])))
 
 	var query_addr = fdb.mapi(addr_table, 
@@ -113,10 +113,10 @@ func house_search_test(name_table, addr_table, value=30000):
 		.filter({value=ops.gteq(value)})\
 		.map(["addr_id", "street", "value"])
 
-	var addr_id_iter = fdb.iter(addr_table,
+	var addr_id_iter = fdb.itbl(addr_table,
 		value_qry.map(ops.open('addr_id')))
 
-	var homeowners = fdb.iter(name_table, fdb.qry()\
+	var homeowners = fdb.itbl(name_table, fdb.qry()\
 		.filter({addr_id=ops.in_(addr_id_iter)})\
 		.map(["name", "addr_id"]))
 
@@ -130,11 +130,11 @@ func house_search_test(name_table, addr_table, value=30000):
 
 # INSTANT EVAL
 func count_names_test(name_table):
-	var count_name = fdb.iter(name_table, fdb.qry()\
+	var count_name = fdb.itbl(name_table, fdb.qry()\
 		.filter({name=ops.contains('i')}))\
 		.size()
 
-	var result_age = fdb.iter(name_table, fdb.qry()\
+	var result_age = fdb.itbl(name_table, fdb.qry()\
 		.filter({name="dan"}))\
 		.front() # same as .at(0)
 				
@@ -150,7 +150,7 @@ func to_caps(item):
 	return item.name.to_upper()
 
 func take_test(name_table, amt_take=4):
-	var runner = fdb.iter(name_table, fdb.qry()\
+	var runner = fdb.itbl(name_table, fdb.qry()\
 		.filter({name=ops.func_(self, "name_starts_with_letters", ["a", "m"])})\
 		.map({name=funcref(self, 'to_caps')})\
 		.take(amt_take))

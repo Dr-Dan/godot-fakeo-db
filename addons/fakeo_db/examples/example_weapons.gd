@@ -48,7 +48,7 @@ var data = [
 
 const Proc = preload("res://addons/fakeo_db/scripts/Processors.gd")
 
-var filter = Proc.FilterOp.new(ops.dict({dmg=ops.gteq(10)}))
+var filter = Proc.FilterOp.new(ops.dict_cmpr({dmg=ops.gteq(10)}))
 var map = Proc.MapOp.new(ops.open(["name", "dmg"]))
 var take = Proc.Take.new(3)
 		
@@ -57,34 +57,36 @@ var take = Proc.Take.new(3)
 var chain_queries = [
 	{
 		description="map fields from each object into an array",
-		result=fdb.mapply(data, ["name", "type", "subtype", "dmg"])			
+		result=fdb.mapply(ops.open(["name", "type", "subtype", "dmg"]), data)			
 	},
 	{
 		description="apply effect (*5) to each and select others into an iterator",
-		result=fdb.mapi(data, {dmg='_x.dmg*5'}, ["name", "type", "subtype"])
+		result=fdb.mapi(ops.dict_apply({dmg='_x.dmg*5'}, ["name", "type", "subtype"]), data)
 	},
 	{
 		description="create a field and map others",
-		result=fdb.qapply(data, fdb.qry()\
-			.filter({subtype="bow"})\
-			.map({dmg_range_ratio='_x.dmg/_x.atk_range'}, 
-				["name", "subtype", "dmg", "atk_range"]))
+		result=fdb.qapply(fdb.qry()\
+			.filter(ops.dict_cmpr({subtype="bow"}))\
+			.map(ops.dict_apply(
+				{dmg_range_ratio='_x.dmg/_x.atk_range'}, 
+				["name", "subtype", "dmg", "atk_range"])),
+			data)
 	},
 	{
 		description="bows with dmg >= 7",
-		result=fdb.iter(data, fdb.qry()\
-			.filter({subtype="bow", dmg=ops.gteq(7)})\
-			.proc(Proc.MapOp.new(ops.open(["name", "dmg", "atk_range"]))))
+		result=fdb.itbl(fdb.qry()\
+			.filter(ops.dict_cmpr({subtype="bow", dmg=ops.gteq(7)}))\
+			.proc(Proc.MapOp.new(ops.open(["name", "dmg", "atk_range"]))),
+			data)
 	},	
 	{
 		description="map: name and dmg fields",
-		result=fdb.iter(data, [filter, map])
+		result=fdb.itbl([filter, map], data)
 	},
 	{
 		description="take: 3 from projected result",
-		result=fdb.iter(data, [filter, map, take])
+		result=fdb.itbl([filter, map, take], data)
 	},
-
 ]
 
 func _damage_or_sword(item):
@@ -94,28 +96,28 @@ var deferred_queries= [
 	{
 		description="subtype is in [sword, spear, thrown] using an op",
 		query=fdb.qry()\
-			.filter({subtype=ops.in_(["sword", "spear", "thrown"])})\
-			.map(["name", "subtype", "dmg", "atk_range"])
+			.filter(ops.dict_cmpr({subtype=ops.in_(["sword", "spear", "thrown"])}))\
+			.map(ops.open(["name", "subtype", "dmg", "atk_range"]))
 	},
 	{
 		description="filter by dmg and type using func",
 		query=fdb.qry()\
-			.filter(funcref(self, "_damage_or_sword"))\
-			.map(["name", "subtype", "dmg",])
+			.filter(ops.func_(self, "_damage_or_sword"))\
+			.map(ops.open(["name", "subtype", "dmg",]))
 	},	
 	{
 		description="item damage >= 10 and 'o' in subtype",
-		query=fdb.filtq('dmg >= 10 and "o" in subtype', ["dmg", "subtype"])\
-			.map(["name", "subtype", "dmg",])
+		query=fdb.filtq(ops.expr('dmg >= 10 and "o" in subtype', ["dmg", "subtype"]))\
+			.map(ops.open(["name", "subtype", "dmg",]))
 	},
 	{
 		description="type is Weapon",
-		query=fdb.filtq(ops.is_(Weapon)).map(['name'])
+		query=fdb.filtq(ops.is_(Weapon)).map(ops.open(['name']))
 	},	
 	{
 		description=\
 		"type is Dictionary; can't use built-in type as an arg so use Variant value instead",
-		query=fdb.filtq(ops.is_var(TYPE_DICTIONARY)).map(['name'])
+		query=fdb.filtq(ops.is_var(TYPE_DICTIONARY)).map(ops.open(['name']))
 	}	
 ]
 	
@@ -126,20 +128,18 @@ func _add(x, y):
 	return {dmg=x.dmg + y.dmg}
 	
 func _run():
-#
-#	print(2 in fdb.mapply(data, ops.open('dmg')))
-#	print(fdb.in_(2, fdb.mapi(data, ops.open('dmg'))))
-#	print(fdb.mapi(data, ops.open('dmg')).contains(2))
-	
 	# pass the item through operators in sequence
-	printt('dmgs + 1', fdb.mapply(data, 
+	printt('dmgs + 1', fdb.mapply( 
 		ops.comp([
-			ops.open('dmg'), ops.expr('_x + 1')])))
+			ops.open('dmg'), ops.expr('_x + 1')]), 
+		data))
 	# reduce only works with expressions and funcrefs
-	printt('reduce from iter:', fdb.reduce(
-		fdb.mapi(data, ops.open('dmg')), '_x+_y'))
+	printt('reduce from itbl:', 
+		fdb.reduce(
+			ops.expr('_x+_y'), 
+			fdb.mapi(ops.open('dmg'), data)))
 	printt('reduce total damage:', fdb.reduce(
-		data, funcref(self, '_add'))) # can also use ops.func_(self, '_add')
+		ops.func_(self, '_add'), data)) # can also use ops.func_(self, '_add')
 	
 	for q in chain_queries:
 		print_break_mini()
@@ -149,7 +149,7 @@ func _run():
 	for q in deferred_queries:
 		print_break_mini()
 		print(q.description)
-		for item in fdb.iter(data, q.query): print(item)
+		for item in fdb.itbl(q.query, data): print(item)
 
 # ==============================================================
 

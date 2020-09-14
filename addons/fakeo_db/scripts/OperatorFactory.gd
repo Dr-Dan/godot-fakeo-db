@@ -11,6 +11,9 @@ static func value(val):
 static func even():
 	return Operators.Even.new()
 	
+static func odd():
+	return not_(Operators.Even.new())
+	
 # static func gt(item0, item1=null):
 # 	if item1:
 # 		return Operators.OpCaller2(Operators.GT, item0, item1)
@@ -101,7 +104,7 @@ static func open(field):
 # 		return Operators.OpenMultiDeep.new(field)
 # 	return Operators.OpenDeep.new(field)
 
-static func dict(preds, _any=false, _fail_missing=true):
+static func dict_cmpr(preds, _any=false, _fail_missing=true):
 	return Operators.DictCompare.new(preds, _any, _fail_missing)
 	
 static func dict_apply(input, args=[]):

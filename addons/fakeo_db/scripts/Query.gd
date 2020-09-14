@@ -22,9 +22,13 @@ func proc_array(item:Array)\
 
 # -------------------------------------------------------
 
-func filter(input, args:Array=[])\
+func map(input)\
 	-> Query:
-	return proc(Proc.FilterOpAuto.new(input, args))
+	return proc(Proc.MapOp.new(input))
+
+func filter(input)\
+	-> Query:
+	return proc(Proc.FilterOp.new(input))
 
 func take(amt: int)\
 	-> Query:
@@ -37,10 +41,6 @@ func take_while(op: OpBase)\
 func skip(amt: int)\
 	-> Query:
 	return proc(Proc.Skip.new(amt))
-
-func map(input, args:Array=[])\
-	-> Query:
-	return proc(Proc.MapOpAuto.new(input, args))
 
 # func reduce(op)\
 # 	-> Query:

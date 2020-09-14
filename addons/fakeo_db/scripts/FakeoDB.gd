@@ -8,6 +8,11 @@ const Processors = preload("res://addons/fakeo_db/scripts/Processors.gd")
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
 const OperatorFactory = preload("res://addons/fakeo_db/scripts/OperatorFactory.gd")
 
+
+static func in_(v, it) -> bool:
+	return it.contains(v)
+	
+	
 static func cltn(array:Array=[]) -> Enumerables.Collection:
 	return Enumerables.Collection.new(array)
 	
@@ -15,45 +20,38 @@ static func cltn(array:Array=[]) -> Enumerables.Collection:
 static func qry(query=[]) -> Query:
 	return Query.new(_qry_to_arr(query))
 
-static func iter(coll, query=[]) -> Iterable:
+static func itbl(query, coll) -> Iterable:
 	return Iterable.new(_input_to_proc(query), coll)
 
-static func in_(v, it) -> bool:
-	return it.contains(v)
+
+static func reduce(op, coll):
+	return ittr(op, coll).back()
 	
-static func reduce(coll, op, args=[]):
-	if op is FuncRef:
-		op = Operators.Func.new(op, args)
-	elif op is String:
-		op = Operators.Expr.new(op)
-#	elif not (op is Operators.Expr or op is Operators.Func):
-#		push_warning('reduce should be called with: String, FuncRef, Operators.Expr, Operators.Func')
-	# return iter(coll, qry().reduce(op)).back()
-	return iter(coll, Processors.IterateOp.new(op)).back()
-
-static func mapq(op, args=[]) -> Query:
-	return qry([Processors.MapOpAuto.new(op, args)])
-
-static func filtq(op, args=[]) -> Query:
-	return qry([Processors.FilterOpAuto.new(op, args)])
-
-
-static func qapply(coll, qry) -> Array:
-	return iter(coll, qry).run()
+static func ittr(op, coll):
+	return itbl(Processors.IterateOp.new(op), coll)
 	
-static func mapply(coll, input, args=[]) -> Array:
-	return mapi(coll, input, args).run()
+static func mapq(op) -> Query:
+	return qry([Processors.MapOp.new(op)])
+
+static func filtq(op) -> Query:
+	return qry([Processors.FilterOp.new(op)])
+
+
+static func qapply(qry, coll) -> Array:
+	return itbl(qry, coll).run()
 	
-static func fapply(coll, input, args=[]) -> Array:
-	return filti(coll, input, args).run()
+static func mapply(input, coll) -> Array:
+	return mapi(input, coll).run()
+	
+static func fapply(input, coll) -> Array:
+	return filti(input, coll).run()
 	
 
-static func mapi(coll, op, args=[]) -> Iterable:
-	return iter(coll, Processors.MapOpAuto.new(op, args))
+static func mapi(op, coll) -> Iterable:
+	return itbl(Processors.MapOp.new(op), coll)
 
-static func filti(coll, op, args=[]) -> Iterable:
-	return iter(coll, Processors.FilterOpAuto.new(op, args))
-
+static func filti(op, coll) -> Iterable:
+	return itbl(Processors.FilterOp.new(op), coll)
 
 static func _input_to_proc(query) -> Processors.Processor:
 	if query is Iterable or query is Query:

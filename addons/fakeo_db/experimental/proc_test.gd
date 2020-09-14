@@ -23,7 +23,7 @@ func _run() -> void:
 #	print(run_qry_coll(q0, get_qry_data(q0), name_table))
 #	print(fdb.qry_proc(q0).apply(name_table))
 	
-	var p = Proc.WhereOp.new(ops.dict({age=ops.gteq(20)}))	
+	var p = Proc.WhereOp.new(ops.dict_cmpr({age=ops.gteq(20)}))	
 	var p2 = Proc.WhereDict.new({age=ops.lteq(100)})
 	
 	var po = Proc.WhereExpr.new('age >= 20 and age <= 100', ["age"])
@@ -37,7 +37,7 @@ func _run() -> void:
 		.project(["bag/hat", "name"])\
 		.apply(name_table))
 	# TODO: show this in examples
-#	var ps = Proc.SelectOp.new(ops.dict({age=ops.gt(30)}))
+#	var ps = Proc.SelectOp.new(ops.dict_cmpr({age=ops.gt(30)}))
 #	var ps = Proc.SelectOp.new(ops.open(["age", "name"]))
 	var ps = Proc.SelectOp.new(ops.open_dp(["bag/hat", "name"]))
 #	print(fdb.qry_proc([ps, Proc.Take.new(2)]).run(name_table))
@@ -51,7 +51,7 @@ func _run() -> void:
 
 
 	# TODO map as opposed to reduce. i.e. project with mutations
-#	var ps2 = Proc.ProjectOp.new(ops.dict({age=ops.expr('_x * 10')}))
+#	var ps2 = Proc.ProjectOp.new(ops.dict_cmpr({age=ops.expr('_x * 10')}))
 #	var ps2 = Proc.SelectOp.new(ops.expr('{"age":age * 4, "name":name}', ["age", "name"]))
 #	var ps2 = Proc.SelectOp.new(ops.expr('{"name":_x.name, "age":_x.age * 10}'))
 
