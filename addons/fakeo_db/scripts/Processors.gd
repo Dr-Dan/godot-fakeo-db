@@ -61,6 +61,21 @@ class MapOp:
 	func next(item, data):	
 		return [get_result(item, data), true, false]
 	
+class Enumerate:
+	extends Processor
+
+	var key:String
+	func _init(key_='i'):
+		key = key_
+		
+	func make_data():
+		return {id=0}
+
+	func next(item, data):	
+		item[key] = data.id
+		data.id += 1
+		return [item, true, false]
+	
 
 class IterateOp:
 	extends Processor
@@ -141,16 +156,16 @@ class TakeWhile:
 		pred_op = pred_op_
 		
 	func make_data():
-		return {t=false}
+		return {terminal=false}
 
 	func get_result(item, data):
 		var r = pred_op.eval(item)
-		data.t = not r
+		data.terminal = not r
 		return r
 		
 	func next(item, data):
 		var r = .next(item, data)
-		r[2] = data.t
+		r[2] = data.terminal
 		return r 
 
 class Slice:

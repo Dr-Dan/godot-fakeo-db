@@ -11,6 +11,7 @@ To use: File > Run
 const ex_util = preload("res://addons/fakeo_db/examples/example_utils.gd")
 const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
 const ops = fdb.OperatorFactory
+const prc = fdb.ProcessorFactory
 
 func _run():
 	ex_util.print_break()
@@ -40,23 +41,29 @@ var addr_table = [
 var id = 0
 func open_operators():
 
-	# get the value of a field in each item
-	# this is only if open is called with a single String (not an Array or Dictionary)
+	# get the value of a field from each item
+	#   if open is called with a single arg (String) 
 	printt('names',
 		fdb.mapply(ops.open('name'), name_table))
 		
 	# open multiple fields; use slashes to go deeper
-	# result is a dictionary for each
+	#   result is a dictionary for each
+	#  if called with Array
 	printt('view weapons, name and age',
-		fdb.mapply(ops.open(['inv/weapon', 'name', 'age']), name_table))
+		fdb.mapply(
+			ops.open(['inv/weapon', 'name', 'age']),
+			name_table))
 		
 
 	# use a dictionary allows mapping to fields that do not yet exist
 	# 	fields in the array will be opened as in open
+	# if a key is not in the item: 
+	#   it will be created and the relevant op will take the entire item
+	# 	as an arg instead of item[key]
 	printt('who has food?',
 		fdb.mapply(
 			ops.dict_apply(
-				{has_food='not _x.inv.food.empty()'}, ['name', 'inv/food']),
+				{has_food='not _x.inv.food.empty()', age=ops.expr('_x*2')}, ['name', 'inv/food'], true),
 			name_table))
 	
 	# TODO: break into 2 args, move into filter example	
@@ -66,18 +73,19 @@ func open_operators():
 	var comp_op = ops.comp(
 		[ops.open('inv/money/coin'), ops.gteq(10)],
 		ops.neq(null))
-			
+
 	printt('who has coin >= 10?',
-		fdb.qapply(fdb.qry()\
-			.filter(comp_op)\
-			.map(ops.open(['name', 'inv/money'])),
-			name_table))
-			
+		fdb.apply(
+			prc.comp([
+				prc.filter(comp_op),
+				prc.map(ops.open(['name', 'inv/money']))]),
+			name_table))		
+	
 	# you can write a custom reducer
 	printt('total knives:',
 		fdb.reduce(
 			Add.new(),
-			fdb.itbl(fdb.mapq(ops.open('inv/weapon/knife')), name_table)))
+			fdb.itbl(prc.map(ops.open('inv/weapon/knife')), name_table)))
 
 # an operator for reducing should implement eval2(input_next, input_accumulated)
 class Add:

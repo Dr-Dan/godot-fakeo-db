@@ -39,12 +39,24 @@ class Util:
 # ==============================================================
 	
 class OperatorBase:
+
+	# func auto_eval(item0, item1):
+	# 	if item1 != null:
+	# 		return eval2(item0, item1)
+	# 	assert(item0 != null)
+	# 	return eval(item0)
+		
 	func eval(item):
 		return false
 
 	func eval2(x_next, x_total):
 		return x_next
 	
+class Identity:
+	extends OperatorBase
+	func eval(item):
+		return item
+
 class Value:
 	extends OperatorBase
 	var value
@@ -125,6 +137,7 @@ class DictApplied:
 	extends OperatorBase
 	var fields:Dictionary
 	var open:OpenMultiDeep
+	var open_if_found:bool
 
 	func _all_ops(fields_:Dictionary):
 		for v in fields_.values():
@@ -132,12 +145,13 @@ class DictApplied:
 				return false
 		return true
 
-	func _init(_fields:Dictionary, _other:Array=[]).():
-		fields = _fields
+	func _init(fields_:Dictionary, other_:Array=[], open_if_found_=false).():
+		fields = fields_
 		for k in fields:
 			fields[k] = Util.get_map_op(fields[k])
-		assert(_all_ops(_fields))
-		open = OpenMultiDeep.new(_other)
+		assert(_all_ops(fields_))
+		open = OpenMultiDeep.new(other_)
+		open_if_found = open_if_found_
 
 	func eval(item):
 		return result(item, fields)
@@ -145,10 +159,10 @@ class DictApplied:
 	func result(item, fields: Dictionary):
 		var r = {}
 		for key in fields:
-			# if key in item:
-			# 	r[key] = fields[key].eval(item[key])
-			# else:
-			r[key] = fields[key].eval(item)
+			if open_if_found and key in item:
+				r[key] = fields[key].eval(item[key])
+			else:
+				r[key] = fields[key].eval(item)
 		var other = open.eval(item)
 		for k in other:
 			r[k] = other[k]
@@ -206,6 +220,13 @@ class All:
 			if not c.eval(item):
 				r = false
 		return r
+
+	func eval2(x_next, x_total):
+		var r = true
+		for c in cmps:
+			if not c.eval(x_total) or not c.eval(x_next):
+				r = false
+		return r	
 	
 """
 	returns true if any operators in 'cmps' are true
@@ -568,9 +589,8 @@ class OpenDeep:
 		var result = null
 		for f in fields:
 			if f == "*":
-				result = item # TODO: test; should be item[f]?
+				result = item
 				continue
-			# assert(f in item)
 			if f in item:
 				result = item[f]
 				item = result

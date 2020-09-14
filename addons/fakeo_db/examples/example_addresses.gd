@@ -3,7 +3,7 @@ extends EditorScript
 
 const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
 const ops = fdb.OperatorFactory
-
+const prc = fdb.ProcessorFactory
 
 """
 To use: File > Run
@@ -53,9 +53,6 @@ func _run():
 
 
 	print_break()
-	print_lists(name_table, addr_table)
-	
-	print_break()
 	age_comp_builder_test(name_table)
 #
 	print_break()
@@ -72,39 +69,23 @@ func _run():
 	
 # ==============================================================
 
-func print_lists(name_table, addr_table):
-	var query_names = fdb.itbl(name_table, 
-		fdb.mapq(ops.open(["name", "age", "addr_id"])))
-
-	var query_addr = fdb.mapi(addr_table, 
-		ops.open(["addr_id", "street", "value"]))
-
-	print("PEOPLE:")
-	for i in query_names: print(i)
-	print("\n--------------")
-	print("ADDRESSES:")
-	for i in query_addr: print(i)
-
-# ==============================================================
-
 var age_comp = ops.and_([ops.gt(20), ops.lt(70)]) # 20 < age < 70
-var age_comp_not = ops.not_(age_comp)
 var fields = ["name", "age"]
 
-var where_age = fdb.qry()\
-	.filter({age=age_comp})\
-	.map(ops.open(fields))
+var where_age = fdb.comp([
+	prc.filter({age=age_comp}),
+	prc.map(ops.open(fields))])
 
-var where_not_age = fdb.qry()\
-	.filter({age=age_comp_not})\
-	.map(ops.open(fields))
+var where_not_age = fdb.comp([
+	prc.filter({age=ops.not_(age_comp)}),
+	prc.map(ops.open(fields))])
 
 func age_comp_builder_test(name_table):
 	print("age > 20 and age < 70")
-	print(fdb.qapply(name_table, where_age))
+	print(fdb.apply(where_age, name_table))
 	print_break_mini()
 	print("not (age > 20 and age < 70) == age < 20 and age > 70")
-	print(fdb.qapply(name_table, where_not_age))
+	print(fdb.apply(where_not_age, name_table))
 
 ## ==============================================================
 
@@ -121,7 +102,7 @@ func house_search_test(name_table, addr_table, value=30000):
 		.map(["name", "addr_id"]))
 
 	print("house value > %d" % value)
-	print(fdb.qapply(addr_table, value_qry))
+	print(fdb.apply(addr_table, value_qry))
 	print_break_mini()
 	print("homeowners filter house value > %d (addr_id in 'addr_ids')" % value)
 	print(homeowners.run())
@@ -189,7 +170,7 @@ func collection_append_remove():
 
 	# func_as_args only works when supplied with arrays
 	# each item is used as an argument for the referenced function (connect)
-	var r = fdb.qapply(connections, fdb.qry()\
+	var r = fdb.apply(connections, fdb.qry()\
 		.as_args(funcref(people, "connect")))
 #	var r = fdb.mapply(connections, 
 # 		ops.expr('p.connect(_x[0], _x[1], _x[2])', {p=people}))
@@ -214,7 +195,7 @@ func collection_append_remove():
 	print("Items Removed:")
 	print(removed.to_array())
 
-	fdb.qapply(connections, 
+	fdb.apply(connections, 
 	fdb.qry().as_args(funcref(people, "disconnect")))
 	# no signals anymore; this will not cause printage
 	people.append({name="unknown", age=21, addr_id=1})

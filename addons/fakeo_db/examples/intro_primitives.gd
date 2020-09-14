@@ -82,22 +82,30 @@ func primitive_intro():
 	printt('pow(x, y)',
 		fdb.mapply(ops.expr('pow(_x, y)', {y=10}), data))
 
+	# ittr (iterator) applies op to the next item and previous result
+	# in this case; adding them together
+	printt('add all items:',
+		fdb.ittr(ops.func_(self, 'plus_y'), data).run())
+
+	# reduce just returns the last result from ittr
+	printt('multiply all items (except 0):',
+		fdb.reduce(ops.expr('_x * _y'), data.slice(1, -1)))
+
 	# comp(ose) passes each entry through a series of operators
 	printt('(((x + 3) + y) > 8)',
 		fdb.mapply(
 			ops.comp([
 				ops.expr('_x + 3'),
 				ops.func_(self, 'plus_y', [2]),
-				ops.gt(8)
-				]), data))
+				ops.gt(8)]), 
+				data))
 
-	# ittr (iterator)
-	printt('add all items:',
-		fdb.ittr(ops.expr('_x + _y'), data).run())
-
-	# reduce return the last result from ittr
-	printt('multiply all items (except 0):',
-		fdb.reduce(ops.expr('_x * _y'), data.slice(1, -1)))
+	# the array is automatically wrapped with ops.comp later
+	# dict_apply can be used to create new objects
+	printt('(((x + 3) + y) > 8)',
+		fdb.mapply([
+			ops.expr('_x + 3'),
+			ops.func_(self, 'plus_y', [2]),
+			ops.dict_apply({value=ops.identity(), is_gt_8=ops.gt(8)})], 
+			data))
 		
-# TODO: iterators example + count, front etc
-# ==============================================================	

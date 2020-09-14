@@ -8,6 +8,9 @@ static func comp(ops:Array, exit_op=null, is_predicate=false):
 static func value(val):
 	return Operators.Value.new(val)
 
+static func identity():
+	return Operators.Identity.new()
+
 static func even():
 	return Operators.Even.new()
 	
@@ -107,8 +110,8 @@ static func open(field):
 static func dict_cmpr(preds, _any=false, _fail_missing=true):
 	return Operators.DictCompare.new(preds, _any, _fail_missing)
 	
-static func dict_apply(input, args=[]):
-	return Operators.DictApplied.new(input, args)	
+static func dict_apply(input, args=[], open_if_found=false):
+	return Operators.DictApplied.new(input, args, open_if_found)	
 
 static func op(item:String, arg):
 	match item:

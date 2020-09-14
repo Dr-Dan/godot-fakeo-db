@@ -3,7 +3,7 @@ extends EditorScript
 
 const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
 const ops = fdb.OperatorFactory
-
+const prc = fdb.ProcessorFactory
 
 """
 To use: File > Run
@@ -65,18 +65,18 @@ var chain_queries = [
 	},
 	{
 		description="create a field and map others",
-		result=fdb.qapply(fdb.qry()\
-			.filter(ops.dict_cmpr({subtype="bow"}))\
-			.map(ops.dict_apply(
+		result=fdb.apply(prc.comp([
+			prc.filter(ops.dict_cmpr({subtype="bow"})),
+			prc.map(ops.dict_apply(
 				{dmg_range_ratio='_x.dmg/_x.atk_range'}, 
-				["name", "subtype", "dmg", "atk_range"])),
+				["name", "subtype", "dmg", "atk_range"]))]),
 			data)
 	},
 	{
 		description="bows with dmg >= 7",
-		result=fdb.itbl(fdb.qry()\
-			.filter(ops.dict_cmpr({subtype="bow", dmg=ops.gteq(7)}))\
-			.proc(Proc.MapOp.new(ops.open(["name", "dmg", "atk_range"]))),
+		result=fdb.itbl([
+			prc.filter(ops.dict_cmpr({subtype="bow", dmg=ops.gteq(7)})),
+			prc.map(ops.open(["name", "dmg", "atk_range"]))],
 			data)
 	},	
 	{
@@ -89,35 +89,31 @@ var chain_queries = [
 	},
 ]
 
-func _damage_or_sword(item):
-	return item.dmg > 20 or item.name=="Wooden Sword"
-	
 var deferred_queries= [
 	{
 		description="subtype is in [sword, spear, thrown] using an op",
-		query=fdb.qry()\
-			.filter(ops.dict_cmpr({subtype=ops.in_(["sword", "spear", "thrown"])}))\
-			.map(ops.open(["name", "subtype", "dmg", "atk_range"]))
+		query=prc.comp([
+			prc.filter(ops.dict_cmpr({subtype=ops.in_(["sword", "spear", "thrown"])})),
+			prc.map(ops.open(["name", "subtype", "dmg", "atk_range"]))])
 	},
 	{
-		description="filter by dmg and type using func",
-		query=fdb.qry()\
-			.filter(ops.func_(self, "_damage_or_sword"))\
-			.map(ops.open(["name", "subtype", "dmg",]))
-	},	
-	{
 		description="item damage >= 10 and 'o' in subtype",
-		query=fdb.filtq(ops.expr('dmg >= 10 and "o" in subtype', ["dmg", "subtype"]))\
-			.map(ops.open(["name", "subtype", "dmg",]))
+		query=prc.comp([
+			prc.filter(ops.expr('dmg >= 10 and "o" in subtype', ["dmg", "subtype"])),
+			prc.map(ops.open(["name", "subtype", "dmg",]))])
 	},
 	{
 		description="type is Weapon",
-		query=fdb.filtq(ops.is_(Weapon)).map(ops.open(['name']))
+		query=prc.comp([
+			prc.filter(ops.is_(Weapon)),
+			prc.map(ops.open(['name']))])
 	},	
 	{
 		description=\
 		"type is Dictionary; can't use built-in type as an arg so use Variant value instead",
-		query=fdb.filtq(ops.is_var(TYPE_DICTIONARY)).map(ops.open(['name']))
+		query=prc.comp([
+			prc.filter(ops.is_var(TYPE_DICTIONARY)),
+			prc.map(ops.open(['name']))])
 	}	
 ]
 	

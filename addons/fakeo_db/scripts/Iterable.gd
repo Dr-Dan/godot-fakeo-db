@@ -49,7 +49,6 @@ func _iter_next(arg):
 	var r = []
 	var st = index
 	for i in range(st, source.size()):
-	# while not terminal:
 		r = next(source[index], query_data)
 		index += 1
 		terminal = r[2]
