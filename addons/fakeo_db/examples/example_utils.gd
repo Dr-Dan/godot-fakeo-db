@@ -1,5 +1,5 @@
-static func print_break():
-	print("\n###############################")
+static func print_break(txt:String=''):
+	print("%s\n###############################" % txt)
 
-static func print_break_mini():
-	print("\n--------------")
+static func print_break_mini(txt:String=''):
+	print("%s \n--------------" % txt)

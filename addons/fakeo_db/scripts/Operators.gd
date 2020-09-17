@@ -6,34 +6,34 @@ const EXPR_NAME2 = '_y'
 
 ## =======================================================
 ## UTILS
-class Util:
-	static func get_map_op(input, args=[])\
-		-> OperatorBase:
-		if input is OperatorBase:
-			return input
-		elif input is String:
-			if args is Dictionary:
-				return ExprArgsDict.new(input, args)
-			return ExprArgsDeep.new(input, args)
-		elif input is FuncRef:
-			return Func.new(input, args)
-		elif input is Array:
-			return OpenMultiDeep.new(input)
-		elif input is Dictionary:
-			return DictApplied.new(input, args)
-		return null
+# class Util:
+# 	static func get_map_op(input, args=[])\
+# 		-> OperatorBase:
+# 		if input is OperatorBase:
+# 			return input
+# 		elif input is String:
+# 			if args is Dictionary:
+# 				return ExprArgsDict.new(input, args)
+# 			return ExprArgsDeep.new(input, args)
+# 		elif input is FuncRef:
+# 			return Func.new(input, args)
+# 		elif input is Array:
+# 			return OpenMultiDeep.new(input)
+# 		elif input is Dictionary:
+# 			return DictApplied.new(input, args)
+# 		return null
 	
-	static func get_filter_op(input, args=[])\
-		-> OperatorBase:
-		if input is OperatorBase:
-			return input
-		elif input is FuncRef:
-			return Func.new(input, args)
-		elif input is String:
-			return ExprArgsDeep.new(input, args)
-		elif input is Dictionary:
-			return DictCompare.new(input)
-		return null
+# 	static func get_filter_op(input, args=[])\
+# 		-> OperatorBase:
+# 		if input is OperatorBase:
+# 			return input
+# 		elif input is FuncRef:
+# 			return Func.new(input, args)
+# 		elif input is String:
+# 			return ExprArgsDeep.new(input, args)
+# 		elif input is Dictionary:
+# 			return DictCompare.new(input)
+# 		return null
 		
 
 # ==============================================================
@@ -66,6 +66,19 @@ class Value:
 	func eval(item):
 		return value
 
+class RunOp:
+	extends OperatorBase
+	
+	var field:String
+	var op:OperatorBase
+	
+	func _init(field_: String, op_:OperatorBase):
+		field = field_
+		op = op_
+		
+	func eval(item):
+		return op.eval(item[field])
+		
 class OperatorIterator:
 	extends OperatorBase
 

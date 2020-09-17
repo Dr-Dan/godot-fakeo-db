@@ -73,19 +73,6 @@ static func func_as_args(obj:Object, func_name:String):
 	var fn = funcref(obj, func_name)
 	return Operators.FuncAsArgs.new(fn)
 
-# this is just and?!
-#static func if_then(if_op, then_op):
-#	var o = [if_op]
-#	if then_op is Array:
-#		for to in then_op:
-#			o.append(to)
-#	else: o.append(then_op)
-#	return and_(o)
-
-# should do while something in item is true
-#static func do_while(ops:Array, exit_op=null):
-#	return op_iter(ops, exit_op)
-
 static func expr(expr_str:String, fields=null, target=null):
 	if fields is Dictionary:
 		return Operators.ExprArgsDict.new(expr_str, fields, target)
@@ -93,26 +80,20 @@ static func expr(expr_str:String, fields=null, target=null):
 		return Operators.ExprArgsDeep.new(expr_str, fields, target)
 	return Operators.Expr.new(expr_str, target)
 
-# static func expr_dp(expr_str:String, fields:Array, target=null):
-# 	return Operators.ExprArgsDeep.new(expr_str, fields, target)
-
-
 static func open(field):
 	if field is Array:
 		return Operators.OpenMultiDeep.new(field)
 	return Operators.OpenDeep.new(field)
 	
-# static func open_dp(field):
-# 	if field is Array:
-# 		return Operators.OpenMultiDeep.new(field)
-# 	return Operators.OpenDeep.new(field)
-
 static func dict_cmpr(preds, _any=false, _fail_missing=true):
 	return Operators.DictCompare.new(preds, _any, _fail_missing)
 	
 static func dict_apply(input, args=[], open_if_found=false):
-	return Operators.DictApplied.new(input, args, open_if_found)	
-
+	return Operators.DictApplied.new(input, args, open_if_found)
+	
+static func run(field, op):
+	return Operators.RunOp.new(field, op)
+	
 static func op(item:String, arg):
 	match item:
 		"<":
@@ -126,7 +107,7 @@ static func op(item:String, arg):
 		"=", "==":
 			return eq(arg)
 		"!=":
-			return neq(arg)			
+			return neq(arg)
 		"and", "&", "&&":
 			return and_(arg)
 		"or", "|", "||":

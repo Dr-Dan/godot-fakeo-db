@@ -1,11 +1,30 @@
 const OpUtil = preload("res://addons/fakeo_db/scripts/Operators.gd").Util
-const Exit = [null, false]
-	
+
+class SkipItem:
+	func _init():
+		pass
+
+class Terminate:
+	func _init():
+		pass
+
+# class TerminateResult:
+# 	extends Terminate
+
+# 	var item
+# 	func _init(item_):
+# 		item = item_
+		
+# class Result:
+# 	func _init():
+# 		pass
+		
+
 class Processor:
 	extends Resource
 	
 	func next(item, data):
-		return [item, true, false]
+		return item
 
 	func make_data():
 		return {}
@@ -35,14 +54,17 @@ class ProcIterator:
 		return {proc_data=proc_data}
 			
 	func next(item, data):	
-		var r = [item, true, false]
+		# var r = [item, true, false]
+		var r = item
 		var t = false
 		for i in procs.size():
 			var q = procs[i]
-			r = q.next(r[0], data.proc_data[i])
-			if r[2]: t = true
-			if not r[1]: break # or r[2]?
-		if t: r[2] = true
+			r = q.next(r, data.proc_data[i])
+			# if r[2]: t = true
+			# if not r[1]: break # or r[2]?
+			if r is Terminate or r is SkipItem:
+				 break
+		# if t: r[2] = true
 		return r
 
 
@@ -59,22 +81,29 @@ class MapOp:
 		return pred_op.eval(item)
 
 	func next(item, data):	
-		return [get_result(item, data), true, false]
+		return get_result(item, data)
 	
 class Enumerate:
 	extends Processor
 
 	var key:String
-	func _init(key_='i'):
+	var step:int
+
+	func _init(key_='i', step_:int=1):
 		key = key_
+		step = max(1, step_)
 		
 	func make_data():
 		return {id=0}
 
 	func next(item, data):	
+		# if item is Dictionary:
 		item[key] = data.id
-		data.id += 1
-		return [item, true, false]
+		# else:
+		# 	assert(item.has_method('set'))
+		# 	item.set(key, data.id)
+		data.id += step
+		return item
 	
 
 class IterateOp:
@@ -101,7 +130,7 @@ class IterateOp:
 		return data.value
 
 	func next(item, data):	
-		return [get_result(item, data), true, false]	
+		return get_result(item, data)
 		
 class Filter:
 	extends Processor
@@ -113,7 +142,10 @@ class Filter:
 		return true
 
 	func next(item, data):
-		return [item, get_result(item, data), false]
+		var r = get_result(item, data)
+		if not r:
+			return SkipItem.new()
+		return item
 
 class FilterIndexed:
 	extends Filter
@@ -138,15 +170,15 @@ class FilterOp:
 	func get_result(item, data):
 		return pred_op.eval(item)
 
-class MapOpAuto:
-	extends MapOp
-	func _init(input, args={}).(OpUtil.get_map_op(input, args)):
-		pass
+# class MapOpAuto:
+# 	extends MapOp
+# 	func _init(input, args={}).(OpUtil.get_map_op(input, args)):
+# 		pass
 	
-class FilterOpAuto:
-	extends FilterOp
-	func _init(input, args={}).(OpUtil.get_filter_op(input, args)):
-		pass
+# class FilterOpAuto:
+# 	extends FilterOp
+# 	func _init(input, args={}).(OpUtil.get_filter_op(input, args)):
+# 		pass
 
 class TakeWhile:
 	extends Filter
@@ -165,7 +197,9 @@ class TakeWhile:
 		
 	func next(item, data):
 		var r = .next(item, data)
-		r[2] = data.terminal
+		if data.terminal:
+			return Terminate.new()
+		# r[2] = data.terminal
 		return r 
 
 class Slice:
@@ -179,8 +213,12 @@ class Slice:
 
 	func next(item, data):
 		var r = .next(item, data)
-		r[1] = data.i >= st_idx
-		r[2] = data.i >= end_idx
+		# r[1] = data.i >= st_idx
+		# r[2] = data.i >= end_idx
+		if data.i >= st_idx:
+			return SkipItem.new() 
+		if data.i >= end_idx:
+			return Terminate.new()
 		return r 
 		
 class Take:
@@ -192,7 +230,9 @@ class Take:
 
 	func next(item, data):
 		var r = .next(item, data)
-		r[2] = data.i >= count
+		# r[2] = data.i >= count
+		if data.i > count:
+			return Terminate.new()
 		return r 
 
 class Skip:

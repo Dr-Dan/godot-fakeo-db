@@ -7,6 +7,7 @@ const Processors = preload("res://addons/fakeo_db/scripts/Processors.gd")
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
 const OperatorFactory = preload("res://addons/fakeo_db/scripts/OperatorFactory.gd")
 const ProcessorFactory = preload("res://addons/fakeo_db/scripts/ProcessorFactory.gd")
+const AutoProcessors = preload("res://addons/fakeo_db/scripts/AutoProcessors.gd")
 
 static func cltn(array:Array=[]) -> Enumerables.Collection:
 	return Enumerables.Collection.new(array)
@@ -15,11 +16,10 @@ static func cltn(array:Array=[]) -> Enumerables.Collection:
 static func itbl(input, coll) -> Iterable:
 	return Iterable.new(_input_to_proc(input), coll)
 
-
-static func mapi(op, coll) -> Iterable:
+static func mitbl(op, coll) -> Iterable:
 	return itbl(Processors.MapOp.new(_input_to_op(op)), coll)
 
-static func filti(op, coll) -> Iterable:
+static func fitbl(op, coll) -> Iterable:
 	return itbl(Processors.FilterOp.new(_input_to_op(op)), coll)
 
 
@@ -27,10 +27,10 @@ static func apply(input, coll) -> Array:
 	return itbl(input, coll).run()
 	
 static func mapply(input, coll) -> Array:
-	return mapi(input, coll).run()
+	return mitbl(input, coll).run()
 	
 static func fapply(input, coll) -> Array:
-	return filti(input, coll).run()
+	return fitbl(input, coll).run()
 	
 
 static func ittr(op, coll):
@@ -39,6 +39,7 @@ static func ittr(op, coll):
 static func reduce(op, coll):
 	return ittr(op, coll).back()
 
+	
 static func _input_to_op(input):
 	if input is Array:
 		input = Operators.OperatorIterator.new(input)

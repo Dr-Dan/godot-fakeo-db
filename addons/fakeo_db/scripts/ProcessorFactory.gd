@@ -30,9 +30,13 @@ static func skip(amt: int)\
 	-> Processor:
 	return Procs.Skip.new(amt)
 
-# func reduce(op)\
-# 	-> Query:
-# 	return proc(Procs.IterateOp.new(op))
+static func ittr(op)\
+	-> Processor:
+	return Procs.IterateOp.new(op)
+
+static func enumerate(key='i', step=1)\
+	-> Processor:
+	return Procs.Enumerate.new(key, step)
 
 static func as_args(fn:FuncRef)\
 	-> Processor:

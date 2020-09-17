@@ -15,7 +15,7 @@ const ops = fdb.OperatorFactory
 func _run():
 	ex_util.print_break()
 	print("using a collection of primitives (int)\n")
-	primitive_intro()
+	operators()
 	
 # ==============================================================	
 
@@ -36,9 +36,9 @@ class Div:
 	func eval(x):
 		return float(x) / val
 					
-func primitive_intro():
+func operators():
 	var data = range(10)
-	print('data [x0, ..., x9]: ', data)
+	print('data: ', data)
 	
 	var a = []
 	for i in data:
@@ -74,7 +74,7 @@ func primitive_intro():
 	printt('user-op: x / 2',
 		fdb.mapply(Div.new(2), data))
 
-	# call function from expr. string converted to expression op
+	# call built-in function from expr
 	printt('x cubed',
 		fdb.mapply(ops.expr('pow(_x, 3)'), data))
 
@@ -88,8 +88,8 @@ func primitive_intro():
 		fdb.ittr(ops.func_(self, 'plus_y'), data).run())
 
 	# reduce just returns the last result from ittr
-	printt('multiply all items (except 0):',
-		fdb.reduce(ops.expr('_x * _y'), data.slice(1, -1)))
+	printt('multiply all items (> 0):',
+		fdb.reduce(ops.expr('max(1,_x) * _y'), data))
 
 	# comp(ose) passes each entry through a series of operators
 	printt('(((x + 3) + y) > 8)',
@@ -102,10 +102,10 @@ func primitive_intro():
 
 	# the array is automatically wrapped with ops.comp later
 	# dict_apply can be used to create new objects
-	printt('(((x + 3) + y) > 8)',
-		fdb.mapply([
-			ops.expr('_x + 3'),
-			ops.func_(self, 'plus_y', [2]),
-			ops.dict_apply({value=ops.identity(), is_gt_8=ops.gt(8)})], 
-			data))
-		
+#	printt('(((x + 3) + y) > 8)',
+	fdb.mapply([
+		ops.expr('_x + 3'),
+		ops.func_(self, 'plus_y', [2]),
+		ops.dict_apply({value=ops.identity(), is_gt_8=ops.gt(8)}),
+		ops.expr('print(_x)')], 
+		data)

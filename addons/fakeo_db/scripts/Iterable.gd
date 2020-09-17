@@ -14,33 +14,26 @@ func _init(proc_, source_=[]):
 	source = source_
 	proc = proc_
 
-# exit by default
 func next(item, data):
 	return proc.next(item, data)
 
-func make_data():
-	return proc.make_data()
-
 func apply(coll):
-	var data = make_data()
+	var data = proc.make_data()
 	var result = []
 	for n in coll:
 		var r = proc.next(n, data)
-		if r[1]:
-			result.append(r[0])
-		if r[2]: break
+		if r is Proc.Terminate: break
+		if not r is Proc.SkipItem:
+			result.append(r)
 	return result
 
 func run() -> Array:
 	return apply(source)
 
-func _terminal(coll, idx):
-	return terminal or idx > coll.size()-1
-
 func _iter_init(arg):
 	if source.empty(): return false
 	reset()
-	query_data = make_data()
+	query_data = proc.make_data()
 	index = 0
 	return _iter_next(arg)
 			
@@ -51,11 +44,11 @@ func _iter_next(arg):
 	for i in range(st, source.size()):
 		r = next(source[index], query_data)
 		index += 1
-		terminal = r[2]
-		if r[1]:
-			current = r[0]
+		if r is Proc.Terminate: break
+		if not r is Proc.SkipItem:
+			current = r
 			return true
-		elif terminal: break
+		
 	return false
 
 func _iter_get(arg):
@@ -66,6 +59,7 @@ func reset():
 	current = null
 	terminal = false
 	query_data = {}
+	
 	
 # get item at index in enumerable
 func at(index):
