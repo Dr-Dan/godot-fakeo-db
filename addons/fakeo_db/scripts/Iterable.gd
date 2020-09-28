@@ -9,7 +9,7 @@ var terminal = false
 var query_data = {}
 var proc:Proc.Processor
 
-func _init(proc_, source_=[]):
+func _init(proc_=null, source_=[]):
 	index = -1
 	source = source_
 	proc = proc_
@@ -17,13 +17,13 @@ func _init(proc_, source_=[]):
 func next(item, data):
 	return proc.next(item, data)
 
-func apply(coll):
+func apply(coll) -> Array:
 	var data = proc.make_data()
 	var result = []
 	for n in coll:
 		var r = proc.next(n, data)
 		if r is Proc.Terminate: break
-		if not r is Proc.SkipItem:
+		if not r is Proc.None:
 			result.append(r)
 	return result
 
@@ -45,7 +45,7 @@ func _iter_next(arg):
 		r = next(source[index], query_data)
 		index += 1
 		if r is Proc.Terminate: break
-		if not r is Proc.SkipItem:
+		if not r is Proc.None:
 			current = r
 			return true
 		

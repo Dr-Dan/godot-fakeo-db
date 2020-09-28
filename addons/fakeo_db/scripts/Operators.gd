@@ -6,34 +6,40 @@ const EXPR_NAME2 = '_y'
 
 ## =======================================================
 ## UTILS
-# class Util:
-# 	static func get_map_op(input, args=[])\
-# 		-> OperatorBase:
-# 		if input is OperatorBase:
-# 			return input
-# 		elif input is String:
-# 			if args is Dictionary:
-# 				return ExprArgsDict.new(input, args)
-# 			return ExprArgsDeep.new(input, args)
-# 		elif input is FuncRef:
-# 			return Func.new(input, args)
-# 		elif input is Array:
-# 			return OpenMultiDeep.new(input)
-# 		elif input is Dictionary:
-# 			return DictApplied.new(input, args)
-# 		return null
-	
-# 	static func get_filter_op(input, args=[])\
-# 		-> OperatorBase:
-# 		if input is OperatorBase:
-# 			return input
-# 		elif input is FuncRef:
-# 			return Func.new(input, args)
-# 		elif input is String:
-# 			return ExprArgsDeep.new(input, args)
-# 		elif input is Dictionary:
-# 			return DictCompare.new(input)
-# 		return null
+class Util:
+	static func get_map_op(input, args=[])\
+		-> OperatorBase:
+		if input is OperatorBase:
+			return input
+		elif input is String:
+			if args is Dictionary:
+				return ExprArgsDict.new(input, args)
+			return ExprArgsDeep.new(input, args)
+		elif input is FuncRef:
+			return Func.new(input, args)
+		elif input is Array:
+			if not input.empty() and input[0] is String:
+				return OpenMultiDeep.new(input)
+			return OperatorIterator.new(input)
+		elif input is Dictionary:
+			return DictApplied.new(input, args)
+		return null
+
+	static func get_filter_op(input, args=[])\
+		-> OperatorBase:
+		if input is OperatorBase:
+			return input
+		elif input is FuncRef:
+			return Func.new(input, args)
+		elif input is String:
+			return ExprArgsDeep.new(input, args)
+		elif input is Array:
+			if not input.empty() and input[0] is String:
+				return OpenMultiDeep.new(input)
+			return OperatorIterator.new(input)
+		elif input is Dictionary:
+			return DictCompareOpen.new(input)
+		return null
 		
 
 # ==============================================================
@@ -50,7 +56,8 @@ class OperatorBase:
 		return false
 
 	func eval2(x_next, x_total):
-		return x_next
+		push_warning('using default eval2 in Operator')
+		return eval(x_next)
 	
 class Identity:
 	extends OperatorBase
@@ -102,6 +109,17 @@ class OperatorIterator:
 					break		
 		return item
 
+	# func eval2(x_next, x_total):
+	# 	for op in ops:
+	# 		x_total = op.eval2(x_next, x_total)
+	# 		if exit_op != null:
+	# 			var e = exit_op.eval(item)
+	# 			if not e:
+	# 				if is_pred:
+	# 					item = e
+	# 				break		
+	# 	return item
+
 # ==============================================================
 # DICTIONARY OPERATORS;
 
@@ -117,12 +135,12 @@ usage:
 """
 class DictCompare:
 	extends OperatorBase
-	var fields
+	var fields:Dictionary
 	var any:bool
 	var fail_missing:bool
 
-	func _init(fields: Dictionary, _any=false, _fail_missing=true):
-		self.fields = fields
+	func _init(fields_: Dictionary, _any=false, _fail_missing=true):
+		fields = fields_
 		for p in fields:
 			if not fields[p] is OperatorBase:
 				fields[p] = Eq.new(fields[p])
@@ -144,7 +162,41 @@ class DictCompare:
 				return false
 		return true		
 
-			
+class DictCompareOpen:
+	extends OperatorBase
+	var fields:Dictionary
+	var any:bool
+	var fail_missing:bool
+
+	func _init(fields_: Dictionary, _any=false, _fail_missing=true):
+		# fields = fields_
+		for p in fields_:
+			var op = fields_[p]
+			if not op is OperatorBase:
+				op = Eq.new(fields_[p])
+			var open = OpenDeep.new(p)
+			p = open.fields.back()
+			fields[p] = {op=op, open=open}
+		any = _any
+		fail_missing = _fail_missing
+
+	func eval(item):
+		return item_valid(item, fields)
+
+	func item_valid(item, comps: Dictionary)->bool:
+		for key in comps:
+			var r = comps[key].open.eval(item)
+			if r == null and fail_missing:
+				return false
+			else:
+				if comps[key].op.eval(r):
+					if any:
+						return true
+				else:
+					return false
+		return true		
+
+						
 # NOTE: will not actually stop user from mutating an object
 class DictApplied:
 	extends OperatorBase
@@ -198,7 +250,7 @@ class DictApplied:
 class And:
 	extends OperatorBase
 	var cmps
-	func _init(cmps:Array):
+	func _init(cmps:Array=[]):
 		self.cmps = cmps
 		
 	func eval(item):
@@ -224,7 +276,7 @@ class And:
 class All:
 	extends OperatorBase
 	var cmps
-	func _init(cmps:Array):
+	func _init(cmps:Array=[]):
 		self.cmps = cmps
 		
 	func eval(item):
@@ -252,7 +304,7 @@ class All:
 class Or:
 	extends OperatorBase
 	var cmps
-	func _init(cmps:Array):
+	func _init(cmps:Array=[]):
 		self.cmps = cmps
 		
 	func eval(item):
@@ -304,6 +356,7 @@ class IsVariantType:
 				
 # ------------------------------------------------------------ 
 # COMPARITIVE
+	
 """
 	Less than
 """
@@ -320,34 +373,14 @@ class Even:
 class LT:
 	extends OperatorBase
 	var val
-	func _init(val):
+	func _init(val=0):
 		self.val = val
 		
 	func eval(item):
-		return item < val
+		return eval2(item, val)
 
-#class OpCaller1:
-#	extends OperatorBase
-#	var op
-#	var arg
-#
-#	func _init(op_, arg_):
-#		self.op = op_
-#		self.arg = arg_
-#
-#	func eval(item0, item1=null):
-#		return op.eval(item0, arg)
-#
-#class OpCaller2:
-#	extends OperatorBase
-#	var op
-#
-#	func _init(op_):
-#		self.op = op_
-#
-#	func eval(item0, item1=null):
-#		return op.eval(item0, item1)
-	
+	func eval2(item0, item1):
+		return item0 < item1	
 
 
 """
@@ -356,11 +389,11 @@ class LT:
 class GT:
 	extends OperatorBase
 	var val
-	func _init(val):
+	func _init(val=0):
 		self.val = val
 		
 	func eval(item):
-		return item > val
+		return eval2(item, val)
 
 	func eval2(item0, item1):
 		return item0 > item1	
@@ -371,7 +404,7 @@ class GT:
 class Eq:
 	extends OperatorBase
 	var val
-	func _init(val):
+	func _init(val=0):
 		self.val = val
 		
 	func eval(item):
@@ -385,7 +418,7 @@ class Eq:
 class In:
 	extends OperatorBase
 	var container
-	func _init(container):
+	func _init(container=[]):
 		self.container = container
 		
 	func eval(item):
@@ -429,8 +462,8 @@ class Contains:
 		return false
 #		return self.item in item
 
-	func eval2(item0, item1):
-		return item1 in item0	
+	# func eval2(item0, item1):
+	# 	return item1 in item0	
 			
 # ==============================================================
 # FUNCTION-Y; 'eval' can return anything
@@ -478,6 +511,8 @@ class FuncAsArgs:
 	func eval(item):
 		return func_ref.call_funcv(item)
 
+	func eval2(item0, item1):
+		return func_ref.call_funcv(item0 + item1)
 
 class Expr:
 	extends OperatorBase
@@ -486,7 +521,7 @@ class Expr:
 	var target
 	var expr_str
 	func _init(expr_str_:String, _target=null).():
-		expr.parse(expr_str_, [EXPR_NAME])
+		expr.parse(expr_str_, [EXPR_NAME, EXPR_NAME2])
 		expr_str = expr_str_
 		target = _target
 		
@@ -494,7 +529,6 @@ class Expr:
 		return expr.execute([item], target)
 
 	func eval2(item0, item1):
-		expr.parse(expr_str, [EXPR_NAME, EXPR_NAME2])
 		return expr.execute([item0, item1], target)
 				
 class ExprArgs:
@@ -523,13 +557,13 @@ class ExprArgsDeep:
 	var fields = []
 	var target
 	
-	func _init(expr_str:String, fields:Array, _target=null).():
+	func _init(expr_str:String, fields_:Array, _target=null).():
 		var r = []
-		for f in fields:
+		for f in fields_:
 			var f_split = f.split("/")
 			r.append(f_split[f_split.size()-1])
-			self.fields.append(OpenDeep.new(f))
-		expr.parse(expr_str,  [EXPR_NAME] + r)
+			fields.append(OpenDeep.new(f))
+		expr.parse(expr_str,  [EXPR_NAME] + r + [EXPR_NAME2])
 		target = _target
 		
 	func eval(item):
@@ -537,7 +571,13 @@ class ExprArgsDeep:
 		for f in fields:
 			args.append(f.eval(item))
 		return expr.execute([item] + args, target)
-	
+
+	func eval2(item0, item1):
+		var args = []
+		for f in fields:
+			args.append(f.eval(item0))
+		return expr.execute([item0] + args + [item1], target)
+			
 
 class ExprArgsDict:
 	extends OperatorBase
@@ -548,7 +588,7 @@ class ExprArgsDict:
 	var expr_str:String
 	func _init(expr_str_:String, _fields:Dictionary={}, _target=null).():
 		fields = _fields
-		expr.parse(expr_str_, [EXPR_NAME] + fields.keys())
+		expr.parse(expr_str_, [EXPR_NAME] + fields.keys() + [EXPR_NAME2])
 		expr_str = expr_str_
 		target = _target
 		
@@ -556,8 +596,7 @@ class ExprArgsDict:
 		return expr.execute([item] + fields.values(), target)
 	
 	func eval2(item0, item1):
-		expr.parse(expr_str, [EXPR_NAME, EXPR_NAME2] + fields.keys())
-		return expr.execute([item0, item1] + fields.values(), target)
+		return expr.execute([item0] + fields.values() + [item1], target)
 		
 class Open:
 	extends OperatorBase
@@ -572,7 +611,7 @@ class Open:
 		if field in item:
 			result = item[field]
 		return result
-		
+	
 class OpenMulti:
 	extends OperatorBase
 
@@ -627,15 +666,109 @@ class OpenMultiDeep:
 
 	func eval(item):
 		var result = {}
-#		for f in ops:
-#			var name = f.fields.back()
-#			result[name] = f.eval(item)
 		for f in ops:
 			if not ops[f].fields.empty():
 				var name = ops[f].fields.back()
 				result[name] = ops[f].eval(item)
 		return result
 
+class OpenIndex:
+	extends OperatorBase
+	
+	var idx:int
+	var defval = null
+	
+	func _init(idx:int, defval_=null).():
+		self.idx = idx
+		defval = defval_
+
+	func eval(item):
+		var result = defval
+		if item is Array and idx < item.size():
+			result = item[idx]
+		return result
+
+# class OpenIndexMulti:
+# 	extends OperatorBase
+
+# 	var idxs:Array
+	
+# 	func _init(_idxs:Array).():
+# 		idxs = _idxs
+
+# 	func eval(item):
+# 		var n = []
+# 		for i in idxs:
+# 			if i < item.size():
+# 				n.append(item[i])
+# 		return n
+	
+class OpenIndexMultiDeep:
+	extends OperatorBase
+
+	# filled with OpenDeep
+	var ops:Dictionary = {}
+	
+	func _init(idxs_:Array, defval=null).():
+		for f in idxs_:
+			if f is Array:
+				ops[f] = OpenIndexDeepArray.new(f, defval)
+			else:
+				ops[f] = OpenIndexDeep.new(str(f), defval)
+			assert(not ops[f].idxs.empty())
+
+	func eval(item):
+		var result = []
+		for f in ops:
+			if not ops[f].idxs.empty():
+				var name = ops[f].idxs.back()
+				result.append(ops[f].eval(item))
+		return result
+		
+class OpenIndexDeep:
+	extends OperatorBase
+	
+	var idxs:Array = []
+	var defval
+	
+	func _init(field:String, defval_=null).():
+		defval = defval_
+		var f_split = field.split("/")
+		for s in f_split:
+			idxs.append(int(s))
+
+	func eval(item):
+		var result = defval
+		for f in idxs:
+			# if f == "*":
+			# 	result = item
+			# 	continue
+			if item is Array and f < item.size():
+				result = item[f]
+				item = result
+				
+			else: return defval
+		return result
+		
+class OpenIndexDeepArray:
+	extends OperatorBase
+	
+	var idxs:Array = []
+	var defval
+	func _init(path:Array, defval_=null).():
+		idxs = path
+		defval = defval_
+
+	func eval(item):
+		var result = defval
+		for i in idxs:
+			if item is Array and i < item.size():
+				result = item[i]
+				item = result
+				
+			else: return defval
+		return result
+			
 class ApplyToResult:
 	extends OperatorBase
 	

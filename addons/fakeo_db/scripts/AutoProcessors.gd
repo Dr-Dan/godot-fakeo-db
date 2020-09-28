@@ -20,10 +20,19 @@ static func comp(input:Array, coll=null, itbl=false):
 	return get_proc(Procs.ProcIterator.new(input), coll, itbl)
 
 static func map(input, coll=null, itbl=false):
-	return get_proc(Procs.MapOp.new(input), coll, itbl)
+	return get_proc(Procs.MapOp.new(Operators.Util.get_map_op(input)), coll, itbl)
 
 static func filter(input, coll=null, itbl=false):
-	return get_proc(Procs.FilterOp.new(input), coll, itbl)
+	return get_proc(Procs.FilterOp.new(Operators.Util.get_filter_op(input)), coll, itbl)
+
+static func project(input, coll=null, itbl=false):
+	var op = null
+	if input is Array:
+		op = Operators.OpenMultiDeep.new(input)
+	else:
+		assert(input is String) 
+		op = Operators.OpenDeep.new(input)
+	return map(op, coll, itbl)
 
 static func take(amt: int, coll=null, itbl=false):
 	return get_proc(Procs.Take.new(amt), coll, itbl)
@@ -36,9 +45,6 @@ static func skip(amt: int, coll=null, itbl=false):
 
 static func ittr(op, coll=null, itbl=false):
 	return get_proc(Procs.IterateOp.new(op), coll, itbl)
-
-static func enumerate(key='i', step=1, coll=null, itbl=false):
-	return get_proc(Procs.Enumerate.new(key, step), coll, itbl)
 
 static func as_args(fn:FuncRef, coll=null, itbl=false):
 	return get_proc(map(Operators.FuncAsArgs.new(fn)), coll, itbl)

@@ -23,22 +23,22 @@ static func odd():
 # 	else:
 # 		return Operators.OpCaller1(Operators.GT, item0)
 	
-static func gt(item):
+static func gt(item=0):
 	return Operators.GT.new(item)
 	
-static func lt(item):
+static func lt(item=0):
 	return Operators.LT.new(item)
 
-static func eq(item):
+static func eq(item=0):
 	return Operators.Eq.new(item)
 
 static func neq(item):
 	return not_(Operators.Eq.new(item))
 
-static func gteq(item):
+static func gteq(item=0):
 	return or_([gt(item), eq(item)])
 	
-static func lteq(item):
+static func lteq(item=0):
 	return or_([lt(item), eq(item)])
 
 static func and_(items: Array):
@@ -78,6 +78,8 @@ static func expr(expr_str:String, fields=null, target=null):
 		return Operators.ExprArgsDict.new(expr_str, fields, target)
 	elif fields is Array:
 		return Operators.ExprArgsDeep.new(expr_str, fields, target)
+	elif fields is String:
+		return Operators.ExprArgsDeep.new(expr_str, [fields], target)
 	return Operators.Expr.new(expr_str, target)
 
 static func open(field):
@@ -85,8 +87,15 @@ static func open(field):
 		return Operators.OpenMultiDeep.new(field)
 	return Operators.OpenDeep.new(field)
 	
+static func open_idx(field, defval=null):
+	if field is Array:
+		return Operators.OpenIndexMultiDeep.new(field, defval)
+	elif field is String:
+		return Operators.OpenIndexDeep.new(field, defval)
+	return Operators.OpenIndex.new(field, defval)
+	
 static func dict_cmpr(preds, _any=false, _fail_missing=true):
-	return Operators.DictCompare.new(preds, _any, _fail_missing)
+	return Operators.DictCompareOpen.new(preds, _any, _fail_missing)
 	
 static func dict_apply(input, args=[], open_if_found=false):
 	return Operators.DictApplied.new(input, args, open_if_found)

@@ -1,6 +1,6 @@
 const OpUtil = preload("res://addons/fakeo_db/scripts/Operators.gd").Util
 
-class SkipItem:
+class None:
 	func _init():
 		pass
 
@@ -44,7 +44,7 @@ class ProcIterator:
 	extends Processor
 
 	var procs:Array = []
-	func _init(procs_:Array):
+	func _init(procs_:Array=[]):
 		procs = procs_
 	
 	func make_data():
@@ -60,11 +60,8 @@ class ProcIterator:
 		for i in procs.size():
 			var q = procs[i]
 			r = q.next(r, data.proc_data[i])
-			# if r[2]: t = true
-			# if not r[1]: break # or r[2]?
-			if r is Terminate or r is SkipItem:
+			if r is Terminate or r is None:
 				 break
-		# if t: r[2] = true
 		return r
 
 
@@ -88,20 +85,21 @@ class Enumerate:
 
 	var key:String
 	var step:int
+	var wrap:bool
 
-	func _init(key_='i', step_:int=1):
+	func _init(key_='i', step_:int=1, wrap_:bool=false):
 		key = key_
 		step = max(1, step_)
+		wrap = wrap_
 		
 	func make_data():
 		return {id=0}
 
 	func next(item, data):	
-		# if item is Dictionary:
-		item[key] = data.id
-		# else:
-		# 	assert(item.has_method('set'))
-		# 	item.set(key, data.id)
+		if wrap:
+			item = {key:data.id, item=item}
+		else:
+			item[key] = data.id
 		data.id += step
 		return item
 	
@@ -114,6 +112,7 @@ class IterateOp:
 	
 	var mut_op
 	var def_val
+	
 	func make_data():
 		return {started=false, value=def_val}
 
@@ -126,7 +125,7 @@ class IterateOp:
 			data.started = true
 			data.value = item
 		else:
-			data.value = mut_op.eval2(item, data.value)
+			data.value = mut_op.eval2(data.value, item)
 		return data.value
 
 	func next(item, data):	
@@ -143,9 +142,9 @@ class Filter:
 
 	func next(item, data):
 		var r = get_result(item, data)
-		if not r:
-			return SkipItem.new()
-		return item
+		if r:
+			return item
+		return None.new()
 
 class FilterIndexed:
 	extends Filter
@@ -199,7 +198,6 @@ class TakeWhile:
 		var r = .next(item, data)
 		if data.terminal:
 			return Terminate.new()
-		# r[2] = data.terminal
 		return r 
 
 class Slice:
@@ -213,10 +211,8 @@ class Slice:
 
 	func next(item, data):
 		var r = .next(item, data)
-		# r[1] = data.i >= st_idx
-		# r[2] = data.i >= end_idx
 		if data.i >= st_idx:
-			return SkipItem.new() 
+			return None.new() 
 		if data.i >= end_idx:
 			return Terminate.new()
 		return r 
@@ -230,7 +226,6 @@ class Take:
 
 	func next(item, data):
 		var r = .next(item, data)
-		# r[2] = data.i >= count
 		if data.i > count:
 			return Terminate.new()
 		return r 
