@@ -33,7 +33,7 @@ var name_table = [
 	{name="Mike", age=22, addr_id=0, inv={money={coin=25}, weapon={gun=1, knife=2}, food={nut=2}}},
 	{name="The Old One", age=112, addr_id=0, inv={money={coin=1}, weapon={gun=1}, food={nut=2}}},
 	{name="Anne", age=16, addr_id=1, inv={money={coin=2}, weapon={knife=2}, food={}}},
-	{name="xXx", age=42, addr_id=1, inv={money={coin=2000}, weapon={knife=10}, food={}, drink={relentless=1}}},
+	{name="xXx", age=42, addr_id=1, inv={money={coin=2000}, weapon={knife=10, gun=2}, food={}, drink={relentless=1}}},
 	{name="Carla", age=49, addr_id=2, inv={food={berry=20}}}]
 	
 func auto_test():
@@ -42,24 +42,35 @@ func auto_test():
 	ex_util.pr_array('open fields', fdb.apply(tx, name_table))
 		
 	# calling flex.map with a String applies an expression
-	ex_util.pr_array('age * 10',
+	ex_util.pr_array('deep age analysis',
 		flex.map(
-			'{"age":_x.age * 10, "name":_x.name}',
+			'{"name":_x.name, "is_old":_x.age > 90}',
 			name_table))
 
-	# calling flex.xxx with the 'coll' arg returns an Array
+	# calling flex.xxx with the 'coll' (2nd) arg returns an Array
 	ex_util.pr_array('view weapons, name and age',
 		# flex.map([]) == flex.map(ops.open([])) == flex.project([])
 		flex.map(
 			['inv/weapon', 'name', 'age'],
 			name_table))
 
+	ex_util.pr_array('time-travel',
+		# if the first item in the Array is an op:
+		#   flex.map([]) == flex.map(ops.comp([]))
+		flex.map([
+				ops.open(['name', 'age', 'inv/food']),
+				ops.dict_apply({age='_x.age*10'}, ['name', 'food'])], 
+			name_table))
+			
 	# and setting the last arg ('itbl') to true returns an Iterable for deferred evaluation
 	var has_coin_itbl = flex.comp([
+		# flex.filter({}) == flex.filter(ops.dict_cmpr({}))
 		flex.filter({'inv/money/coin':ops.gteq(10)}),
 		flex.map(['name', 'inv/money'])],
 		name_table,
 		true)
+
+	# run iterable later
 	ex_util.pr_array('who has coin >= 10?',
 		has_coin_itbl.run())
 
@@ -70,6 +81,7 @@ func auto_test():
 		.reduce(
 			Add.new(), 
 			name_table))
+
 
 # an operator for reducing should implement eval2(input_next, input_total)
 class Add:

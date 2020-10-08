@@ -24,6 +24,7 @@ static func filter(input)\
 	return Procs.FilterOp.new(input)
 	# return Procs.FilterOp.new(Operators.Util.get_filter_op(input))
 
+# TODO: use op factory for this
 static func project(input):
 	var op = null
 	if input is Array:

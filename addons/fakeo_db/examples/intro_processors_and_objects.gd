@@ -115,11 +115,17 @@ func open_operators():
 			proc=prc.map(ops.open('name'))
 		},
 		{
-			#  if called with Array
-			#  	 open multiple fields; use slashes to go deeper
-			#  result is a dictionary for each
+			#  called with Array:
+			#  	 open multiple fields; use slashes to go deeeper
+			#  result is a dictionary for each with the (final) field name as the key
 			msg='view weapons, name and age',
 			proc=prc.map(ops.open(['inv/weapon', 'name', 'age']))
+		},
+			{
+			#  if called with Dictionary
+			#  	 will write results to the key
+			msg='open (my) stuff',
+			proc=prc.map(ops.open({my_wpns='inv/weapon', my_age='age'}))
 		},
 		{
 			# prc.project(x) == prc.map(ops.open(x))

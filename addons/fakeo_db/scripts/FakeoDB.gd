@@ -17,8 +17,8 @@ static func cltn(array:Array=[]) -> Enumerables.Collection:
 	return Enumerables.Collection.new(array)
 
 
-# procs should be Array(Processor)
-static func flex(procs=[]):
+# 'procs' should be Array(Processor)
+static func flex(procs:Array=[]) -> AutoProcessorChainer:
 	return AutoProcessorChainer.new(procs)
 	
 
@@ -32,15 +32,15 @@ static func itbl(input, coll) -> Iterable:
 static func apply(input, coll) -> Array:
 	return itbl(input, coll).run()
 
-static func reduce(op, coll):
+static func reduce(op: Operators.OperatorBase, coll):
 	return flex().ittr(op, coll).back()
 
-static func sort(op, coll):
+static func sort(op: Operators.OperatorBase, coll) -> Array:
 	return HeapSort.heap_sort(op, coll)
 
 	
-static func first(op, coll):
+static func first(op: Operators.OperatorBase, coll):
 	return flex().filter(op, coll, true).front()
 
-static func last(op, coll):
+static func last(op: Operators.OperatorBase, coll):
 	return flex().filter(op, coll, true).back()

@@ -2,7 +2,7 @@
 
 For Godot 3.2
 
-An addon that lets you query arrays of data with ease. Useful in games with more complicated data structures such as RPG, RTS. Born out of frustration while writing AI and GUI code where this addon can be particularly useful.
+An addon that lets you query arrays of primitives and objects
 
 
 ## Features
@@ -14,15 +14,18 @@ An addon that lets you query arrays of data with ease. Useful in games with more
 ## About
 ### [Wiki](../../wiki)
 
-## Usage
+## Warning
 
-This addon is not production tested and will not be faster than handwritten code.
+This addon is not production tested and will probably be slower than handwritten code i.e. for loops. 
+
+
+## Quick Example
+TODO: insert example
+TODO: links to other examples, imply ordered viewing
 
 ## Installation
 
 1. Either download from the Godot Asset Store or just copy fakeo_db into the 'addons' folder in your project.
-
-2. (Optional) Enable plugin: Project > Project Settings > Plugins
 
 ## License
 

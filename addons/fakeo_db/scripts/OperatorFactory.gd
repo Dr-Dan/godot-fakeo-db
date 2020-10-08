@@ -85,6 +85,9 @@ static func expr(expr_str:String, fields=null, target=null):
 static func open(field):
 	if field is Array:
 		return Operators.OpenMultiDeep.new(field)
+	elif field is Dictionary:
+		return Operators.OpenMultiDeepDict.new(field)
+	assert(field is String)
 	return Operators.OpenDeep.new(field)
 	
 static func open_idx(field, defval=null):

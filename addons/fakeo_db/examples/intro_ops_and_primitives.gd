@@ -24,10 +24,10 @@ func _run():
 func less_than_6(x):
 	return x < 6
 
-func plus_y(x, y):
+func plus_xy(x, y):
 	return x+y
 
-func multyz(x, y, z):
+func mult_xyz(x, y, z):
 	return x*y*z
 
 class Div:
@@ -95,11 +95,11 @@ func operators():
 		{
 			# additional args passed to function
 			msg='x + y',
-			op=ops.func_(self, 'plus_y', [2]),
+			op=ops.func_(self, 'plus_xy', [2]),
 		},
 		{
 			msg='x*y*z',
-			op=ops.func_(self, 'multyz', [5, 10]),
+			op=ops.func_(self, 'mult_xyz', [5, 10]),
 		},
 		{
 			# use a class that derives from OperatorBase (^above)
@@ -111,7 +111,7 @@ func operators():
 			msg='(((x + 3) + y) > 8)',
 			op=ops.comp([
 				ops.expr('_x + 3'),
-				ops.func_(self, 'plus_y', [2])])
+				ops.func_(self, 'plus_xy', [2])])
 		},
 		{
 			msg='expr => {}\n',
@@ -120,27 +120,22 @@ func operators():
 			op=ops.expr('{"value": _x}')
 		},
 		{
-			# an Array will be treated as ops.comp(arr)
-			# dict_apply can be used to create a new object
+			# dict_apply returns a Dictionary with the ops applied
+			#  it will create new fields if they do not exist (in the data)
 			msg='dict_apply => {}\n',
+			# an Array will be treated as ops.comp(arr)
 			op=[ops.expr('_x + 3'),
-				ops.func_(self, 'plus_y', [2]),
 				ops.dict_apply({value=ops.identity(), is_even=ops.even()})]
 		},
 	]
-	# var a = []
-	# for i in data:
-	# 	i = plus_y(i+3, 2)
-	# 	var d = {is_even=i % 2 == 0, value=i}
-	# 	a.append(d)
-
-	prints('data:', data)
 	
+	prints('data:', data)
 	ex_util.pr_equals_break()
+	
 	printt('filter\n')
 	
 	var flex = fdb.flex()
-	# f(ilter)apply
+
 	# filter returns all in data where the op returns true
 	for f in filter_ops:
 		printt(f.msg, flex.filter(f.op, data))
@@ -148,25 +143,33 @@ func operators():
 	ex_util.pr_equals_break()
 
 	printt('map\n')
-	# m(ap)apply
+
 	# map applies an op to each in data and returns the result
 	for m in map_ops:
 		printt(m.msg, flex.map(m.op, data))
 		ex_util.pr_dash_break()
+	ex_util.pr_equals_break()
 
-	# ittr (iterator) combines the next item and previous result
+
+	# ittr (iterator) passes the next item and previous result to the operator
 	# in this case; adding them together
-	# for this reason the function 'plus_y' must take 2 args
+	# for this reason the function 'plus_xy' must take 2 args
 	printt('add all items:',
-		flex.ittr(ops.func_(self, 'plus_y'), data))
+		flex.ittr(ops.func_(self, 'plus_xy'), data))
 
-	# reduce just returns the last result from ittr
+	# reduce returns the last result from ittr
 	printt('product:',
 		fdb.reduce(ops.expr('_x * _y'), data.slice(1,-1)))
+
+	# printt('product:',
+	# 	fdb.flex()\
+	# 		.filter('_x > 0')\
+	# 		.reduce(ops.expr('_x * _y'), data))
 
 	# not all operators will work with sort, ittr, reduce
 	# expr, func_, lt/gt/eq for this purpose
 	ex_util.pr_dash_break()
+	print('Sorting\n')
 	printt('sorted',
 		fdb.sort(ops.lt(), data))
 	printt('sorted (descending)',

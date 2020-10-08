@@ -23,6 +23,12 @@ func get_proc(input, coll=null, itbl=false):
 		return c
 	return c.apply(coll)
 
+# func then(data):
+# 	if data is Array:
+# 		return append_array(data)
+# 	assert(data is Procs.Processor)
+# 	return append(data)
+
 # override these two if extending
 func append(item):
 	return get_script().new(procs + [item])
@@ -31,7 +37,7 @@ func append_array(items:Array):
 	return get_script().new(procs + items)
 	
 # -------------------------------------------------------
-# eval
+# instant eval
 
 func itbl(coll=[]):
 	return Itbl.new(self, coll)

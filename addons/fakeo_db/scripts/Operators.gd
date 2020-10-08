@@ -7,32 +7,30 @@ const EXPR_NAME2 = '_y'
 ## =======================================================
 ## UTILS
 class Util:
-	static func get_map_op(input, args=[])\
+	static func get_map_op(input)\
 		-> OperatorBase:
 		if input is OperatorBase:
 			return input
 		elif input is String:
-			if args is Dictionary:
-				return ExprArgsDict.new(input, args)
-			return ExprArgsDeep.new(input, args)
+			return ExprArgsDeep.new(input)
 		elif input is FuncRef:
-			return Func.new(input, args)
+			return Func.new(input)
 		elif input is Array:
 			if not input.empty() and input[0] is String:
 				return OpenMultiDeep.new(input)
 			return OperatorIterator.new(input)
 		elif input is Dictionary:
-			return DictApplied.new(input, args)
+			return DictApplied.new(input)
 		return null
 
-	static func get_filter_op(input, args=[])\
+	static func get_filter_op(input)\
 		-> OperatorBase:
 		if input is OperatorBase:
 			return input
 		elif input is FuncRef:
-			return Func.new(input, args)
+			return Func.new(input)
 		elif input is String:
-			return ExprArgsDeep.new(input, args)
+			return ExprArgsDeep.new(input)
 		elif input is Array:
 			if not input.empty() and input[0] is String:
 				return OpenMultiDeep.new(input)
@@ -557,7 +555,7 @@ class ExprArgsDeep:
 	var fields = []
 	var target
 	
-	func _init(expr_str:String, fields_:Array, _target=null).():
+	func _init(expr_str:String, fields_:Array=[], _target=null).():
 		var r = []
 		for f in fields_:
 			var f_split = f.split("/")
@@ -667,11 +665,29 @@ class OpenMultiDeep:
 	func eval(item):
 		var result = {}
 		for f in ops:
-			if not ops[f].fields.empty():
-				var name = ops[f].fields.back()
-				result[name] = ops[f].eval(item)
+			var name = ops[f].fields.back()
+			result[name] = ops[f].eval(item)
 		return result
 
+class OpenMultiDeepDict:
+	extends OperatorBase
+
+	# filled with OpenDeep
+	var ops:Dictionary = {}
+	
+	func _init(_fields:Dictionary).():
+		for k in _fields:
+			var v = _fields[k]
+			ops[k] = OpenDeep.new(v)
+			assert(not ops[k].fields.empty())
+
+	func eval(item):
+		var result = {}
+		for k in ops:
+			# var name = ops[k].fields.back()
+			result[k] = ops[k].eval(item)
+		return result
+		
 class OpenIndex:
 	extends OperatorBase
 	
