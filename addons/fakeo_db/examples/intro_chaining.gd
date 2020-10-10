@@ -8,7 +8,7 @@ To use: File > Run
 
 const ex_util = preload("res://addons/fakeo_db/examples/example_utils.gd")
 const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
-const ops = fdb.OperatorFactory
+const ops = fdb.OpFactory
 
 # flex also supports chaining
 func _run():
@@ -16,7 +16,7 @@ func _run():
 	var map_mult_chn = fdb.flex().map('_x * 2')
 	print(map_mult_chn.filter('_x >= 4', [1,2,3]))
 		
-	# As the ProcessorChainer is a Processor it can be passed to apply and itbl
+	# As the TransducerChainer is a Transducer it can be passed to apply and itbl
 	print(map_mult_chn.skip(1).map('float(_x) / 2', [1,2,3]))
 		
 	var map_pow_chn = map_mult_chn.map('pow(_x, 3)')
@@ -38,5 +38,5 @@ func _run():
 	print(fdb.flex()\
 		.filter('_x > 3')\
 		.map('_x * 2')\
-		.reduce(ops.expr('_x + _y'),
+		.reduce('_x + _y',
 			[1,-2 ,12,6,1, 23]))

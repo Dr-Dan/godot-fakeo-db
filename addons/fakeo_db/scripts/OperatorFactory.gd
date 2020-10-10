@@ -69,6 +69,9 @@ static func func_(obj:Object, func_name:String, args=[]):
 	var fn = funcref(obj, func_name)
 	return Operators.Func.new(fn, args)
 
+static func call_fn(func_name:String, args=[], return_item=false):
+	return Operators.CallFunc.new(func_name, args, return_item)	
+	
 static func func_as_args(obj:Object, func_name:String):
 	var fn = funcref(obj, func_name)
 	return Operators.FuncAsArgs.new(fn)
@@ -81,6 +84,9 @@ static func expr(expr_str:String, fields=null, target=null):
 	elif fields is String:
 		return Operators.ExprArgsDeep.new(expr_str, [fields], target)
 	return Operators.Expr.new(expr_str, target)
+
+static func open_v(fields:Array):
+	return Operators.OpenValue.new(fields)
 
 static func open(field):
 	if field is Array:
@@ -106,6 +112,9 @@ static func dict_apply(input, args=[], open_if_found=false):
 static func run(field, op):
 	return Operators.RunOp.new(field, op)
 	
+static func if_(pred, then, else_):
+	return Operators.RunIf.new(pred, then, else_)
+		
 static func op(item:String, arg):
 	match item:
 		"<":

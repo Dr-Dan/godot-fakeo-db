@@ -20,7 +20,7 @@ class Terminate:
 # 		pass
 		
 
-class Processor:
+class Transducer:
 	extends Resource
 	
 	func next(item, data):
@@ -41,7 +41,7 @@ class Processor:
 	# 	return result	
 
 class ProcIterator:
-	extends Processor
+	extends Transducer
 
 	var procs:Array = []
 	func _init(procs_:Array=[]):
@@ -66,7 +66,7 @@ class ProcIterator:
 
 
 class MapOp:
-	extends Processor
+	extends Transducer
 	const OpBase = preload("res://addons/fakeo_db/scripts/Operators.gd").OperatorBase
 	
 	var pred_op
@@ -81,7 +81,7 @@ class MapOp:
 		return get_result(item, data)
 	
 class Enumerate:
-	extends Processor
+	extends Transducer
 
 	var key:String
 	var step:int
@@ -105,7 +105,7 @@ class Enumerate:
 	
 
 class IterateOp:
-	extends Processor
+	extends Transducer
 	const Ops = preload("res://addons/fakeo_db/scripts/Operators.gd")
 	const OpBase = Ops.OperatorBase
 	const OpFunc = Ops.Func
@@ -132,7 +132,7 @@ class IterateOp:
 		return get_result(item, data)
 		
 class Filter:
-	extends Processor
+	extends Transducer
 
 	func _init().():
 		pass

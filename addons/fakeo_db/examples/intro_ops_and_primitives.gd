@@ -11,7 +11,7 @@ To use: File > Run
 
 const ex_util = preload("res://addons/fakeo_db/examples/example_utils.gd")
 const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
-const ops = fdb.OperatorFactory
+const ops = fdb.OpFactory
 
 func _run():
 	ex_util.pr_equals_break()
@@ -91,6 +91,14 @@ func operators():
 			# named args can be passed to an expression
 			msg='pow(x, y)',
 			op=ops.expr('pow(_x, y)', {y=10})
+		},
+		{
+			# if-else
+			msg='if x < 5: pow(x, 2) else: x * 10',
+			op=ops.if_(
+				ops.lt(5), 
+				ops.expr('pow(_x, 2)'), # then
+				ops.expr('_x * 10')) # else
 		},
 		{
 			# additional args passed to function
@@ -173,7 +181,7 @@ func operators():
 	printt('sorted',
 		fdb.sort(ops.lt(), data))
 	printt('sorted (descending)',
-			fdb.sort(ops.expr('_x > _y'), data))
+			flex.sort('_x > _y', data))
 	printt('sorted dict',
 		fdb.sort(
 			ops.expr('_x.x > _y.x'), 

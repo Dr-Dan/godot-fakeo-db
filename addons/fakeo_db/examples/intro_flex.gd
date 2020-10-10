@@ -7,19 +7,19 @@ extends EditorScript
 To use: File > Run
 (Ctrl+Shift+X)
 
-AutoProcessors take 3 arguments
+AutoTransducers take 3 arguments
 	static func map(input, coll=null, itbl=false): ...
 	
-	1 arg: returns a Processor
+	1 arg: returns a Transducer
 	2 args: returns an Array
 	3 args: returns an Iterable if 'itbl' == true
 """
 
 const ex_util = preload("res://addons/fakeo_db/examples/example_utils.gd")
 const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
-const ops = fdb.OperatorFactory
+const ops = fdb.OpFactory
 
-# unlike Operator/ProcessorFactory chain requires instantiating
+# unlike Operator/TransducerFactory chain requires instantiating
 #  upon calling map, filter it returns a copy of itself
 #  so changes will not affect other branches
 var flex = fdb.flex()
@@ -37,7 +37,7 @@ var name_table = [
 	{name="Carla", age=49, addr_id=2, inv={food={berry=20}}}]
 	
 func auto_test():
-	# calling flex.xxx with 1 arg returns a Processor
+	# calling flex.xxx with 1 arg returns a Transducer
 	var tx = flex.map(ops.open(['inv/weapon', 'name', 'age']))
 	ex_util.pr_array('open fields', fdb.apply(tx, name_table))
 		

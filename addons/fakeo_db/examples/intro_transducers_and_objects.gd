@@ -10,8 +10,8 @@ To use: File > Run
 
 const ex_util = preload("res://addons/fakeo_db/examples/example_utils.gd")
 const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
-const ops = fdb.OperatorFactory
-const prc = fdb.ProcessorFactory
+const ops = fdb.OpFactory
+const prc = fdb.TdxFactory
 var flex = fdb.flex()
 
 func _run():
@@ -27,7 +27,7 @@ func _run():
 	sorting()
 
 	ex_util.pr_equals_break()
-	more_processors()
+	more_transducers()
 	
 	ex_util.pr_equals_break()	
 	example_enumerate()
@@ -47,13 +47,18 @@ class Human:
 		self.age = age
 		self.addr_id = addr_id
 		self.inv = inv
+		
+	func speak():
+		print('hi, my name is %s' % name)
+		return self
 	
 var name_table = [
 	{name="Mike", age=22, addr_id=0, inv={money={coin=25}, weapon={gun=1, knife=2}, food={nut=2}}},
 	{name="The Oldest One", age=112, addr_id=0, inv={money={coin=1}, weapon={gun=1}, food={nut=2}}},
 	{name="Jane Doe", age=16, addr_id=1, inv={weapon={knife=2}, food={}}},
-	{name="xXx", age=42, addr_id=1, inv={money={coin=2000}, weapon={knife=10}, food={}, drink={relentless=1}}},
+	{name="xXx", age=42, addr_id=1, inv={money={coin=2000}, weapon={knife=10, gun=2}, food={}, drink={relentless=1}}},
 	Human.new("Carla", 49, 2, {money={coin=248}, food={berry=20}}),
+	Human.new("Jing", 87, 2, {money={coin=300}, weapon={knife=1}, food={berry=20}}),
 ]
 
 var addr_table = [
@@ -107,44 +112,50 @@ class Add:
 
 
 func open_operators():
-	var procs = [
+	var tdxs = [
 		{
 			# if open is called with a single arg (String) 
 			#   get the value of a field from each item
 			msg='all names',
-			proc=prc.map(ops.open('name'))
+			tdx=prc.map(ops.open('name'))
 		},
 		{
 			#  called with Array:
 			#  	 open multiple fields; use slashes to go deeeper
 			#  result is a dictionary for each with the (final) field name as the key
 			msg='view weapons, name and age',
-			proc=prc.map(ops.open(['inv/weapon', 'name', 'age']))
+			tdx=prc.map(ops.open(['inv/weapon', 'name', 'age']))
 		},
 			{
 			#  if called with Dictionary
 			#  	 will write results to the key
 			msg='open (my) stuff',
-			proc=prc.map(ops.open({my_wpns='inv/weapon', my_age='age'}))
+			tdx=prc.map(ops.open({my_wpns='inv/weapon', my_age='age'}))
 		},
+		{
+			#  open_v(alue) returns just the resulting values in an Array
+			# i.e. [v0, v1] instead of [{k0:v0}, {k1:v1}]
+			msg='view weapons, name and age => []',
+			tdx=prc.map(ops.open_v(['name', 'age', 'inv/weapon']))
+		},		
 		{
 			# prc.project(x) == prc.map(ops.open(x))
 			# accepts Array and String as input
 			msg='project name, inv',
-			proc=prc.project(['name', 'inv'])
+			tdx=prc.project(['name', 'inv'])
 		},
 		{
-			msg='who has coin >= 10?',
-			proc=[
+			msg='who has coin >= 250?',
+			tdx=[
 				prc.filter(
 					# can use slashes in dict_cmpr
-					ops.dict_cmpr({'inv/money/coin':ops.gteq(10)})),				
+					ops.dict_cmpr({'inv/money/coin':ops.gteq(250)})),				
 				prc.project(['name', 'inv/money'])]
 		},
 		{
 			# expressions follow the same principle
 			msg='age:coin ratio',
-			proc=[
+			tdx=[
 				prc.filter(
 					ops.expr('coin != null', 'inv/money/coin')),
 				prc.map(ops.dict_apply({
@@ -158,16 +169,16 @@ func open_operators():
 			#   it will be created and the relevant op will take the entire item
 			# 	as an arg instead of item[key]
 			msg='who has food?',
-			proc=prc.map(ops.dict_apply(
-				{has_food='not _x.inv.food.empty()', age=ops.expr('_x*2')}, 
+			tdx=prc.map(ops.dict_apply(
+				{has_food='not _x.inv.food.empty()'}, 
 				['name', 'inv/food'], 
 				true))
 		},
 	]
-	# apply expects a Processor as the first arg
-	for itm in procs:
+	# apply expects a Transducer as the first arg
+	for itm in tdxs:
 		ex_util.pr_array(itm.msg,
-			fdb.apply(itm.proc, name_table))
+			fdb.apply(itm.tdx, name_table))
 
 	ex_util.pr_dash_break()
 	# get all knife field data
@@ -189,15 +200,13 @@ func sorting():
 				ops.expr('age < _y.age', ['age']),
 				name_table)))
 			
-	var coin_holders = flex.filter(ops.open('inv/money/coin'), name_table)
+	# filter to remove null entries. Chain into the sort.
 	ex_util.pr_array('sort by wealth', 
-		flex.map(
-			ops.open(['name', 'inv/money/coin']), 
-			fdb.sort(
-				ops.expr('_x.inv.money.coin > _y.inv.money.coin'),
-			coin_holders)))
+		flex.filter(ops.open('inv/money/coin'))\
+			.map(['name', 'inv/money/coin'])\
+			.sort('_x.coin > _y.coin', name_table))
 			
-func more_processors():
+func more_transducers():
 	var value=30000
 	var value_qry = prc.comp([
 		prc.filter(ops.dict_cmpr({value=ops.gteq(value)})),
@@ -222,9 +231,11 @@ func more_processors():
 		"homeowners filter house value > %d (addr_id in 'addr_ids')" % value,
 		homeowners)
 
-
+	# if the last arg in call_fn is true the item is returned
+	#  instead of the function return value
 	var is_cls = prc.comp([
 		prc.filter(ops.is_(Human)),
+		prc.map(ops.call_fn('speak', [], true)),
 		prc.project(['name'])])
 
 	# use Variant.Type enum if the class-type can't be used
@@ -232,9 +243,11 @@ func more_processors():
 		prc.filter(ops.is_var(TYPE_DICTIONARY)),
 		prc.project(['name'])])
 
-	ex_util.pr_array('extends Human:', fdb.apply(is_cls, name_table))
+	ex_util.pr_array('extends Human:', fdb.itbl(is_cls, name_table))
 	ex_util.pr_array('extends Dictionary:', fdb.apply(is_dict, name_table))
 
+func get_funcy():
+	pass
 
 func example_enumerate():
 	# enumerate

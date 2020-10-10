@@ -1,15 +1,15 @@
 extends Resource
 
 const Iterable = preload("res://addons/fakeo_db/scripts/Iterable.gd")
-const Procs = preload("res://addons/fakeo_db/scripts/Processors.gd")
-const Processor = Procs.Processor
+const Procs = preload("res://addons/fakeo_db/scripts/Transducers.gd")
+const Transducer = Procs.Transducer
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
 const OpBase = Operators.OperatorBase
 
 static func get_proc(input, coll=null, itbl=false):
 	if coll == null:
 		return input
-	assert(input is Processor)
+	assert(input is Transducer)
 	var c = Iterable.new(input, coll)
 	if itbl:
 		return c

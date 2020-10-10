@@ -3,29 +3,28 @@ extends Node
 const Enumerables = preload("res://addons/fakeo_db/scripts/Enumerables.gd")
 const Iterable = preload("res://addons/fakeo_db/scripts/Iterable.gd")
 
-const Processors = preload("res://addons/fakeo_db/scripts/Processors.gd")
+const Transducers = preload("res://addons/fakeo_db/scripts/Transducers.gd")
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
 
-const OperatorFactory = preload("res://addons/fakeo_db/scripts/OperatorFactory.gd")
-const ProcessorFactory = preload("res://addons/fakeo_db/scripts/ProcessorFactory.gd")
+const OpFactory = preload("res://addons/fakeo_db/scripts/OperatorFactory.gd")
+const TdxFactory = preload("res://addons/fakeo_db/scripts/TransducerFactory.gd")
 
-const AutoProcessorChainer = preload("res://addons/fakeo_db/scripts/AutoProcessorChainer.gd")
+const TdxChainer = preload("res://addons/fakeo_db/scripts/AutoTransducerChainer.gd")
 
 const HeapSort = preload("res://addons/fakeo_db/scripts/Algo/heap_sort.gd")
 
 static func cltn(array:Array=[]) -> Enumerables.Collection:
 	return Enumerables.Collection.new(array)
 
-
-# 'procs' should be Array(Processor)
-static func flex(procs:Array=[]) -> AutoProcessorChainer:
-	return AutoProcessorChainer.new(procs)
+# 'procs' should be Array(Transducer)
+static func flex(procs:Array=[]) -> TdxChainer:
+	return TdxChainer.new(procs)
 	
 
 static func itbl(input, coll) -> Iterable:	
 	if input is Array:
-		input = Processors.ProcIterator.new(input)
-	assert(input is Processors.Processor)
+		input = Transducers.ProcIterator.new(input)
+	assert(input is Transducers.Transducer)
 	return Iterable.new(input, coll)
 
 

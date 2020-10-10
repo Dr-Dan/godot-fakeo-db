@@ -2,7 +2,7 @@
 #extends EditorScript
 #
 #const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
-#const ops = fdb.OperatorFactory
+#const ops = fdb.OpFactory
 
 # https://www.geeksforgeeks.org/heap-sort/
 

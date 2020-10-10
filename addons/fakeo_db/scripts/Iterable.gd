@@ -1,29 +1,29 @@
 extends Resource
 
-const Proc = preload("res://addons/fakeo_db/scripts/Processors.gd")
+const Tdxs = preload("res://addons/fakeo_db/scripts/Transducers.gd")
 
 var source = []
 var index = -1
 var current
 var terminal = false
 var query_data = {}
-var proc:Proc.Processor
+var tdx:Tdxs.Transducer
 
-func _init(proc_=null, source_=[]):
+func _init(tdx_=null, source_=[]):
 	index = -1
 	source = source_
-	proc = proc_
+	tdx = tdx_
 
 func next(item, data):
-	return proc.next(item, data)
+	return tdx.next(item, data)
 
 func apply(coll) -> Array:
-	var data = proc.make_data()
+	var data = tdx.make_data()
 	var result = []
 	for n in coll:
-		var r = proc.next(n, data)
-		if r is Proc.Terminate: break
-		if not r is Proc.None:
+		var r = tdx.next(n, data)
+		if r is Tdxs.Terminate: break
+		if not r is Tdxs.None:
 			result.append(r)
 	return result
 
@@ -33,7 +33,7 @@ func run() -> Array:
 func _iter_init(arg):
 	if source.empty(): return false
 	reset()
-	query_data = proc.make_data()
+	query_data = tdx.make_data()
 	index = 0
 	return _iter_next(arg)
 			
@@ -44,8 +44,8 @@ func _iter_next(arg):
 	for i in range(st, source.size()):
 		r = next(source[index], query_data)
 		index += 1
-		if r is Proc.Terminate: break
-		if not r is Proc.None:
+		if r is Tdxs.Terminate: break
+		if not r is Tdxs.None:
 			current = r
 			return true
 		

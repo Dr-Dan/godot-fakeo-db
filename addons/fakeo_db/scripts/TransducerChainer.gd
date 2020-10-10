@@ -1,7 +1,7 @@
-extends "Processors.gd".ProcIterator
+extends "Transducers.gd".ProcIterator
 
 const Itbl = preload("res://addons/fakeo_db/scripts/Iterable.gd")
-const prc = preload("res://addons/fakeo_db/scripts/ProcessorFactory.gd")
+const prc = preload("res://addons/fakeo_db/scripts/TransducerFactory.gd")
 const ops = preload("res://addons/fakeo_db/scripts/Operators.gd")
 
 func _init(procs_:Array=[]).(procs_) -> void:

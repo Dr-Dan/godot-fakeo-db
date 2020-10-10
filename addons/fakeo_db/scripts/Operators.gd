@@ -84,6 +84,23 @@ class RunOp:
 	func eval(item):
 		return op.eval(item[field])
 		
+class RunIf:
+	extends OperatorBase
+	
+	var _then:OperatorBase
+	var _else:OperatorBase
+	var _pred:OperatorBase
+	
+	func _init(pred_: OperatorBase, then_:OperatorBase, else_:OperatorBase):
+		_pred = pred_
+		_then = then_
+		_else = else_
+		
+	func eval(item):
+		if _pred.eval(item):
+			return _then.eval(item)
+		return _else.eval(item)
+				
 class OperatorIterator:
 	extends OperatorBase
 
@@ -512,6 +529,27 @@ class FuncAsArgs:
 	func eval2(item0, item1):
 		return func_ref.call_funcv(item0 + item1)
 
+class CallFunc:
+	extends OperatorBase
+	
+	var fn_name:String
+	var args:Array
+	var return_item = false
+	
+	func _init(fn_name_:String, args:Array=[], return_item_=false):
+		fn_name = fn_name_
+		args = args
+		return_item = return_item_
+		
+	func eval(item):
+		var r = item.callv(fn_name, args)
+		if return_item:
+			return item
+		return r
+
+	# func eval2(item0, item1):
+	# 	return func_ref.call_funcv([item0, item1] + args)
+				
 class Expr:
 	extends OperatorBase
 	
@@ -669,6 +707,7 @@ class OpenMultiDeep:
 			result[name] = ops[f].eval(item)
 		return result
 
+# creates dictionary with fields renamed to those supplied
 class OpenMultiDeepDict:
 	extends OperatorBase
 
@@ -785,38 +824,38 @@ class OpenIndexDeepArray:
 			else: return defval
 		return result
 			
-class ApplyToResult:
-	extends OperatorBase
+# class ApplyToResult:
+# 	extends OperatorBase
 	
-	var op0
-	var op1
+# 	var op0
+# 	var op1
 	
-	func _init(op0_, op1_):
-		op0 = op0_
-		op1 = op1_
+# 	func _init(op0_, op1_):
+# 		op0 = op0_
+# 		op1 = op1_
 		
-	func eval(x):
-		var r = op0.eval(x)
-		if r != null:
-			return op1.eval(r)
-		return false
+# 	func eval(x):
+# 		var r = op0.eval(x)
+# 		if r != null:
+# 			return op1.eval(r)
+# 		return false
 		
 # returns in the order provided an array of the requested fields
 # ['name', 'age'] => ['mike', 43]
-#class ValueMulti:
-#	extends OperatorBase
-#
-#	# filled with OpenDeep
-#	var ops:Array = []
-#
-#	func _init(_fields:Array).():
-#		for f in _fields:
-#			ops.append(OpenDeep.new(f))
-#			assert(not ops.back().fields.empty())
-#
-#	func eval(item):
-#		var result = []
-#		for f in ops:
-#			if not f.fields.empty():
-#				result.append(f.eval(item))
-#		return result
+class OpenValue:
+	extends OperatorBase
+
+	# filled with OpenDeep
+	var ops:Array = []
+
+	func _init(_fields:Array).():
+		for f in _fields:
+			ops.append(OpenDeep.new(f))
+			assert(not ops.back().fields.empty())
+
+	func eval(item):
+		var result = []
+		for f in ops:
+			if not f.fields.empty():
+				result.append(f.eval(item))
+		return result

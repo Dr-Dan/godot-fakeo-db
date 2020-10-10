@@ -1,8 +1,8 @@
-extends "Processors.gd".ProcIterator
+extends "Transducers.gd".ProcIterator
 
 const Itbl = preload("res://addons/fakeo_db/scripts/Iterable.gd")
-const prc = preload("res://addons/fakeo_db/scripts/ProcessorFactory.gd")
-const Procs = preload("res://addons/fakeo_db/scripts/Processors.gd")
+const prc = preload("res://addons/fakeo_db/scripts/TransducerFactory.gd")
+const Procs = preload("res://addons/fakeo_db/scripts/Transducers.gd")
 const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
 const OpBase = Operators.OperatorBase
 const HeapSort = preload("res://addons/fakeo_db/scripts/Algo/heap_sort.gd")
@@ -17,7 +17,7 @@ func _init(procs_:Array=[]).(procs_) -> void:
 func get_proc(input, coll=null, itbl=false):
 	if coll == null:
 		return append(input)
-	assert(input is Procs.Processor)
+	assert(input is Procs.Transducer)
 	var c = Itbl.new(append(input), coll)
 	if itbl:
 		return c
@@ -26,7 +26,7 @@ func get_proc(input, coll=null, itbl=false):
 # func then(data):
 # 	if data is Array:
 # 		return append_array(data)
-# 	assert(data is Procs.Processor)
+# 	assert(data is Procs.Transducer)
 # 	return append(data)
 
 # override these two if extending
@@ -50,7 +50,7 @@ func reduce(op, coll):
 	return ittr(Operators.Util.get_map_op(op), coll).back()
 
 func sort(op, coll):
-	return HeapSort.heap_sort(op, apply(coll))
+	return HeapSort.heap_sort(Operators.Util.get_map_op(op), apply(coll))
 
 	
 func first(op, coll):
