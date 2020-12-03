@@ -9,15 +9,14 @@ To use: File > Run
 """
 
 const ex_util = preload("res://addons/fakeo_db/examples/example_utils.gd")
-const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
-const ops = fdb.OpFactory
-const prc = fdb.TdxFactory
-var flex = fdb.flex()
+const Fko = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
+const Ops = Fko.OpFactory
+const Tdx = Fko.TdxFactory
 
 func _run():
 		
 	ex_util.pr_equals_break()
-	flow()
+	evaluation()
 	
 	ex_util.pr_equals_break()
 	print("using a collection of objects (Dictionary)\n")
@@ -66,37 +65,66 @@ var addr_table = [
 	{addr_id=1, street="the lane", value=10000},
 	{addr_id=2, street="london road", value=35250}]
 
-func flow():
-	ex_util.pr_array('first 3', 
-		fdb.apply(prc.take(3), name_table))
+# ==============================================================	
 
-	ex_util.pr_array('skip 3, get name', fdb.apply(
-		[prc.skip(3), prc.map(ops.open('name'))], 
+func evaluation():
+	ex_util.pr_array('first 3', 
+		Fko.apply(Tdx.take(3), name_table))
+
+	ex_util.pr_array('skip 3, get name', Fko.apply(
+		[Tdx.skip(3), Tdx.map(Ops.open('name'))], 
 		name_table))
 	
-	ex_util.pr_array('take_while ...', fdb.apply(
-		prc.take_while(ops.expr('_x.age > 20')), 
+	ex_util.pr_array('take_while ...', Fko.apply(
+		Tdx.take_while(Ops.expr('_x.age > 20')), 
 		name_table))
 
 	# Iterable does not execute immediately
-	var it = fdb.itbl(
-		[prc.skip(1), prc.take(4)], 
+	var it = Fko.itbl(
+		[Tdx.skip(1), Tdx.take(4)], 
 		name_table)
 
 	# instead it does so when calling run, at, first etc.
 	ex_util.pr_equals_break()
 	print('iterable [skip 1, take 4]:')
+	# run just evaluates the iterable => Array
 	ex_util.pr_array('run:', it.run())
 	# apply() the effects to a different collection
 	ex_util.pr_array('apply ^^^ to some collection:', it.apply(name_table))
+
 	printt('\n3rd: %s\n5th: %s' % [it.at(3), it.at(5)])
 	printt('\nfirst: %s\nsecond: %s' % [it.front(), it.ffront()])
 	printt('\nlast: %s\nsecond-last: %s' % [it.back(), it.bback()])
 	printt('\nsize: %s\nempty?: %s' % [it.size(), it.empty()])
 
+# ==============================================================	
+
+func sorting():
+	print('Sorting')
+	var names_and_ages = Fko.apply(
+		Tdx.map(
+			Ops.open(['name', 'age'])), 
+		name_table)
+	ex_util.pr_array('sort by age', 
+					 Fko.sort(
+						 Ops.expr('age < _y.age', ['age']), 
+						 names_and_ages))
+
+			
+	# filter will remove null entries. chain into the sort
+	# chain will handle different input types automatically.
+	#   This is explained in depth in the chaining example
+	ex_util.pr_array('sort by wealth', 
+					 Fko.chain()\
+					 .filter(Ops.open('inv/money/coin'))\
+					 .map(['name', 'inv/money/coin'])\
+					 .sort('_x.coin > _y.coin', name_table))
+	
+# ==============================================================	
+
 # an operator for reducing should implement eval2(input_next, input_accumulated)
 class Add:
-	extends ops.Operators.OperatorBase
+	extends Ops.Operators.OperatorBase
 	var val
 	
 	func _init(val_=0):
@@ -112,119 +140,110 @@ class Add:
 
 
 func open_operators():
-	var tdxs = [
+	var queries = [
 		{
 			# if open is called with a single arg (String) 
 			#   get the value of a field from each item
 			msg='all names',
-			tdx=prc.map(ops.open('name'))
+			tdx=Tdx.map(Ops.open('name'))
 		},
 		{
 			#  called with Array:
 			#  	 open multiple fields; use slashes to go deeeper
 			#  result is a dictionary for each with the (final) field name as the key
 			msg='view weapons, name and age',
-			tdx=prc.map(ops.open(['inv/weapon', 'name', 'age']))
+			tdx=Tdx.map(Ops.open(['inv/weapon', 'name', 'age']))
 		},
 			{
 			#  if called with Dictionary
 			#  	 will write results to the key
 			msg='open (my) stuff',
-			tdx=prc.map(ops.open({my_wpns='inv/weapon', my_age='age'}))
+			tdx=Tdx.map(Ops.open({my_wpns='inv/weapon', my_age='age'}))
 		},
 		{
 			#  open_v(alue) returns just the resulting values in an Array
 			# i.e. [v0, v1] instead of [{k0:v0}, {k1:v1}]
 			msg='view weapons, name and age => []',
-			tdx=prc.map(ops.open_v(['name', 'age', 'inv/weapon']))
+			tdx=Tdx.map(Ops.open_v(['name', 'age', 'inv/weapon']))
 		},		
 		{
-			# prc.project(x) == prc.map(ops.open(x))
+			# Tdx.project(x) == Tdx.map(Ops.open(x))
 			# accepts Array and String as input
 			msg='project name, inv',
-			tdx=prc.project(['name', 'inv'])
+			tdx=Tdx.project(['name', 'inv'])
 		},
 		{
 			msg='who has coin >= 250?',
 			tdx=[
-				prc.filter(
-					# can use slashes in dict_cmpr
-					ops.dict_cmpr({'inv/money/coin':ops.gteq(250)})),				
-				prc.project(['name', 'inv/money'])]
+				Tdx.filter(
+					# dict_c(o)mp(a)r(e) looks for a given field in the dictionary
+					#   and validates it using an op.
+					# values can be used and will be wrapped: {field=2} => {field=ops.eq(2)}
+					# you can use slashes in dict_cmpr
+					Ops.dict_cmpr({'inv/money/coin':Ops.gteq(250)})),				
+				Tdx.project(['name', 'inv/money'])]
 		},
 		{
 			# expressions follow the same principle
 			msg='age:coin ratio',
 			tdx=[
-				prc.filter(
-					ops.expr('coin != null', 'inv/money/coin')),
-				prc.map(ops.dict_apply({
-					age_coin_ratio=ops.expr('age/float(coin)', ['inv/money/coin', 'age'])}, 
+				Tdx.filter(
+					Ops.expr('coin != null', 'inv/money/coin')),
+				Tdx.map(Ops.dict_apply({
+					age_coin_ratio=Ops.expr('age/float(coin)', ['inv/money/coin', 'age'])}, 
 					['name']))]
 		},
 		{
-			# use a dictionary allows mapping to fields that do not yet exist
-			# 	fields that exist will be opened as in ops.open
+			# dict_apply allows mapping to fields that do not yet exist
+			# 	fields that exist will be opened as in Ops.open
 			# if a key is not in the item: 
 			#   it will be created and the relevant op will take the entire item
 			# 	as an arg instead of item[key]
 			msg='who has food?',
-			tdx=prc.map(ops.dict_apply(
+			tdx=Tdx.map(Ops.dict_apply(
 				{has_food='not _x.inv.food.empty()'}, 
 				['name', 'inv/food'], 
 				true))
 		},
 	]
 	# apply expects a Transducer as the first arg
-	for itm in tdxs:
+	for itm in queries:
 		ex_util.pr_array(itm.msg,
-			fdb.apply(itm.tdx, name_table))
+			Fko.apply(itm.tdx, name_table))
 
 	ex_util.pr_dash_break()
+	
 	# get all knife field data
-	var knife_data = fdb.apply(
-		prc.project('inv/weapon/knife'), name_table)
+	var knife_data = Fko.apply(
+		Tdx.project('inv/weapon/knife'), name_table)
 	# sum
 	printt('total knives:',
-		fdb.reduce(
+		Fko.reduce(
 			Add.new(),
 			knife_data))
 		
-func sorting():
-	print('Sorting')
-	ex_util.pr_array('sort by age', 
-		flex.map(
-			ops.open(['name', 'age']), 
-			fdb.sort(
-				# in this context, additional args i.e.'age' will refer to _x
-				ops.expr('age < _y.age', ['age']),
-				name_table)))
-			
-	# filter to remove null entries. Chain into the sort.
-	ex_util.pr_array('sort by wealth', 
-		flex.filter(ops.open('inv/money/coin'))\
-			.map(['name', 'inv/money/coin'])\
-			.sort('_x.coin > _y.coin', name_table))
-			
+# ==============================================================	
+
 func more_transducers():
+	var chain = Fko.chain()
 	var value=30000
-	var value_qry = prc.comp([
-		prc.filter(ops.dict_cmpr({value=ops.gteq(value)})),
-		prc.project(["addr_id", "street", "value"])])
+	var value_qry = Tdx.comp([
+		Tdx.filter(Ops.dict_cmpr({value=Ops.gteq(value)})),
+		Tdx.project(["addr_id", "street", "value"])])
 
 	ex_util.pr_array("house value > %d" % value, 
-		fdb.apply(value_qry, addr_table))
+		Fko.apply(value_qry, addr_table))
 
 	# select just the addr_id
-	var addrs = flex.map(
-		ops.open('addr_id'),
-		fdb.apply(value_qry, addr_table))
+	var addrs = chain.map(
+		Ops.open('addr_id'),
+		Fko.apply(value_qry, addr_table))
 
 	# select any person where the addr_id is in addrs
-	var homeowners = fdb.apply(
-		prc.comp([
-			prc.filter(ops.dict_cmpr({addr_id=ops.in_(addrs)})),
-			prc.project(["name", "addr_id"])]),
+	var homeowners = Fko.apply(
+		Tdx.comp([
+			Tdx.filter(Ops.dict_cmpr({addr_id=Ops.in_(addrs)})),
+			Tdx.project(["name", "addr_id"])]),
 		name_table)
 
 	ex_util.pr_array(
@@ -233,44 +252,50 @@ func more_transducers():
 
 	# if the last arg in call_fn is true the item is returned
 	#  instead of the function return value
-	var is_cls = prc.comp([
-		prc.filter(ops.is_(Human)),
-		prc.map(ops.call_fn('speak', [], true)),
-		prc.project(['name'])])
+	var is_cls = Tdx.comp([
+		Tdx.filter(Ops.is_(Human)),
+		Tdx.map(Ops.call_fn('speak', [], true)),
+		Tdx.project(['name'])])
 
 	# use Variant.Type enum if the class-type can't be used
-	var is_dict = prc.comp([
-		prc.filter(ops.is_var(TYPE_DICTIONARY)),
-		prc.project(['name'])])
+	var is_dict = Tdx.comp([
+		Tdx.filter(Ops.is_var(TYPE_DICTIONARY)),
+		Tdx.project(['name'])])
 
-	ex_util.pr_array('extends Human:', fdb.itbl(is_cls, name_table))
-	ex_util.pr_array('extends Dictionary:', fdb.apply(is_dict, name_table))
+	ex_util.pr_array('extends Human:', Fko.itbl(is_cls, name_table))
+	ex_util.pr_array('extends Dictionary:', Fko.apply(is_dict, name_table))
+
+# ==============================================================	
 
 func get_funcy():
 	pass
 
-func example_enumerate():
-	# enumerate
-	var en_wrap = ops.expr('{"data":_x, "id":e.next()}', {e=Enumeratee.new()})
-	ex_util.pr_array('enumerated (wrap)', flex.map(en_wrap, name_table))
-
-	var en_map = ops.dict_apply({idx=ops.expr('e.next()', {e=Enumeratee.new()})},
-		['name', 'age'])
-	ex_util.pr_array('enumerated (map)', flex.map(en_map, name_table))
-
-	ex_util.pr_array('enumerated (op)', flex.map(EnumerateOp.new(), name_table))
-	
+# ==============================================================
 
 class Enumeratee:
 	var i = -1
 	func next():
 		i+=1
 		return i
-		
+	
 class EnumerateOp:
-	extends ops.Operators.OperatorBase
+	extends Ops.Operators.OperatorBase
 	var i:=-1
 
 	func eval(x):
 		i += 1
 		return [i, x]
+
+func example_enumerate():
+	var chain = Fko.chain()
+	# enumerate
+	var en_wrap = Ops.expr('{"data":_x, "id":e.next()}', {e=Enumeratee.new()})
+	ex_util.pr_array('enumerated (wrap)', chain.map(en_wrap, name_table))
+
+	var en_map = Ops.dict_apply({idx=Ops.expr('e.next()', {e=Enumeratee.new()})},
+		['name', 'age'])
+	ex_util.pr_array('enumerated (map)', chain.map(en_map, name_table))
+
+	ex_util.pr_array('enumerated (op)', chain.map(EnumerateOp.new(), name_table))
+	
+

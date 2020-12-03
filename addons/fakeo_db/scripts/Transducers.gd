@@ -8,17 +8,6 @@ class Terminate:
 	func _init():
 		pass
 
-# class TerminateResult:
-# 	extends Terminate
-
-# 	var item
-# 	func _init(item_):
-# 		item = item_
-		
-# class Result:
-# 	func _init():
-# 		pass
-		
 
 class Transducer:
 	extends Resource
@@ -29,7 +18,7 @@ class Transducer:
 	func make_data():
 		return {}
 
-	# allows for faster impls over lists
+	# TODO: for optional faster impls over lists?
 	# func apply(coll):
 	# 	var data = make_data()
 	# 	var result = []
@@ -40,7 +29,7 @@ class Transducer:
 	# 		if r[2]: break
 	# 	return result	
 
-class ProcIterator:
+class TdxIterator:
 	extends Transducer
 
 	var procs:Array = []
@@ -54,7 +43,6 @@ class ProcIterator:
 		return {proc_data=proc_data}
 			
 	func next(item, data):	
-		# var r = [item, true, false]
 		var r = item
 		var t = false
 		for i in procs.size():
@@ -168,16 +156,6 @@ class FilterOp:
 		
 	func get_result(item, data):
 		return pred_op.eval(item)
-
-# class MapOpAuto:
-# 	extends MapOp
-# 	func _init(input, args={}).(OpUtil.get_map_op(input, args)):
-# 		pass
-	
-# class FilterOpAuto:
-# 	extends FilterOp
-# 	func _init(input, args={}).(OpUtil.get_filter_op(input, args)):
-# 		pass
 
 class TakeWhile:
 	extends Filter

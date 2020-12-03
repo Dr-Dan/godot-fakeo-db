@@ -686,9 +686,6 @@ class OpenDeep:
 			else: return null
 		return result
 
-		
-# TODO: this should be up with dict functions? Or be renamed. (Project?)
-# ValuesMulti is more inline with other OpenXXX classes
 class OpenMultiDeep:
 	extends OperatorBase
 
@@ -742,21 +739,6 @@ class OpenIndex:
 		if item is Array and idx < item.size():
 			result = item[idx]
 		return result
-
-# class OpenIndexMulti:
-# 	extends OperatorBase
-
-# 	var idxs:Array
-	
-# 	func _init(_idxs:Array).():
-# 		idxs = _idxs
-
-# 	func eval(item):
-# 		var n = []
-# 		for i in idxs:
-# 			if i < item.size():
-# 				n.append(item[i])
-# 		return n
 	
 class OpenIndexMultiDeep:
 	extends OperatorBase
@@ -824,22 +806,6 @@ class OpenIndexDeepArray:
 			else: return defval
 		return result
 			
-# class ApplyToResult:
-# 	extends OperatorBase
-	
-# 	var op0
-# 	var op1
-	
-# 	func _init(op0_, op1_):
-# 		op0 = op0_
-# 		op1 = op1_
-		
-# 	func eval(x):
-# 		var r = op0.eval(x)
-# 		if r != null:
-# 			return op1.eval(r)
-# 		return false
-		
 # returns in the order provided an array of the requested fields
 # ['name', 'age'] => ['mike', 43]
 class OpenValue:

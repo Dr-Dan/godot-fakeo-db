@@ -1,9 +1,3 @@
-#tool
-#extends EditorScript
-#
-#const fdb = preload("res://addons/fakeo_db/scripts/FakeoDB.gd")
-#const ops = fdb.OpFactory
-
 # https://www.geeksforgeeks.org/heap-sort/
 
 static func heapify(arr, n, i, op):
