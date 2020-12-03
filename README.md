@@ -1,55 +1,63 @@
 # Fakeo DB
 
-For Godot 3.2
+Written in Godot 3.2
 
-An addon that makes querying arrays easy.
+An addon that makes querying arrays of objects and/or primitives easy.
 
-## Features
+## Usage
 
-* Works with lists of objects and primitives
-* Simple, functional, compositional style
-    * composible operators and transducers
-* Optional deferred execution using Iterable
+I will write some documentation but for now I hope the examples will suffice.
 
-## About
-### [Wiki](../../wiki)
+[examples...](../master/addons/fakeo_db/examples)
 
-## Quick Example
 ```gdscript
-# an array of int
-var numbers = range(10)
+var numbers = range(5)
+var chain = Fakeo.chain()
 
-# get first 3 even numbers
-var even = fdb.flex().filter(ops.even()).take(3).apply(numbers)
-# multiplied by 2
-var multiplied = fdb.flex().map('_x * 2', numbers)
-# sum all
-var sum = fdb.flex().reduce('_x + _y', numbers)
+chain.filter(ops.even(), numbers) 
+# => [0,2,4]
+chain.filter([ops.gt(1), ops.lteq(4)], numbers) 
+# => [2,3,4]
 
-var scores = [
-    {name='da-best', email='db@gmail.com', region='EU', score=190520, hours_played=2400},
-    {name='wizz', email='wizzl@aol.com', region='US', score=40200, hours_played=230},
-    ...]
+chain.map('_x * 5_', numbers) 
+# => [0,5,10,15,20]
 
-var score_per_hour = fdb.flex()\
-    .map(ops.dict_apply({sph='_x.score/_x.hours_played'}, ['name']), 
-    scores)
-    
-var high_scores = fdb.flex()\
-    .filter({region='EU'})\
-    .map(['name', 'score'])\
-    .sort('_x.score > _y.score', 
-    scores)
+chain.sort('_x > _y', data)
+# => [4,3,2,1,0]
 
+chain\
+    .filter(ops.is_var(TYPE_ARRAY))\
+    .map(ops.open_idx('1/0'),
+        ['hello?', 22, {}, [0, [1]], [2], [3, [4]]])) 
+# => [1,4]
+
+
+var name_table = [
+	{name="Mike", age=22, addr_id=0, inv={money={coin=25}, weapon={gun=1, knife=2}}},
+	{name="The Old One", age=112, addr_id=0, inv={money={coin=1}, weapon={gun=1}}},
+	{name="Anne", age=16, addr_id=1, inv={money={coin=10}, weapon={knife=2}}},
+    ]
+
+chain.map(ops.open('name'), name_table)
+# => [{name="Mike"}, ...]
+
+chain.filter({'inv/money/coin'=ops.gt(5)}).map(['name', 'inv/money/coin'], name_table)
+# => [{name="Mike", coin=25}, {name="Anne", coin=10}]
+
+chain.project('inv/weapon/knife')\
+    .reduce('_x + _y', name_table)
+# => 4
 ```
-TODO: links to other examples
 
 ## Installation
 
 1. Either download from the Godot Asset Store or just copy fakeo_db into the 'addons' folder in your project.
 
+
 ## Sorry
 This addon is not production tested and will probably be slower than handwritten code i.e. for loops. 
+
+It is also likely to change dramatically up to v1.0.
 
 ## License
 

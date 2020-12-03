@@ -1,11 +1,43 @@
-extends "Transducers.gd".ProcIterator
+extends "Transducers.gd".TdxIterator
+class_name TdxChainer
 
 const Itbl = preload("res://addons/fakeo_db/scripts/Iterable.gd")
-const prc = preload("res://addons/fakeo_db/scripts/TransducerFactory.gd")
-const ops = preload("res://addons/fakeo_db/scripts/Operators.gd")
+const TdxFac = preload("res://addons/fakeo_db/scripts/TransducerFactory.gd")
+const Tdxs = preload("res://addons/fakeo_db/scripts/Transducers.gd")
+const Operators = preload("res://addons/fakeo_db/scripts/Operators.gd")
+const OpBase = Operators.OperatorBase
+const HeapSort = preload("res://addons/fakeo_db/scripts/Algo/heap_sort.gd")
 
-func _init(procs_:Array=[]).(procs_) -> void:
+# -------------------------------------------------------
+
+func _init(procs_:Array=[]).(procs_):
 	pass
+
+# -------------------------------------------------------
+
+func get_result(input:Tdxs.Transducer, coll=null, itbl:bool=false):
+	if coll == null:
+		return append(input)
+	var c = Itbl.new(append(input), coll)
+	if itbl:
+		return c
+	return c.apply(coll)
+
+func then(data):
+	if data is Array:
+		return append_array(data)
+	assert(data is Tdxs.Transducer)
+	return append(data)
+
+# override these two if extending
+func append(item:Tdxs.Transducer):
+	return get_script().new(procs + [item])
+	
+func append_array(items:Array):
+	return get_script().new(procs + items)
+	
+# -------------------------------------------------------
+# instant eval i.e. no chaining
 
 func itbl(coll=[]):
 	return Itbl.new(self, coll)
@@ -13,34 +45,46 @@ func itbl(coll=[]):
 func apply(coll):
 	return itbl(coll).run()
 	
-# these use different init from base so must be overwritten
-func append(item):
-	return get_script().new(procs + [item])
 	
-func append_array(items:Array):
-	return get_script().new(procs + items)
+func reduce(op, coll):
+	return ittr(Operators.Util.get_map_op(op), coll).back()
+
+func sort(op, coll):
+	return HeapSort.heap_sort(Operators.Util.get_map_op(op), apply(coll))
+
 	
+func first(op, coll):
+	return filter(op, coll).front()
 
-func comp(input):
-	return append(prc.comp(input))
+func last(op, coll):
+	return filter(op, coll).back()
 
-func map(input):
-	return append(prc.map(ops.Util.get_map_op(input)))
+# -------------------------------------------------------
+# chainers
 
-func filter(input):
-	return append(prc.filter(ops.Util.get_filter_op(input)))
+func comp(input:Array, coll=null, itbl=false):
+	return get_result(TdxFac.comp(input), coll, itbl)
 
-func project(input):
-	return append(prc.project(input))
+func map(input, coll=null, itbl=false):
+	return get_result(TdxFac.map(Operators.Util.get_map_op(input)), coll, itbl)
 
-func take(amt: int):
-	return append(prc.take(amt))
+func filter(input, coll=null, itbl=false):
+	return get_result(TdxFac.filter(Operators.Util.get_filter_op(input)), coll, itbl)
 
-func take_while(op):
-	return append(prc.take_while(op))
+func project(input, coll=null, itbl=false):
+	return get_result(TdxFac.project(input), coll, itbl)
+	
+func take(amt: int, coll=null, itbl=false):
+	return get_result(TdxFac.take(amt), coll, itbl)
 
-func skip(amt: int):
-	return append(prc.skip(amt))
+func take_while(op: OpBase, coll=null, itbl=false):
+	return get_result(TdxFac.take_while(op), coll, itbl)
 
-func ittr(op):
-	return append(prc.ittr(op))
+func skip(amt: int, coll=null, itbl=false):
+	return get_result(TdxFac.skip(amt), coll, itbl)
+
+func ittr(op, coll=null, itbl=false):
+	return get_result(TdxFac.ittr(op), coll, itbl)
+
+func as_args(fn:FuncRef, coll=null, itbl=false):
+	return get_result(TdxFac.map(Operators.FuncAsArgs.new(fn)), coll, itbl)
