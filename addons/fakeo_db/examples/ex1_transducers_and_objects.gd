@@ -15,7 +15,11 @@ const Tdx = Fko.TdxFactory
 
 func _run():
 		
+<<<<<<< HEAD:addons/fakeo_db/examples/ex1_transducers_and_objects.gd
 	ex_util.pr_break('=')
+=======
+	ex_util.pr_equals_break()
+>>>>>>> b78bf5fabb5b5309a0e7a9ed5d3ddaab63fa04fe:addons/fakeo_db/examples/intro_transducers_and_objects.gd
 	evaluation()
 	
 	ex_util.pr_break('=')

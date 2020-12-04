@@ -8,3 +8,4 @@ const LIB_NAME = 'FakeoDB'
 
 # func _exit_tree():
 # 	self.remove_autoload_singleton(LIB_NAME)
+
