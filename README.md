@@ -4,6 +4,11 @@ Written in Godot 3.2
 
 An addon that makes querying arrays of objects and/or primitives easy.
 
+## NOTE
+Archived...
+
+Moved to https://github.com/Dr-Dan/godot-funcy
+
 ## Usage
 
 I will write some documentation but for now I hope the examples will suffice.
